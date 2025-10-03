@@ -1,0 +1,29 @@
+import { Hono } from "hono"
+import { cors } from "hono/cors"
+import authRoutes from "./routes/auth"
+import pengaduanMasyarakatRoutes from "./routes/pengaduan-masyarakat"
+import aduanRoutes from "./routes/aduan"
+import dusunRoutes from "./routes/dusun"
+import pengelolaanPBBRoutes from "./routes/pengelolaan-pbb"
+import perangkatDesaRoutes from "./routes/perangkat-desa"
+import suratPBBRoutes from "./routes/surat-pbb"
+import publicRoutes from "./routes/public"
+import statistikRoutes from "./routes/statistik"
+
+const app = new Hono<{ Bindings: Env }>()
+
+app.use("/*", cors())
+
+app.get("/api/", (c) => c.json({ message: "Desa Fajar Baru API" }))
+
+app.route("/api/auth", authRoutes)
+app.route("/api/pengaduan-masyarakat", pengaduanMasyarakatRoutes)
+app.route("/api/aduan", aduanRoutes)
+app.route("/api/dusun", dusunRoutes)
+app.route("/api/pengelolaan-pbb", pengelolaanPBBRoutes)
+app.route("/api/perangkat-desa", perangkatDesaRoutes)
+app.route("/api/surat-pbb", suratPBBRoutes)
+app.route("/api", publicRoutes)
+app.route("/api/statistik", statistikRoutes)
+
+export default app
