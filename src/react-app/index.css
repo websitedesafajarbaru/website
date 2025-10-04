@@ -42,7 +42,6 @@ body {
   color: var(--dark-text);
 }
 
-/* Navbar Custom Styling */
 .navbar {
   background-color: #fff !important;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
@@ -64,7 +63,6 @@ body {
   color: var(--primary-color) !important;
 }
 
-/* Main Content Area */
 main {
   min-height: calc(100vh - 76px);
   padding: 1.5rem;
@@ -76,7 +74,6 @@ main {
   }
 }
 
-/* Card Styling */
 .card {
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
@@ -110,7 +107,6 @@ main {
   }
 }
 
-/* Table Container with Horizontal Scroll */
 .table-container {
   width: 100%;
   overflow-x: auto;
@@ -165,7 +161,6 @@ main {
   }
 }
 
-/* Button Styling */
 .btn {
   border-radius: var(--border-radius);
   padding: 0.5rem 1rem;
@@ -215,7 +210,6 @@ main {
   font-size: 0.875rem;
 }
 
-/* Badge Styling */
 .badge {
   padding: 0.35rem 0.65rem;
   border-radius: 3px;
@@ -223,7 +217,6 @@ main {
   font-size: 0.75rem;
 }
 
-/* Form Styling */
 .form-control,
 .form-select {
   border-radius: 8px;
@@ -246,7 +239,6 @@ main {
   color: var(--dark-text);
 }
 
-/* Modal Styling */
 .modal-content {
   border: none;
   border-radius: var(--border-radius);
@@ -277,7 +269,6 @@ main {
   background-color: var(--light-bg);
 }
 
-/* Container Widths */
 .container-wide {
   max-width: 1400px;
   margin: 0 auto;
@@ -290,16 +281,12 @@ main {
   }
 }
 
-/* Alert Styling */
 .alert {
   border-radius: var(--border-radius);
   border: none;
   box-shadow: var(--shadow-sm);
 }
 
-/* Remove extra styles */
-
-/* Dashboard Header */
 .dashboard-header {
   background: white;
   border-radius: var(--border-radius);
@@ -331,7 +318,6 @@ main {
   }
 }
 
-/* Scrollbar Styling */
 .table-container::-webkit-scrollbar {
   height: 8px;
 }
@@ -350,7 +336,6 @@ main {
   background: var(--primary-dark);
 }
 
-/* Action Buttons in Table */
 .action-buttons {
   display: flex;
   gap: 0.5rem;
@@ -358,7 +343,6 @@ main {
   white-space: nowrap;
 }
 
-/* Border Left Accent for Cards */
 .border-left-primary {
   border-left: 4px solid var(--primary-color) !important;
 }
@@ -371,12 +355,10 @@ main {
   border-left: 4px solid var(--info-color) !important;
 }
 
-/* Timeline Styling */
 .timeline {
   position: relative;
 }
 
-/* Responsive */
 @media (max-width: 768px) {
   .dashboard-header {
     flex-direction: column;

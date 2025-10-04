@@ -128,8 +128,6 @@ export function DetailDusunLaporan() {
               </div>
             </div>
           )}
-
-          {/* Statistik Cards */}
           <div className="row g-3 mb-4">
             <div className="col-md-4">
               <div className="card border-primary h-100">
@@ -216,7 +214,6 @@ export function DetailDusunLaporan() {
             </div>
           </div>
 
-          {/* Tabel Surat PBB */}
           <div className="card">
             <div className="card-header d-flex justify-content-between align-items-center">
               <h6 className="mb-0">

@@ -1,6 +1,3 @@
-/**
- * Format role dari database ke display text
- */
 export const formatRole = (role: string): string => {
   const roleMap: Record<string, string> = {
     superadmin: "Superadmin",
@@ -11,9 +8,6 @@ export const formatRole = (role: string): string => {
   return roleMap[role] || role
 }
 
-/**
- * Format status pembayaran PBB
- */
 export const formatStatusPembayaran = (status: string): string => {
   const statusMap: Record<string, string> = {
     belum_bayar: "Belum Bayar",
@@ -27,9 +21,6 @@ export const formatStatusPembayaran = (status: string): string => {
   return statusMap[status] || status
 }
 
-/**
- * Format status data PBB
- */
 export const formatStatusDataPBB = (status: string): string => {
   const statusMap: Record<string, string> = {
     belum_lengkap: "Belum Lengkap",
@@ -38,9 +29,6 @@ export const formatStatusDataPBB = (status: string): string => {
   return statusMap[status] || status
 }
 
-/**
- * Format status aduan
- */
 export const formatStatusAduan = (status: string): string => {
   const statusMap: Record<string, string> = {
     menunggu: "Menunggu",
@@ -51,9 +39,6 @@ export const formatStatusAduan = (status: string): string => {
   return statusMap[status] || status
 }
 
-/**
- * Format kategori aduan
- */
 export const formatKategoriAduan = (kategori: string): string => {
   const kategoriMap: Record<string, string> = {
     infrastruktur: "Infrastruktur",
@@ -65,9 +50,6 @@ export const formatKategoriAduan = (kategori: string): string => {
   return kategoriMap[kategori] || kategori
 }
 
-/**
- * Get badge color for status pembayaran
- */
 export const getStatusPembayaranColor = (status: string): string => {
   const colorMap: Record<string, string> = {
     belum_bayar: "warning",
@@ -81,9 +63,6 @@ export const getStatusPembayaranColor = (status: string): string => {
   return colorMap[status] || "secondary"
 }
 
-/**
- * Get badge color for status data PBB
- */
 export const getStatusDataPBBColor = (status: string): string => {
   const colorMap: Record<string, string> = {
     belum_lengkap: "warning",
@@ -92,9 +71,6 @@ export const getStatusDataPBBColor = (status: string): string => {
   return colorMap[status] || "secondary"
 }
 
-/**
- * Get badge color for status aduan
- */
 export const getStatusAduanColor = (status: string): string => {
   const colorMap: Record<string, string> = {
     menunggu: "warning",
@@ -105,9 +81,6 @@ export const getStatusAduanColor = (status: string): string => {
   return colorMap[status] || "secondary"
 }
 
-/**
- * Get badge color for role
- */
 export const getRoleColor = (role: string): string => {
   const colorMap: Record<string, string> = {
     superadmin: "danger",

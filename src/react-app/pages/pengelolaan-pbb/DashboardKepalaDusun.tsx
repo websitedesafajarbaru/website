@@ -279,7 +279,6 @@ export function DashboardKepalaDusun() {
 
       {activeTab === "laporan" && statistik && (
         <div>
-          {/* Statistik Cards */}
           <div className="row g-3 mb-4">
             <div className="col-md-4">
               <div className="card border-primary h-100">
@@ -365,8 +364,6 @@ export function DashboardKepalaDusun() {
               </div>
             </div>
           </div>
-
-          {/* Tabel Surat PBB */}
           <div className="card">
             <div className="card-header">
               <h6 className="mb-0">
@@ -419,8 +416,6 @@ export function DashboardKepalaDusun() {
           </div>
         </div>
       )}
-
-      {/* Modal Detail Surat */}
       {showDetailModal && selectedSurat && (
         <div className="modal show d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
           <div className="modal-dialog modal-dialog-centered modal-lg">

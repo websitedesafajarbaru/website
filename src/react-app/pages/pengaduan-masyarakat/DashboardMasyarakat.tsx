@@ -143,7 +143,6 @@ export function DashboardMasyarakat() {
         </div>
       </div>
 
-      {/* Daftar Tab */}
       {activeTab === "daftar" && (
         <>
           {loading ? (
@@ -241,7 +240,6 @@ export function DashboardMasyarakat() {
         </>
       )}
 
-      {/* Buat Tab */}
       {activeTab === "buat" && (
         <div className="card">
           <div className="card-header bg-primary text-white">
@@ -308,7 +306,6 @@ export function DashboardMasyarakat() {
         </div>
       )}
 
-      {/* Detail Tab */}
       {activeTab === "detail" && selectedAduan && (
         <div className="card shadow-sm">
           <div className="card-header bg-primary text-white">
