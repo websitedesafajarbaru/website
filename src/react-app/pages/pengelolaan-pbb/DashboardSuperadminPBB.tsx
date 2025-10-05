@@ -22,7 +22,7 @@ interface DusunDetail extends Dusun {
 export function DashboardSuperadminPBB() {
   const { token } = useAuth()
   const navigate = useNavigate()
-  const [activeTab, setActiveTab] = useState<"dusun" | "surat" | "laporan" | "tambah-dusun" | "tambah-surat" | "detail-dusun" | "detail-perangkat" | "detail-surat">("dusun")
+  const [activeTab, setActiveTab] = useState<"dusun" | "surat" | "laporan" | "tambah-dusun" | "tambah-surat" | "detail-dusun" | "detail-perangkat" | "tambah-perangkat">("dusun")
   const [dusun, setDusun] = useState<Dusun[]>([])
   const [suratPBB, setSuratPBB] = useState<SuratPBB[]>([])
   const [laporan, setLaporan] = useState<Laporan | null>(null)
@@ -43,13 +43,12 @@ export function DashboardSuperadminPBB() {
   })
 
   const [selectedDusun, setSelectedDusun] = useState<DusunDetail | null>(null)
-  const [dusunTokens, setDusunTokens] = useState<{ tokenKepalaDusun: string; tokenKetuaRT: string } | null>(null)
   const [selectedPerangkat, setSelectedPerangkat] = useState<PerangkatDesa | null>(null)
-  const [selectedSurat, setSelectedSurat] = useState<SuratPBB | null>(null)
   const [activeYear, setActiveYear] = useState<number>(new Date().getFullYear())
   const [availableYears, setAvailableYears] = useState<number[]>([])
-  const [editingDusun, setEditingDusun] = useState<number | null>(null)
+  const [isEditingDusun, setIsEditingDusun] = useState<boolean>(false)
   const [editDusunName, setEditDusunName] = useState<string>("")
+  const [isAddingPerangkat, setIsAddingPerangkat] = useState<boolean>(false)
   const [perangkatForm, setPerangkatForm] = useState({
     nama_lengkap: "",
     username: "",
@@ -57,6 +56,52 @@ export function DashboardSuperadminPBB() {
     id_dusun: "",
     jabatan: "",
   })
+
+  const [searchDusun, setSearchDusun] = useState("")
+  const [searchSuratPBB, setSearchSuratPBB] = useState("")
+  const [searchStatistik, setSearchStatistik] = useState("")
+  const [searchPerangkat, setSearchPerangkat] = useState("")
+  const [showStatistics, setShowStatistics] = useState(false)
+
+  const filteredDusun = dusun.filter((d) => {
+    const searchLower = searchDusun.toLowerCase()
+    return (
+      d.nama_dusun.toLowerCase().includes(searchLower) ||
+      (d.nama_kepala_dusun || "").toLowerCase().includes(searchLower) ||
+      (d.total_perangkat_desa || 0).toString().includes(searchLower)
+    )
+  })
+
+  const filteredSuratPBB = suratPBB.filter((s) => {
+    const searchLower = searchSuratPBB.toLowerCase()
+    return (
+      s.nomor_objek_pajak.toLowerCase().includes(searchLower) ||
+      s.nama_wajib_pajak.toLowerCase().includes(searchLower) ||
+      (s.nama_dusun || "").toLowerCase().includes(searchLower) ||
+      s.tahun_pajak.toString().includes(searchLower) ||
+      s.jumlah_pajak_terhutang.toString().includes(searchLower) ||
+      formatStatusPembayaran(s.status_pembayaran).toLowerCase().includes(searchLower)
+    )
+  })
+
+  const filteredStatistik =
+    laporan?.statistik_per_dusun.filter((stat) => {
+      const searchLower = searchStatistik.toLowerCase()
+      return (
+        stat.nama_dusun.toLowerCase().includes(searchLower) ||
+        (stat.total_surat || 0).toString().includes(searchLower) ||
+        formatStatusDataPBB(stat.status_data_pbb || "belum_lengkap")
+          .toLowerCase()
+          .includes(searchLower) ||
+        (stat.persentase_pembayaran || 0).toString().includes(searchLower)
+      )
+    }) || []
+
+  const filteredPerangkat =
+    selectedDusun?.perangkat_desa?.filter((p) => {
+      const searchLower = searchPerangkat.toLowerCase()
+      return p.nama_lengkap.toLowerCase().includes(searchLower) || p.username.toLowerCase().includes(searchLower) || p.jabatan.toLowerCase().includes(searchLower)
+    }) || []
 
   const fetchActiveYear = useCallback(async () => {
     try {
@@ -166,16 +211,9 @@ export function DashboardSuperadminPBB() {
       if (response.ok) {
         const data = await response.json()
         setSelectedDusun(data)
+        setIsEditingDusun(false)
+        setIsAddingPerangkat(false)
         setActiveTab("detail-dusun")
-        const tokenRes = await fetch(`/api/dusun/${dusunId}/tokens`, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        const tokenData = await tokenRes.json()
-        if (tokenRes.ok) {
-          setDusunTokens(tokenData)
-        } else {
-          setDusunTokens(null)
-        }
       }
     } catch (error) {
       console.error("Error fetching dusun detail:", error)
@@ -192,11 +230,6 @@ export function DashboardSuperadminPBB() {
       jabatan: perangkat.jabatan,
     })
     setActiveTab("detail-perangkat")
-  }
-
-  const openSuratDetail = (surat: SuratPBB) => {
-    setSelectedSurat(surat)
-    setActiveTab("detail-surat")
   }
 
   const handleCreateDusun = async (e: React.FormEvent) => {
@@ -278,6 +311,47 @@ export function DashboardSuperadminPBB() {
     }
   }
 
+  const handleCreatePerangkatDesa = async (e: React.FormEvent) => {
+    e.preventDefault()
+    try {
+      const response = await fetch("/api/perangkat-desa", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          nama_lengkap: perangkatForm.nama_lengkap,
+          username: perangkatForm.username,
+          password: perangkatForm.password,
+          jabatan: perangkatForm.jabatan,
+          id_dusun: Number(perangkatForm.id_dusun),
+        }),
+      })
+      if (response.ok) {
+        setActiveTab("detail-dusun")
+        setPerangkatForm({
+          nama_lengkap: "",
+          username: "",
+          password: "",
+          id_dusun: "",
+          jabatan: "",
+        })
+        setIsAddingPerangkat(false)
+        if (selectedDusun) {
+          openDusunDetail(selectedDusun.id)
+        }
+        alert("Perangkat desa berhasil ditambahkan!")
+      } else {
+        const error = await response.json()
+        alert(error.message || "Gagal menambahkan perangkat desa")
+      }
+    } catch (err) {
+      console.error(err)
+      alert("Terjadi kesalahan")
+    }
+  }
+
   const updatePerangkatDesa = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!selectedPerangkat) return
@@ -325,14 +399,15 @@ export function DashboardSuperadminPBB() {
     }
   }
 
-  const deletePerangkatDesa = async () => {
-    if (!selectedPerangkat) return
+  const deletePerangkatDesa = async (perangkat?: PerangkatDesa) => {
+    const targetPerangkat = perangkat || selectedPerangkat
+    if (!targetPerangkat) return
 
-    const confirmation = confirm(`Apakah Anda yakin ingin menghapus perangkat desa "${selectedPerangkat.nama_lengkap}"? Tindakan ini tidak dapat dibatalkan.`)
+    const confirmation = confirm(`Apakah Anda yakin ingin menghapus perangkat desa "${targetPerangkat.nama_lengkap}"? Tindakan ini tidak dapat dibatalkan.`)
     if (!confirmation) return
 
     try {
-      const response = await fetch(`/api/perangkat-desa/${selectedPerangkat.id}`, {
+      const response = await fetch(`/api/perangkat-desa/${targetPerangkat.id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -355,24 +430,50 @@ export function DashboardSuperadminPBB() {
     }
   }
 
-  const startEditDusun = (dusun: Dusun) => {
-    setEditingDusun(dusun.id)
-    setEditDusunName(dusun.nama_dusun)
+  const deleteDusun = async () => {
+    if (!selectedDusun) return
+
+    const confirmation = confirm(
+      `Apakah Anda yakin ingin menghapus dusun "${selectedDusun.nama_dusun}"? Semua data terkait (surat PBB, perangkat desa, dll.) akan dihapus permanen. Tindakan ini tidak dapat dibatalkan.`
+    )
+    if (!confirmation) return
+
+    try {
+      const response = await fetch(`/api/dusun/${selectedDusun.id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      if (response.ok) {
+        alert("Dusun berhasil dihapus!")
+        setActiveTab("dusun")
+        fetchDusun()
+      } else {
+        const error = await response.json()
+        alert(error.message || "Gagal menghapus dusun")
+      }
+    } catch (err) {
+      console.error(err)
+      alert("Terjadi kesalahan")
+    }
   }
 
-  const cancelEditDusun = () => {
-    setEditingDusun(null)
-    setEditDusunName("")
+  const startEditDusun = () => {
+    if (!selectedDusun) return
+    setIsEditingDusun(true)
+    setEditDusunName(selectedDusun.nama_dusun)
   }
 
-  const saveEditDusun = async (dusunId: number) => {
-    if (!editDusunName.trim()) {
+  const saveEditDusun = async () => {
+    if (!selectedDusun || !editDusunName.trim()) {
       alert("Nama dusun tidak boleh kosong")
       return
     }
 
     try {
-      const response = await fetch(`/api/dusun/${dusunId}`, {
+      const response = await fetch(`/api/dusun/${selectedDusun.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -383,12 +484,63 @@ export function DashboardSuperadminPBB() {
 
       if (response.ok) {
         alert("Nama dusun berhasil diperbarui!")
-        setEditingDusun(null)
+        setIsEditingDusun(false)
         setEditDusunName("")
-        fetchDusun()
+        openDusunDetail(selectedDusun.id)
       } else {
         const error = await response.json()
         alert(error.message || "Gagal memperbarui nama dusun")
+      }
+    } catch (err) {
+      console.error(err)
+      alert("Terjadi kesalahan")
+    }
+  }
+
+  const cancelEditDusun = () => {
+    setIsEditingDusun(false)
+    setEditDusunName("")
+  }
+
+  const formatStatusDataPBB = (status: string) => {
+    switch (status) {
+      case "belum_lengkap":
+        return "Belum Lengkap"
+      case "sudah_lengkap":
+        return "Sudah Lengkap"
+      default:
+        return "Belum Lengkap"
+    }
+  }
+
+  const getStatusDataPBBColor = (status: string) => {
+    switch (status) {
+      case "belum_lengkap":
+        return "warning"
+      case "sudah_lengkap":
+        return "success"
+      default:
+        return "secondary"
+    }
+  }
+
+  const updateDusunStatus = async (dusunId: number, status: string) => {
+    try {
+      const response = await fetch(`/api/dusun/${dusunId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ status_data_pbb: status }),
+      })
+
+      if (response.ok) {
+        alert("Status data PBB berhasil diperbarui!")
+        fetchLaporan()
+      } else {
+        const error = await response.json()
+        alert(error.message || "Gagal memperbarui status data PBB")
       }
     } catch (err) {
       console.error(err)
@@ -439,176 +591,214 @@ export function DashboardSuperadminPBB() {
       </ul>
 
       {activeTab === "dusun" && (
-        <div className="card">
-          <div className="card-header d-flex justify-content-between align-items-center">
-            <h6 className="mb-0">Daftar Dusun</h6>
-            <button className="btn btn-sm btn-primary" onClick={() => setActiveTab("tambah-dusun")}>
-              <i className="bi bi-plus-circle me-1"></i>Tambah Dusun
-            </button>
-          </div>
-          <div className="card-body p-0">
-            <div className="table-container">
-              <table className="table table-hover mb-0">
-                <thead>
-                  <tr>
-                    <th>
-                      Nama Dusun
-                      <i className="bi bi-pencil-square ms-1 text-muted" style={{ fontSize: "0.8rem" }} title="Klik ikon pensil untuk edit"></i>
-                    </th>
-                    <th>Kepala Dusun</th>
-                    <th>Total Perangkat Desa</th>
-                    <th>Aksi</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {dusun.map((d) => (
-                    <tr key={d.id}>
-                      <td>
-                        {editingDusun === d.id ? (
-                          <div className="d-flex gap-1 align-items-center">
-                            <input
-                              type="text"
-                              className="form-control form-control-sm"
-                              value={editDusunName}
-                              onChange={(e) => setEditDusunName(e.target.value)}
-                              onKeyDown={(e) => {
-                                if (e.key === "Enter") {
-                                  e.preventDefault()
-                                  saveEditDusun(d.id)
-                                } else if (e.key === "Escape") {
-                                  cancelEditDusun()
-                                }
-                              }}
-                              style={{ minWidth: "120px" }}
-                              autoFocus
-                            />
-                            <button className="btn btn-sm btn-success" onClick={() => saveEditDusun(d.id)} title="Simpan perubahan">
-                              <i className="bi bi-check"></i>
-                            </button>
-                            <button className="btn btn-sm btn-outline-secondary" onClick={cancelEditDusun} title="Batal edit">
-                              <i className="bi bi-x"></i>
-                            </button>
-                          </div>
-                        ) : (
-                          <div className="d-flex gap-1 align-items-center">
-                            <span>{d.nama_dusun}</span>
-                            <button className="btn btn-sm btn-outline-primary" onClick={() => startEditDusun(d)} title="Edit nama dusun">
-                              <i className="bi bi-pencil"></i>
-                            </button>
-                          </div>
-                        )}
-                      </td>
-                      <td>{d.nama_kepala_dusun || "Belum ada"}</td>
-                      <td>
-                        <span className="badge bg-info">
-                          <i className="bi bi-people me-1"></i>
-                          {d.total_perangkat_desa || 0} Orang
-                        </span>
-                      </td>
-                      <td>
-                        <button className="btn btn-sm btn-primary" onClick={() => openDusunDetail(d.id)}>
-                          <i className="bi bi-eye me-1"></i>Lihat Detail
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+        <>
+          <div className="card mb-3">
+            <div className="card-header d-flex justify-content-between align-items-center">
+              <h6 className="mb-0">Daftar Dusun</h6>
+              <button className="btn btn-sm btn-primary" onClick={() => setActiveTab("tambah-dusun")}>
+                <i className="bi bi-plus-circle me-1"></i>Tambah Dusun
+              </button>
             </div>
           </div>
-        </div>
+          <div className="mb-3">
+            <input type="text" className="form-control" placeholder="Cari dusun..." value={searchDusun} onChange={(e) => setSearchDusun(e.target.value)} />
+          </div>
+          <div className="table-container mx-auto" style={{ maxHeight: "500px", overflowY: "auto", maxWidth: "100%" }}>
+            <table className="table table-hover">
+              <thead className="table-light" style={{ position: "sticky", top: 0, zIndex: 1 }}>
+                <tr>
+                  <th>Nama Dusun</th>
+                  <th>Kepala Dusun</th>
+                  <th>Total Perangkat Desa</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredDusun.map((d) => (
+                  <tr key={d.id}>
+                    <td>{d.nama_dusun}</td>
+                    <td>{d.nama_kepala_dusun || "Belum ada"}</td>
+                    <td>
+                      <span className="badge bg-info">
+                        <i className="bi bi-people me-1"></i>
+                        {d.total_perangkat_desa || 0} Orang
+                      </span>
+                    </td>
+                    <td>
+                      <button className="btn btn-sm btn-primary" onClick={() => openDusunDetail(d.id)}>
+                        <i className="bi bi-eye me-1"></i>Lihat Detail
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
 
       {activeTab === "surat" && (
-        <div className="card">
-          <div className="card-header d-flex justify-content-between align-items-center">
-            <h6 className="mb-0">Daftar Surat PBB</h6>
-            <button className="btn btn-sm btn-primary" onClick={() => setActiveTab("tambah-surat")}>
-              <i className="bi bi-plus-circle me-1"></i>Tambah Surat
-            </button>
-          </div>
-          <div className="card-body p-0">
-            <div className="table-container">
-              <table className="table table-hover mb-0">
-                <thead>
-                  <tr>
-                    <th>NOP</th>
-                    <th>Nama Wajib Pajak</th>
-                    <th>Dusun</th>
-                    <th>Tahun</th>
-                    <th>Jumlah Pajak</th>
-                    <th>Status</th>
-                    <th>Aksi</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {suratPBB.map((s) => (
-                    <tr key={s.id}>
-                      <td className="font-monospace small">{s.nomor_objek_pajak}</td>
-                      <td>{s.nama_wajib_pajak}</td>
-                      <td>{s.nama_dusun}</td>
-                      <td>{s.tahun_pajak}</td>
-                      <td>Rp {Number(s.jumlah_pajak_terhutang).toLocaleString("id-ID")}</td>
-                      <td>
-                        <span className={`badge bg-${getStatusPembayaranColor(s.status_pembayaran)}`}>{formatStatusPembayaran(s.status_pembayaran)}</span>
-                      </td>
-                      <td>
-                        <button className="btn btn-sm btn-outline-primary" onClick={() => openSuratDetail(s)}>
-                          <i className="bi bi-eye me-1"></i>Detail
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+        <>
+          <div className="card mb-3">
+            <div className="card-header d-flex justify-content-between align-items-center">
+              <h6 className="mb-0">Daftar Surat PBB</h6>
+              <button className="btn btn-sm btn-primary" onClick={() => setActiveTab("tambah-surat")}>
+                <i className="bi bi-plus-circle me-1"></i>Tambah Surat
+              </button>
             </div>
           </div>
-        </div>
+          <div className="mb-3">
+            <input type="text" className="form-control" placeholder="Cari surat PBB..." value={searchSuratPBB} onChange={(e) => setSearchSuratPBB(e.target.value)} />
+          </div>
+          <div className="table-container mx-auto" style={{ maxHeight: "500px", overflowY: "auto", maxWidth: "100%" }}>
+            <table className="table table-hover">
+              <thead className="table-light" style={{ position: "sticky", top: 0, zIndex: 1 }}>
+                <tr>
+                  <th>NOP</th>
+                  <th>Nama Wajib Pajak</th>
+                  <th>Dusun</th>
+                  <th>Tahun</th>
+                  <th>Jumlah Pajak</th>
+                  <th>Status</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredSuratPBB.map((s) => (
+                  <tr key={s.id}>
+                    <td className="font-monospace small">{s.nomor_objek_pajak}</td>
+                    <td>{s.nama_wajib_pajak}</td>
+                    <td>{s.nama_dusun}</td>
+                    <td>{s.tahun_pajak}</td>
+                    <td>Rp {Number(s.jumlah_pajak_terhutang).toLocaleString("id-ID")}</td>
+                    <td>
+                      <span className={`badge bg-${getStatusPembayaranColor(s.status_pembayaran)}`}>{formatStatusPembayaran(s.status_pembayaran)}</span>
+                    </td>
+                    <td>
+                      <button className="btn btn-sm btn-outline-primary" onClick={() => navigate(`/dashboard/pbb/surat/${s.id}`)}>
+                        <i className="bi bi-eye me-1"></i>Detail
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
 
       {activeTab === "laporan" && laporan && (
         <div>
-          <div className="row g-3 mb-4">
-            <div className="col-md-4">
-              <div className="card border-primary h-100">
-                <div className="card-body">
-                  <div className="d-flex align-items-center">
-                    <div className="flex-grow-1">
-                      <h6 className="text-primary mb-1">Total Dusun</h6>
-                      <h3 className="mb-0">{laporan.statistik_per_dusun.length}</h3>
-                    </div>
-                    <div className="text-primary fs-3">
-                      <i className="bi bi-building"></i>
+          <div className="card mb-3">
+            <div className="card-header">
+              <button
+                className="btn btn-link text-decoration-none p-0 d-flex align-items-center justify-content-between w-100"
+                type="button"
+                onClick={() => setShowStatistics(!showStatistics)}
+                aria-expanded={showStatistics}
+                aria-controls="statisticsCollapse"
+              >
+                <h6 className="mb-0">
+                  <i className="bi bi-bar-chart me-2"></i>Statistik Keseluruhan
+                </h6>
+                <i className={`bi bi-chevron-${showStatistics ? "up" : "down"}`}></i>
+              </button>
+            </div>
+            <div className={`collapse ${showStatistics ? "show" : ""}`} id="statisticsCollapse">
+              <div className="card-body">
+                <div className="row g-3">
+                  <div className="col-md-4">
+                    <div className="card border-primary h-100">
+                      <div className="card-body">
+                        <div className="d-flex align-items-center">
+                          <div className="flex-grow-1">
+                            <div className="text-muted small mb-1">Total Pajak Terhutang</div>
+                            <div className="h4 mb-0 text-primary">
+                              Rp {laporan.statistik_per_dusun.reduce((sum, stat) => sum + (stat.total_pajak_terhutang || 0), 0).toLocaleString("id-ID")}
+                            </div>
+                          </div>
+                          <i className="bi bi-wallet2 text-primary" style={{ fontSize: "2.5rem", opacity: 0.3 }}></i>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
-            </div>
-            <div className="col-md-4">
-              <div className="card border-info h-100">
-                <div className="card-body">
-                  <div className="d-flex align-items-center">
-                    <div className="flex-grow-1">
-                      <h6 className="text-info mb-1">Total Surat PBB</h6>
-                      <h3 className="mb-0">{laporan.total_surat_keseluruhan}</h3>
-                    </div>
-                    <div className="text-info fs-3">
-                      <i className="bi bi-people"></i>
+
+                  <div className="col-md-4">
+                    <div className="card border-success h-100">
+                      <div className="card-body">
+                        <div className="d-flex align-items-center">
+                          <div className="flex-grow-1">
+                            <div className="text-muted small mb-1">Total Pajak Terbayar</div>
+                            <div className="h4 mb-0 text-success">
+                              Rp {laporan.statistik_per_dusun.reduce((sum, stat) => sum + (stat.total_pajak_dibayar || 0), 0).toLocaleString("id-ID")}
+                            </div>
+                          </div>
+                          <i className="bi bi-check-circle text-success" style={{ fontSize: "2.5rem", opacity: 0.3 }}></i>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
-            </div>
-            <div className="col-md-4">
-              <div className="card border-success h-100">
-                <div className="card-body">
-                  <div className="d-flex align-items-center">
-                    <div className="flex-grow-1">
-                      <h6 className="text-success mb-1">Total Pajak Dibayar</h6>
-                      <h3 className="mb-0">Rp {Number(laporan.total_pajak_dibayar_keseluruhan).toLocaleString("id-ID")}</h3>
+
+                  <div className="col-md-4">
+                    <div className="card border-info h-100">
+                      <div className="card-body">
+                        <div className="d-flex align-items-center">
+                          <div className="flex-grow-1">
+                            <div className="text-muted small mb-1">Persentase Pembayaran</div>
+                            <div className="h4 mb-0 text-info">
+                              {(() => {
+                                const totalSurat = laporan.statistik_per_dusun.reduce((sum, stat) => sum + (stat.total_surat || 0), 0)
+                                const totalSuratDibayar = laporan.statistik_per_dusun.reduce((sum, stat) => sum + (stat.total_surat_dibayar || 0), 0)
+                                const percentage = totalSurat > 0 ? (totalSuratDibayar / totalSurat) * 100 : 0
+                                return `${percentage.toFixed(1)}%`
+                              })()}
+                            </div>
+                          </div>
+                          <i className="bi bi-percent text-info" style={{ fontSize: "2.5rem", opacity: 0.3 }}></i>
+                        </div>
+                      </div>
                     </div>
-                    <div className="text-success fs-3">
-                      <i className="bi bi-file-text"></i>
+                  </div>
+
+                  <div className="col-md-4">
+                    <div className="card border-secondary h-100">
+                      <div className="card-body">
+                        <div className="d-flex align-items-center">
+                          <div className="flex-grow-1">
+                            <div className="text-muted small mb-1">Total Surat</div>
+                            <div className="h4 mb-0 text-secondary">{laporan.total_surat_keseluruhan}</div>
+                          </div>
+                          <i className="bi bi-file-text text-secondary" style={{ fontSize: "2.5rem", opacity: 0.3 }}></i>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="col-md-4">
+                    <div className="card border-success h-100">
+                      <div className="card-body">
+                        <div className="d-flex align-items-center">
+                          <div className="flex-grow-1">
+                            <div className="text-muted small mb-1">Surat Sudah Dibayar</div>
+                            <div className="h4 mb-0 text-success">{laporan.statistik_per_dusun.reduce((sum, stat) => sum + (stat.total_surat_dibayar || 0), 0)}</div>
+                          </div>
+                          <i className="bi bi-check2-square text-success" style={{ fontSize: "2.5rem", opacity: 0.3 }}></i>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="col-md-4">
+                    <div className="card border-warning h-100">
+                      <div className="card-body">
+                        <div className="d-flex align-items-center">
+                          <div className="flex-grow-1">
+                            <div className="text-muted small mb-1">Surat Belum Dibayar</div>
+                            <div className="h4 mb-0 text-warning">{laporan.statistik_per_dusun.reduce((sum, stat) => sum + (stat.total_surat_belum_bayar || 0), 0)}</div>
+                          </div>
+                          <i className="bi bi-exclamation-square text-warning" style={{ fontSize: "2.5rem", opacity: 0.3 }}></i>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -616,77 +806,87 @@ export function DashboardSuperadminPBB() {
             </div>
           </div>
 
-          <div className="card">
+          <div className="card mb-3">
             <div className="card-header">
               <h6 className="mb-0">
                 <i className="bi bi-bar-chart me-2"></i>Statistik Per Dusun
               </h6>
             </div>
-            <div className="card-body p-0">
-              <div className="table-container">
-                <table className="table table-hover mb-0">
-                  <thead>
-                    <tr>
-                      <th>Dusun</th>
-                      <th>Total Surat</th>
-                      <th>Status Pembayaran</th>
-                      <th>Pajak Terhutang</th>
-                      <th>Pajak Dibayar</th>
-                      <th>Persentase</th>
-                      <th>Aksi</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {laporan.statistik_per_dusun.map((stat) => (
-                      <tr key={stat.id} style={{ cursor: "pointer" }}>
-                        <td>{stat.nama_dusun}</td>
-                        <td>
-                          <span className="badge bg-info">
-                            <i className="bi bi-file-text me-1"></i>
-                            {stat.total_surat || 0}
-                          </span>
-                        </td>
-                        <td>
-                          <div className="d-flex gap-1 flex-wrap">
-                            <span className="badge bg-success">
-                              <i className="bi bi-check-circle me-1"></i>
-                              {stat.total_surat_dibayar || 0} Dibayar
-                            </span>
-                            <span className="badge bg-warning">
-                              <i className="bi bi-clock me-1"></i>
-                              {stat.total_surat_belum_bayar || 0} Belum
-                            </span>
+          </div>
+          <div className="mb-3">
+            <input type="text" className="form-control" placeholder="Cari statistik dusun..." value={searchStatistik} onChange={(e) => setSearchStatistik(e.target.value)} />
+          </div>
+          <div className="table-container mx-auto" style={{ maxHeight: "500px", overflowY: "auto", maxWidth: "100%" }}>
+            <table className="table table-hover">
+              <thead className="table-light" style={{ position: "sticky", top: 0, zIndex: 1 }}>
+                <tr>
+                  <th>Nama Dusun</th>
+                  <th>Total Surat</th>
+                  <th>Status Data PBB</th>
+                  <th>Persentase</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredStatistik.map((stat) => (
+                  <tr key={stat.id} style={{ cursor: "pointer" }}>
+                    <td>{stat.nama_dusun}</td>
+                    <td>
+                      <span className="badge bg-info">
+                        <i className="bi bi-file-text me-1"></i>
+                        {stat.total_surat || 0}
+                      </span>
+                    </td>
+                    <td>
+                      <span className={`badge bg-${getStatusDataPBBColor(stat.status_data_pbb || "belum_lengkap")}`}>
+                        {formatStatusDataPBB(stat.status_data_pbb || "belum_lengkap")}
+                      </span>
+                    </td>
+                    <td>
+                      <div className="d-flex align-items-center">
+                        <div className="progress flex-grow-1 me-2" style={{ height: "20px", minWidth: "80px" }}>
+                          <div
+                            className="progress-bar bg-success"
+                            role="progressbar"
+                            style={{ width: `${stat.persentase_pembayaran || 0}%` }}
+                            aria-valuenow={stat.persentase_pembayaran || 0}
+                            aria-valuemin={0}
+                            aria-valuemax={100}
+                          >
+                            {(stat.persentase_pembayaran || 0).toFixed(1)}%
                           </div>
-                        </td>
-                        <td>Rp {Number(stat.total_pajak_terhutang || 0).toLocaleString("id-ID")}</td>
-                        <td>Rp {Number(stat.total_pajak_dibayar || 0).toLocaleString("id-ID")}</td>
-                        <td>
-                          <div className="d-flex align-items-center">
-                            <div className="progress flex-grow-1 me-2" style={{ height: "20px", minWidth: "80px" }}>
-                              <div
-                                className="progress-bar bg-success"
-                                role="progressbar"
-                                style={{ width: `${stat.persentase_pembayaran || 0}%` }}
-                                aria-valuenow={stat.persentase_pembayaran || 0}
-                                aria-valuemin={0}
-                                aria-valuemax={100}
-                              >
-                                {(stat.persentase_pembayaran || 0).toFixed(1)}%
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-                        <td>
-                          <button className="btn btn-sm btn-primary" onClick={() => navigate(`/dashboard/pbb/laporan/dusun/${stat.id}`)}>
-                            <i className="bi bi-eye me-1"></i>Detail
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <div className="d-flex align-items-center gap-2">
+                        <button className="btn btn-sm btn-primary" onClick={() => navigate(`/dashboard/pbb/laporan/dusun/${stat.id.toString()}`)}>
+                          <i className="bi bi-eye me-1"></i>Detail
+                        </button>
+                        <select
+                          className="form-select form-select-sm"
+                          style={{
+                            width: "auto",
+                            minWidth: "120px",
+                            height: "31px",
+                            fontSize: "0.875rem",
+                            lineHeight: "1",
+                            paddingTop: "0.125rem",
+                            paddingBottom: "0.25rem",
+                            paddingRight: "2rem",
+                          }}
+                          value={stat.status_data_pbb || "belum_lengkap"}
+                          onChange={(e) => updateDusunStatus(stat.id, e.target.value)}
+                        >
+                          <option value="belum_lengkap">Belum Lengkap</option>
+                          <option value="sudah_lengkap">Sudah Lengkap</option>
+                        </select>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       )}
@@ -880,6 +1080,90 @@ export function DashboardSuperadminPBB() {
         </div>
       )}
 
+      {activeTab === "tambah-perangkat" && (
+        <div className="card">
+          <div className="card-header d-flex justify-content-between align-items-center">
+            <h6 className="mb-0">Tambah Perangkat Desa Baru</h6>
+            <button className="btn btn-sm btn-secondary" onClick={() => setActiveTab("detail-dusun")}>
+              <i className="bi bi-arrow-left me-1"></i>Kembali ke Detail Dusun
+            </button>
+          </div>
+          <div className="card-body">
+            <form onSubmit={handleCreatePerangkatDesa}>
+              <div className="row g-3">
+                <div className="col-md-6">
+                  <label className="form-label">
+                    Nama Lengkap <span className="text-danger">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={perangkatForm.nama_lengkap}
+                    onChange={(e) => setPerangkatForm({ ...perangkatForm, nama_lengkap: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="col-md-6">
+                  <label className="form-label">
+                    Username <span className="text-danger">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={perangkatForm.username}
+                    onChange={(e) => setPerangkatForm({ ...perangkatForm, username: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="col-md-6">
+                  <label className="form-label">
+                    Password <span className="text-danger">*</span>
+                  </label>
+                  <input
+                    type="password"
+                    className="form-control"
+                    value={perangkatForm.password}
+                    onChange={(e) => setPerangkatForm({ ...perangkatForm, password: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="col-md-6">
+                  <label className="form-label">
+                    Jabatan <span className="text-danger">*</span>
+                  </label>
+                  <select className="form-select" value={perangkatForm.jabatan} onChange={(e) => setPerangkatForm({ ...perangkatForm, jabatan: e.target.value })} required>
+                    <option value="">Pilih Jabatan</option>
+                    <option value="kepala_dusun">Kepala Dusun</option>
+                    <option value="ketua_rt">Ketua RT</option>
+                  </select>
+                </div>
+                <div className="col-12">
+                  <label className="form-label">
+                    Dusun <span className="text-danger">*</span>
+                  </label>
+                  <select className="form-select" value={perangkatForm.id_dusun} onChange={(e) => setPerangkatForm({ ...perangkatForm, id_dusun: e.target.value })} required>
+                    <option value="">Pilih Dusun</option>
+                    {dusun.map((d) => (
+                      <option key={d.id} value={d.id}>
+                        {d.nama_dusun}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="d-flex gap-2 mt-4">
+                <button type="submit" className="btn btn-primary">
+                  <i className="bi bi-save me-1"></i>Simpan
+                </button>
+                <button type="button" className="btn btn-secondary" onClick={() => setActiveTab("detail-dusun")}>
+                  Batal
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {activeTab === "detail-dusun" && selectedDusun && (
         <div className="card">
           <div className="card-header d-flex justify-content-between align-items-center">
@@ -898,64 +1182,168 @@ export function DashboardSuperadminPBB() {
                     </h6>
                   </div>
                   <div className="card-body">
-                    <div className="row g-3">
-                      <div className="col-md-6">
-                        <strong>Nama Dusun:</strong>
-                        <p className="mb-0">{selectedDusun.nama_dusun}</p>
+                    {isEditingDusun ? (
+                      <form
+                        onSubmit={(e) => {
+                          e.preventDefault()
+                          saveEditDusun()
+                        }}
+                      >
+                        <div className="mb-3">
+                          <label className="form-label">
+                            Nama Dusun <span className="text-danger">*</span>
+                          </label>
+                          <input type="text" className="form-control" value={editDusunName} onChange={(e) => setEditDusunName(e.target.value)} required autoFocus />
+                        </div>
+                        <div className="d-flex gap-2">
+                          <button type="submit" className="btn btn-primary">
+                            <i className="bi bi-save me-1"></i>Simpan
+                          </button>
+                          <button type="button" className="btn btn-secondary" onClick={cancelEditDusun}>
+                            Batal
+                          </button>
+                        </div>
+                      </form>
+                    ) : (
+                      <div className="row g-3">
+                        <div className="col-md-6">
+                          <strong>Nama Dusun:</strong>
+                          <p className="mb-0">{selectedDusun.nama_dusun}</p>
+                        </div>
+                        <div className="col-md-6 d-flex justify-content-between align-items-start">
+                          <div>
+                            <strong>Kepala Dusun:</strong>
+                            <p className="mb-0">{selectedDusun.nama_kepala_dusun || "Belum ada"}</p>
+                          </div>
+                          <div className="d-flex flex-column gap-2">
+                            <button className="btn btn-warning btn-sm" onClick={startEditDusun}>
+                              <i className="bi bi-pencil me-1"></i>Edit Dusun
+                            </button>
+                            <button className="btn btn-danger btn-sm" onClick={deleteDusun}>
+                              <i className="bi bi-trash me-1"></i>Hapus Dusun
+                            </button>
+                          </div>
+                        </div>
+                        <div className="col-md-6">
+                          <strong>Total Perangkat Desa:</strong>
+                          <p className="mb-0">
+                            <span className="badge bg-info">
+                              <i className="bi bi-people me-1"></i>
+                              {selectedDusun.total_perangkat_desa || 0} Perangkat
+                            </span>
+                          </p>
+                        </div>
                       </div>
-                      <div className="col-md-6">
-                        <strong>Kepala Dusun:</strong>
-                        <p className="mb-0">{selectedDusun.nama_kepala_dusun || "Belum ada"}</p>
-                      </div>
-                      <div className="col-md-6">
-                        <strong>Total Perangkat Desa:</strong>
-                        <p className="mb-0">
-                          <span className="badge bg-info">
-                            <i className="bi bi-people me-1"></i>
-                            {selectedDusun.total_perangkat_desa || 0} Perangkat
-                          </span>
-                        </p>
-                      </div>
-                    </div>
+                    )}
                   </div>
                 </div>
-                {dusunTokens && (
-                  <div className="row mb-3">
-                    <div className="col-md-6">
-                      <div className="card border-info">
-                        <div className="card-body py-2">
-                          <div className="small text-muted mb-1">Token Kepala Dusun</div>
-                          <div className="font-monospace fw-bold text-info" style={{ wordBreak: "break-all" }}>
-                            {dusunTokens.tokenKepalaDusun || "-"}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="col-md-6">
-                      <div className="card border-warning">
-                        <div className="card-body py-2">
-                          <div className="small text-muted mb-1">Token Ketua RT</div>
-                          <div className="font-monospace fw-bold text-warning" style={{ wordBreak: "break-all" }}>
-                            {dusunTokens.tokenKetuaRT || "-"}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
               </div>
 
               <div className="col-12">
-                <div className="card">
-                  <div className="card-header">
+                <div className="card mb-3">
+                  <div className="card-header d-flex justify-content-between align-items-center">
                     <h6 className="mb-0">
                       <i className="bi bi-people me-2"></i>Daftar Perangkat Desa
                     </h6>
+                    <button
+                      className="btn btn-success btn-sm"
+                      onClick={() => {
+                        setPerangkatForm({
+                          nama_lengkap: "",
+                          username: "",
+                          password: "",
+                          id_dusun: selectedDusun.id.toString(),
+                          jabatan: "",
+                        })
+                        setIsAddingPerangkat(true)
+                      }}
+                    >
+                      <i className="bi bi-person-plus me-1"></i>Tambah Perangkat
+                    </button>
                   </div>
-                  <div className="card-body p-0">
-                    <div className="table-container">
-                      <table className="table table-hover mb-0">
-                        <thead>
+                </div>
+                {isAddingPerangkat ? (
+                  <div className="card">
+                    <div className="card-body">
+                      <form onSubmit={handleCreatePerangkatDesa}>
+                        <div className="row g-3">
+                          <div className="col-md-6">
+                            <label className="form-label">
+                              Nama Lengkap <span className="text-danger">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              className="form-control"
+                              value={perangkatForm.nama_lengkap}
+                              onChange={(e) => setPerangkatForm({ ...perangkatForm, nama_lengkap: e.target.value })}
+                              required
+                            />
+                          </div>
+                          <div className="col-md-6">
+                            <label className="form-label">
+                              Username <span className="text-danger">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              className="form-control"
+                              value={perangkatForm.username}
+                              onChange={(e) => setPerangkatForm({ ...perangkatForm, username: e.target.value })}
+                              required
+                            />
+                          </div>
+                          <div className="col-md-6">
+                            <label className="form-label">
+                              Password <span className="text-danger">*</span>
+                            </label>
+                            <input
+                              type="password"
+                              className="form-control"
+                              value={perangkatForm.password}
+                              onChange={(e) => setPerangkatForm({ ...perangkatForm, password: e.target.value })}
+                              required
+                            />
+                          </div>
+                          <div className="col-md-6">
+                            <label className="form-label">
+                              Jabatan <span className="text-danger">*</span>
+                            </label>
+                            <select
+                              className="form-select"
+                              value={perangkatForm.jabatan}
+                              onChange={(e) => setPerangkatForm({ ...perangkatForm, jabatan: e.target.value })}
+                              required
+                            >
+                              <option value="">Pilih Jabatan</option>
+                              <option value="kepala_dusun">Kepala Dusun</option>
+                              <option value="ketua_rt">Ketua RT</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div className="d-flex gap-2 mt-4">
+                          <button type="submit" className="btn btn-primary">
+                            <i className="bi bi-save me-1"></i>Simpan
+                          </button>
+                          <button type="button" className="btn btn-secondary" onClick={() => setIsAddingPerangkat(false)}>
+                            Batal
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="mb-3">
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Cari perangkat desa..."
+                        value={searchPerangkat}
+                        onChange={(e) => setSearchPerangkat(e.target.value)}
+                      />
+                    </div>
+                    <div className="table-container mx-auto" style={{ maxHeight: "500px", overflowY: "auto", maxWidth: "100%" }}>
+                      <table className="table table-hover">
+                        <thead className="table-light" style={{ position: "sticky", top: 0, zIndex: 1 }}>
                           <tr>
                             <th>Nama Lengkap</th>
                             <th>Username</th>
@@ -964,7 +1352,7 @@ export function DashboardSuperadminPBB() {
                           </tr>
                         </thead>
                         <tbody>
-                          {selectedDusun.perangkat_desa?.map((perangkat) => (
+                          {filteredPerangkat.map((perangkat) => (
                             <tr key={perangkat.id}>
                               <td>{perangkat.nama_lengkap}</td>
                               <td>{perangkat.username}</td>
@@ -974,17 +1362,32 @@ export function DashboardSuperadminPBB() {
                                 </span>
                               </td>
                               <td>
-                                <button className="btn btn-sm btn-primary" onClick={() => openPerangkatDetail(perangkat)}>
-                                  <i className="bi bi-pencil me-1"></i>Edit
-                                </button>
+                                <div className="d-flex gap-1">
+                                  <button className="btn btn-sm btn-primary" onClick={() => openPerangkatDetail(perangkat)}>
+                                    <i className="bi bi-pencil me-1"></i>Edit
+                                  </button>
+                                  <button
+                                    className="btn btn-sm btn-danger"
+                                    onClick={() => {
+                                      const confirmation = confirm(
+                                        `Apakah Anda yakin ingin menghapus perangkat desa "${perangkat.nama_lengkap}"? Tindakan ini tidak dapat dibatalkan.`
+                                      )
+                                      if (confirmation) {
+                                        deletePerangkatDesa(perangkat)
+                                      }
+                                    }}
+                                  >
+                                    <i className="bi bi-trash me-1"></i>Hapus
+                                  </button>
+                                </div>
                               </td>
                             </tr>
                           ))}
                         </tbody>
                       </table>
                     </div>
-                  </div>
-                </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -1063,84 +1466,8 @@ export function DashboardSuperadminPBB() {
                 <button type="submit" className="btn btn-primary">
                   <i className="bi bi-save me-1"></i>Simpan Perubahan
                 </button>
-                <button type="button" className="btn btn-danger" onClick={deletePerangkatDesa}>
-                  <i className="bi bi-trash me-1"></i>Hapus
-                </button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
-
-      {activeTab === "detail-surat" && selectedSurat && (
-        <div className="card">
-          <div className="card-header d-flex justify-content-between align-items-center">
-            <h6 className="mb-0">Detail Surat PBB - {selectedSurat.nomor_objek_pajak}</h6>
-            <button className="btn btn-sm btn-secondary" onClick={() => setActiveTab("surat")}>
-              <i className="bi bi-arrow-left me-1"></i>Kembali ke Daftar
-            </button>
-          </div>
-          <div className="card-body">
-            <div className="row g-3">
-              <div className="col-md-6">
-                <label className="form-label text-muted small mb-1">Nomor Objek Pajak (NOP)</label>
-                <div className="fw-semibold font-monospace">{selectedSurat.nomor_objek_pajak}</div>
-              </div>
-              <div className="col-md-6">
-                <label className="form-label text-muted small mb-1">Tahun Pajak</label>
-                <div className="fw-semibold">{selectedSurat.tahun_pajak}</div>
-              </div>
-              <div className="col-md-6">
-                <label className="form-label text-muted small mb-1">Nama Wajib Pajak</label>
-                <div className="fw-semibold">{selectedSurat.nama_wajib_pajak}</div>
-              </div>
-              <div className="col-md-6">
-                <label className="form-label text-muted small mb-1">Status Pembayaran</label>
-                <div>
-                  <span className={`badge bg-${getStatusPembayaranColor(selectedSurat.status_pembayaran)}`}>{formatStatusPembayaran(selectedSurat.status_pembayaran)}</span>
-                </div>
-              </div>
-              <div className="col-12">
-                <label className="form-label text-muted small mb-1">Alamat Wajib Pajak</label>
-                <div className="fw-semibold">{selectedSurat.alamat_wajib_pajak || "-"}</div>
-              </div>
-              <div className="col-12">
-                <label className="form-label text-muted small mb-1">Alamat Objek Pajak</label>
-                <div className="fw-semibold">{selectedSurat.alamat_objek_pajak}</div>
-              </div>
-              <div className="col-md-6">
-                <label className="form-label text-muted small mb-1">Luas Tanah</label>
-                <div className="fw-semibold">{selectedSurat.luas_tanah ? `${selectedSurat.luas_tanah} m²` : "-"}</div>
-              </div>
-              <div className="col-md-6">
-                <label className="form-label text-muted small mb-1">Luas Bangunan</label>
-                <div className="fw-semibold">{selectedSurat.luas_bangunan ? `${selectedSurat.luas_bangunan} m²` : "-"}</div>
-              </div>
-              <div className="col-md-6">
-                <label className="form-label text-muted small mb-1">Nilai Jual Objek Pajak (NJOP)</label>
-                <div className="fw-semibold">{selectedSurat.nilai_jual_objek_pajak ? `Rp ${Number(selectedSurat.nilai_jual_objek_pajak).toLocaleString("id-ID")}` : "-"}</div>
-              </div>
-              <div className="col-md-6">
-                <label className="form-label text-muted small mb-1">Jumlah Pajak Terhutang</label>
-                <div className="fw-semibold text-primary">Rp {Number(selectedSurat.jumlah_pajak_terhutang).toLocaleString("id-ID")}</div>
-              </div>
-              <div className="col-md-6">
-                <label className="form-label text-muted small mb-1">Dusun</label>
-                <div className="fw-semibold">{selectedSurat.nama_dusun || "-"}</div>
-              </div>
-              <div className="col-md-6">
-                <label className="form-label text-muted small mb-1">Perangkat Desa</label>
-                <div className="fw-semibold">{selectedSurat.nama_perangkat || "-"}</div>
-              </div>
-              <div className="col-md-6">
-                <label className="form-label text-muted small mb-1">Waktu Dibuat</label>
-                <div className="small">{new Date(selectedSurat.waktu_dibuat).toLocaleString("id-ID")}</div>
-              </div>
-              <div className="col-md-6">
-                <label className="form-label text-muted small mb-1">Waktu Diperbarui</label>
-                <div className="small">{new Date(selectedSurat.waktu_diperbarui).toLocaleString("id-ID")}</div>
-              </div>
-            </div>
           </div>
         </div>
       )}
