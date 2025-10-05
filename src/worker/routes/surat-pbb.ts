@@ -40,6 +40,17 @@ suratPBBRoutes.post("/", async (c) => {
       return c.json({ error: "Semua field harus diisi" }, 400)
     }
 
+    if (user.roles !== "superadmin") {
+      if (user.roles === "kepala_dusun") {
+        const kepalaDusunData = await c.env.DB.prepare("SELECT id_dusun FROM perangkat_desa WHERE id = ? AND jabatan = 'kepala_dusun'").bind(user.userId).first()
+        if (!kepalaDusunData || kepalaDusunData.id_dusun !== id_dusun) {
+          return c.json({ error: "Anda hanya dapat menambahkan surat PBB untuk dusun yang Anda kelola" }, 403)
+        }
+      } else {
+        return c.json({ error: "Anda tidak memiliki izin untuk menambahkan surat PBB" }, 403)
+      }
+    }
+
     const suratId = generateId()
 
     await c.env.DB.prepare(

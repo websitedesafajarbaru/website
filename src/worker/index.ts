@@ -24,14 +24,12 @@ app.route("/api/surat-pbb", suratPBBRoutes)
 app.route("/api", publicRoutes)
 app.route("/api/statistik", statistikRoutes)
 
-// Catch all route for SPA
 app.get("*", async (c) => {
   const url = new URL(c.req.url)
-  // If it's an API route, skip (but since API routes are handled above, this shouldn't happen)
   if (url.pathname.startsWith("/api/")) {
     return c.text("Not Found", 404)
   }
-  // For SPA routes, serve index.html
+
   const indexRequest = new Request(`${url.origin}/index.html`, c.req)
   const page = await c.env.ASSETS.fetch(indexRequest)
   return page
