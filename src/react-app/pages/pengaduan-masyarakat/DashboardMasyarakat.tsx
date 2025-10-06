@@ -3,7 +3,7 @@ import { useAuth } from "../../contexts/AuthContext"
 import { Aduan } from "../../types"
 
 export function DashboardMasyarakat() {
-  const { user, logout } = useAuth()
+  const { user } = useAuth()
   const [activeTab, setActiveTab] = useState<"daftar" | "buat" | "detail">("daftar")
   const [aduan, setAduan] = useState<Aduan[]>([])
   const [selectedAduan, setSelectedAduan] = useState<Aduan | null>(null)
@@ -137,9 +137,6 @@ export function DashboardMasyarakat() {
               <i className="bi bi-plus-circle me-2"></i>Buat Aduan Baru
             </button>
           )}
-          <button className="btn btn-outline-danger" onClick={logout}>
-            <i className="bi bi-box-arrow-right me-2"></i>Logout
-          </button>
         </div>
       </div>
 

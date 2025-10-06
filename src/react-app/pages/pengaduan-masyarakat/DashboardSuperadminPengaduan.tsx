@@ -3,7 +3,7 @@ import { useAuth } from "../../contexts/AuthContext"
 import { Aduan } from "../../types"
 
 export function DashboardSuperadminPengaduan() {
-  const { token, logout } = useAuth()
+  const { token } = useAuth()
   const [aduan, setAduan] = useState<Aduan[]>([])
   const [selectedAduan, setSelectedAduan] = useState<Aduan | null>(null)
   const [tanggapan, setTanggapan] = useState("")
@@ -136,9 +136,6 @@ export function DashboardSuperadminPengaduan() {
               <i className="bi bi-arrow-left me-2"></i>Kembali ke Daftar
             </button>
           )}
-          <button className="btn btn-outline-danger" onClick={logout}>
-            <i className="bi bi-box-arrow-right me-2"></i>Logout
-          </button>
         </div>
       </div>
 
