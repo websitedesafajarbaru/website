@@ -14,6 +14,7 @@ import { DashboardSuperadminPBB } from "./pages/pengelolaan-pbb/DashboardSuperad
 import { DashboardKepalaDusun } from "./pages/pengelolaan-pbb/DashboardKepalaDusun"
 import { DashboardKetuaRT } from "./pages/pengelolaan-pbb/DashboardKetuaRT"
 import { DetailDusunLaporan } from "./pages/pengelolaan-pbb/DetailDusunLaporan"
+import { DetailSuratPBB } from "./pages/pengelolaan-pbb/DetailSuratPBB"
 
 function App() {
   return (
@@ -74,6 +75,14 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={["superadmin", "kepala_dusun"]}>
                   <DetailDusunLaporan />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/pbb/surat/:id"
+              element={
+                <ProtectedRoute allowedRoles={["superadmin", "kepala_dusun", "ketua_rt"]}>
+                  <DetailSuratPBB />
                 </ProtectedRoute>
               }
             />

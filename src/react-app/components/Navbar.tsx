@@ -1,6 +1,5 @@
 import { Link, useNavigate } from "react-router-dom"
 import { useAuth } from "../contexts/AuthContext"
-import { formatRole } from "../utils/formatters"
 
 export function Navbar() {
   const { isAuthenticated, user, logout } = useAuth()
@@ -71,79 +70,36 @@ export function Navbar() {
                 </li>
               </>
             ) : (
-              <li className="nav-item dropdown">
-                <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                  {user?.nama_lengkap}
-                </a>
-                <ul className="dropdown-menu dropdown-menu-end">
-                  <li>
-                    <span className="dropdown-item-text small">
-                      <strong>Role:</strong> {formatRole(user?.roles || "")}
-                    </span>
+              <>
+                {(user?.roles === "superadmin" || user?.roles === "masyarakat") && (
+                  <li className="nav-item">
+                    <Link className="nav-link" to={user?.roles === "superadmin" ? "/pengaduan-masyarakat/dashboard-superadmin" : "/pengaduan-masyarakat/dashboard-masyarakat"}>
+                      Dashboard Pengaduan
+                    </Link>
                   </li>
-                  <li>
-                    <hr className="dropdown-divider" />
+                )}
+                {(user?.roles === "superadmin" || user?.roles === "kepala_dusun" || user?.roles === "ketua_rt") && (
+                  <li className="nav-item">
+                    <Link
+                      className="nav-link"
+                      to={
+                        user?.roles === "superadmin"
+                          ? "/pengelolaan-pbb/dashboard-superadmin"
+                          : user?.roles === "kepala_dusun"
+                            ? "/pengelolaan-pbb/dashboard-kepala-dusun"
+                            : "/pengelolaan-pbb/dashboard-ketua-rt"
+                      }
+                    >
+                      Dashboard PBB
+                    </Link>
                   </li>
-                  {user?.roles === "superadmin" && (
-                    <>
-                      <li>
-                        <Link className="dropdown-item" to="/pengaduan-masyarakat/dashboard-superadmin">
-                          Dashboard Pengaduan
-                        </Link>
-                      </li>
-                      <li>
-                        <Link className="dropdown-item" to="/pengelolaan-pbb/dashboard-superadmin">
-                          Dashboard PBB
-                        </Link>
-                      </li>
-                      <li>
-                        <hr className="dropdown-divider" />
-                      </li>
-                    </>
-                  )}
-                  {user?.roles === "masyarakat" && (
-                    <>
-                      <li>
-                        <Link className="dropdown-item" to="/pengaduan-masyarakat/dashboard-masyarakat">
-                          Dashboard Saya
-                        </Link>
-                      </li>
-                      <li>
-                        <hr className="dropdown-divider" />
-                      </li>
-                    </>
-                  )}
-                  {user?.roles === "kepala_dusun" && (
-                    <>
-                      <li>
-                        <Link className="dropdown-item" to="/pengelolaan-pbb/dashboard-kepala-dusun">
-                          Dashboard Kepala Dusun
-                        </Link>
-                      </li>
-                      <li>
-                        <hr className="dropdown-divider" />
-                      </li>
-                    </>
-                  )}
-                  {user?.roles === "ketua_rt" && (
-                    <>
-                      <li>
-                        <Link className="dropdown-item" to="/pengelolaan-pbb/dashboard-ketua-rt">
-                          Dashboard Ketua RT
-                        </Link>
-                      </li>
-                      <li>
-                        <hr className="dropdown-divider" />
-                      </li>
-                    </>
-                  )}
-                  <li>
-                    <button className="dropdown-item" onClick={handleLogout}>
-                      Logout
-                    </button>
-                  </li>
-                </ul>
-              </li>
+                )}
+                <li className="nav-item">
+                  <button className="nav-link" onClick={handleLogout}>
+                    Logout
+                  </button>
+                </li>
+              </>
             )}
           </ul>
         </div>

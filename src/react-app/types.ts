@@ -79,5 +79,6 @@ export interface DusunStatistik {
   total_surat: number
   total_surat_dibayar: number
   total_surat_belum_bayar: number
+  total_surat_tidak_diketahui: number
   persentase_pembayaran: number
 }
