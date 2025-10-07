@@ -12,13 +12,6 @@ interface PerangkatDesa {
   jabatan: "kepala_dusun" | "ketua_rt"
 }
 
-interface DusunDetail extends Dusun {
-  token_kepala_dusun: string
-  token_ketua_rt: string
-  perangkat_desa?: PerangkatDesa[]
-  total_perangkat_desa?: number
-}
-
 export function DashboardSuperadminPBB() {
   const { token } = useAuth()
   const navigate = useNavigate()
@@ -42,13 +35,16 @@ export function DashboardSuperadminPBB() {
     status_pembayaran: "belum_bayar",
   })
 
-  const [selectedDusun, setSelectedDusun] = useState<DusunDetail | null>(null)
-  const [selectedPerangkat, setSelectedPerangkat] = useState<PerangkatDesa | null>(null)
+  const [selectedSurat, setSelectedSurat] = useState<SuratPBB | null>(null)
   const [activeYear, setActiveYear] = useState<number>(new Date().getFullYear())
   const [availableYears, setAvailableYears] = useState<number[]>([])
   const [isEditingDusun, setIsEditingDusun] = useState<boolean>(false)
   const [editDusunName, setEditDusunName] = useState<string>("")
   const [isAddingPerangkat, setIsAddingPerangkat] = useState<boolean>(false)
+  const [isEditing, setIsEditing] = useState(false)
+  const [editForm, setEditForm] = useState<Partial<SuratPBB>>({})
+  const [selectedDusun, setSelectedDusun] = useState<Dusun | null>(null)
+  const [selectedPerangkat, setSelectedPerangkat] = useState<PerangkatDesa | null>(null)
   const [perangkatForm, setPerangkatForm] = useState({
     nama_lengkap: "",
     username: "",
@@ -97,11 +93,7 @@ export function DashboardSuperadminPBB() {
       )
     }) || []
 
-  const filteredPerangkat =
-    selectedDusun?.perangkat_desa?.filter((p) => {
-      const searchLower = searchPerangkat.toLowerCase()
-      return p.nama_lengkap.toLowerCase().includes(searchLower) || p.username.toLowerCase().includes(searchLower) || p.jabatan.toLowerCase().includes(searchLower)
-    }) || []
+  const filteredPerangkat: PerangkatDesa[] = []
 
   const fetchActiveYear = useCallback(async () => {
     try {
@@ -548,6 +540,90 @@ export function DashboardSuperadminPBB() {
     }
   }
 
+  const handleStatusChange = async (newStatus: string) => {
+    if (!selectedSurat || !token) return
+
+    try {
+      const response = await fetch(`/api/surat-pbb/${selectedSurat.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ status_pembayaran: newStatus }),
+      })
+
+      if (response.ok) {
+        setSelectedSurat({ ...selectedSurat, status_pembayaran: newStatus as SuratPBB["status_pembayaran"] })
+        setEditForm({ ...editForm, status_pembayaran: newStatus as SuratPBB["status_pembayaran"] })
+      } else {
+        alert("Gagal memperbarui status pembayaran")
+      }
+    } catch (err) {
+      console.error("Error updating status:", err)
+      alert("Terjadi kesalahan")
+    }
+  }
+
+  const handleEditFormChange = (field: string, value: string | number) => {
+    setEditForm({ ...editForm, [field]: value })
+  }
+
+  const handleSaveEdit = async () => {
+    if (!selectedSurat || !token) return
+
+    try {
+      const response = await fetch(`/api/surat-pbb/${selectedSurat.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(editForm),
+      })
+
+      if (response.ok) {
+        setSelectedSurat(editForm as SuratPBB)
+        setIsEditing(false)
+        alert("Surat PBB berhasil diperbarui")
+      } else {
+        const error = await response.json()
+        alert(error.message || "Gagal memperbarui surat PBB")
+      }
+    } catch (err) {
+      console.error("Error updating surat:", err)
+      alert("Terjadi kesalahan")
+    }
+  }
+
+  const handleCancelEdit = () => {
+    setEditForm(selectedSurat || {})
+    setIsEditing(false)
+  }
+
+  const handleDelete = async () => {
+    if (!selectedSurat || !token || !confirm("Apakah Anda yakin ingin menghapus surat PBB ini? Tindakan ini tidak dapat dibatalkan.")) return
+
+    try {
+      const response = await fetch(`/api/surat-pbb/${selectedSurat.id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      })
+
+      if (response.ok) {
+        alert("Surat PBB berhasil dihapus")
+        setSelectedSurat(null)
+        fetchSuratPBB()
+      } else {
+        const error = await response.json()
+        alert(error.message || "Gagal menghapus surat PBB")
+      }
+    } catch (err) {
+      console.error("Error deleting surat:", err)
+      alert("Terjadi kesalahan")
+    }
+  }
+
   return (
     <div className="container-wide">
       <div className="dashboard-header">
@@ -639,51 +715,251 @@ export function DashboardSuperadminPBB() {
 
       {activeTab === "surat" && (
         <>
-          <div className="card mb-3">
-            <div className="card-header d-flex justify-content-between align-items-center">
-              <h6 className="mb-0">Daftar Surat PBB</h6>
-              <button className="btn btn-sm btn-primary" onClick={() => setActiveTab("tambah-surat")}>
-                <i className="bi bi-plus-circle me-1"></i>Tambah Surat
-              </button>
-            </div>
-          </div>
-          <div className="mb-3">
-            <input type="text" className="form-control" placeholder="Cari surat PBB..." value={searchSuratPBB} onChange={(e) => setSearchSuratPBB(e.target.value)} />
-          </div>
-          <div className="table-container mx-auto" style={{ maxHeight: "500px", overflowY: "auto", maxWidth: "100%" }}>
-            <table className="table table-hover">
-              <thead className="table-light" style={{ position: "sticky", top: 0, zIndex: 1 }}>
-                <tr>
-                  <th>NOP</th>
-                  <th>Nama Wajib Pajak</th>
-                  <th>Dusun</th>
-                  <th>Tahun</th>
-                  <th>Jumlah Pajak</th>
-                  <th>Status</th>
-                  <th>Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredSuratPBB.map((s) => (
-                  <tr key={s.id}>
-                    <td className="font-monospace small">{s.nomor_objek_pajak}</td>
-                    <td>{s.nama_wajib_pajak}</td>
-                    <td>{s.nama_dusun}</td>
-                    <td>{s.tahun_pajak}</td>
-                    <td>Rp {Number(s.jumlah_pajak_terhutang).toLocaleString("id-ID")}</td>
-                    <td>
-                      <span className={`badge bg-${getStatusPembayaranColor(s.status_pembayaran)}`}>{formatStatusPembayaran(s.status_pembayaran)}</span>
-                    </td>
-                    <td>
-                      <button className="btn btn-sm btn-outline-primary" onClick={() => navigate(`/dashboard/pbb/surat/${s.id}`)}>
-                        <i className="bi bi-eye me-1"></i>Detail
+          {!selectedSurat ? (
+            <>
+              <div className="card mb-3">
+                <div className="card-header d-flex justify-content-between align-items-center">
+                  <h6 className="mb-0">Daftar Surat PBB</h6>
+                  <button className="btn btn-sm btn-primary" onClick={() => setActiveTab("tambah-surat")}>
+                    <i className="bi bi-plus-circle me-1"></i>Tambah Surat
+                  </button>
+                </div>
+              </div>
+              <div className="mb-3">
+                <input type="text" className="form-control" placeholder="Cari surat PBB..." value={searchSuratPBB} onChange={(e) => setSearchSuratPBB(e.target.value)} />
+              </div>
+              <div className="table-container mx-auto" style={{ maxHeight: "500px", overflowY: "auto", maxWidth: "100%" }}>
+                <table className="table table-hover">
+                  <thead className="table-light" style={{ position: "sticky", top: 0, zIndex: 1 }}>
+                    <tr>
+                      <th>NOP</th>
+                      <th>Nama Wajib Pajak</th>
+                      <th>Dusun</th>
+                      <th>Tahun</th>
+                      <th>Jumlah Pajak</th>
+                      <th>Status</th>
+                      <th>Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredSuratPBB.map((s) => (
+                      <tr key={s.id}>
+                        <td className="font-monospace small">{s.nomor_objek_pajak}</td>
+                        <td>{s.nama_wajib_pajak}</td>
+                        <td>{s.nama_dusun}</td>
+                        <td>{s.tahun_pajak}</td>
+                        <td>Rp {Number(s.jumlah_pajak_terhutang).toLocaleString("id-ID")}</td>
+                        <td>
+                          <span className={`badge bg-${getStatusPembayaranColor(s.status_pembayaran)}`}>{formatStatusPembayaran(s.status_pembayaran)}</span>
+                        </td>
+                        <td>
+                          <button className="btn btn-sm btn-outline-primary" onClick={() => setSelectedSurat(s)}>
+                            <i className="bi bi-eye me-1"></i>Detail
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          ) : (
+            <div className="card">
+              <div className="card-header d-flex justify-content-between align-items-center">
+                <h6 className="mb-0">Detail Surat PBB - {selectedSurat.nomor_objek_pajak}</h6>
+                <div className="d-flex gap-2">
+                  {!isEditing ? (
+                    <button className="btn btn-warning btn-sm" onClick={() => {
+                      setIsEditing(true)
+                      setEditForm(selectedSurat)
+                    }}>
+                      <i className="bi bi-pencil me-1"></i>Edit
+                    </button>
+                  ) : (
+                    <>
+                      <button className="btn btn-success btn-sm" onClick={handleSaveEdit}>
+                        <i className="bi bi-check me-1"></i>Simpan
                       </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                      <button className="btn btn-secondary btn-sm" onClick={handleCancelEdit}>
+                        <i className="bi bi-x me-1"></i>Batal
+                      </button>
+                    </>
+                  )}
+                  <button className="btn btn-danger btn-sm" onClick={handleDelete}>
+                    <i className="bi bi-trash me-1"></i>Hapus
+                  </button>
+                  <button className="btn btn-secondary btn-sm" onClick={() => setSelectedSurat(null)}>
+                    <i className="bi bi-arrow-left me-1"></i>Kembali ke Daftar
+                  </button>
+                </div>
+              </div>
+              <div className="card-body">
+                <div className="row g-3">
+                  <div className="col-md-6">
+                    <label className="form-label text-muted small mb-1">Nomor Objek Pajak (NOP)</label>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={editForm.nomor_objek_pajak || ""}
+                        onChange={(e) => handleEditFormChange("nomor_objek_pajak", e.target.value)}
+                      />
+                    ) : (
+                      <div className="fw-semibold font-monospace">{selectedSurat.nomor_objek_pajak}</div>
+                    )}
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label text-muted small mb-1">Tahun Pajak</label>
+                    {isEditing ? (
+                      <input
+                        type="number"
+                        className="form-control"
+                        value={editForm.tahun_pajak || ""}
+                        onChange={(e) => handleEditFormChange("tahun_pajak", Number(e.target.value))}
+                      />
+                    ) : (
+                      <div className="fw-semibold">{selectedSurat.tahun_pajak}</div>
+                    )}
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label text-muted small mb-1">Nama Wajib Pajak</label>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={editForm.nama_wajib_pajak || ""}
+                        onChange={(e) => handleEditFormChange("nama_wajib_pajak", e.target.value)}
+                      />
+                    ) : (
+                      <div className="fw-semibold">{selectedSurat.nama_wajib_pajak}</div>
+                    )}
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label text-muted small mb-1">Status Pembayaran</label>
+                    {isEditing ? (
+                      <select
+                        className="form-select"
+                        value={editForm.status_pembayaran || ""}
+                        onChange={(e) => handleEditFormChange("status_pembayaran", e.target.value)}
+                      >
+                        <option value="belum_bayar">Belum Bayar</option>
+                        <option value="bayar_sendiri_di_bank">Bayar Sendiri di Bank</option>
+                        <option value="bayar_lewat_perangkat_desa">Bayar Lewat Perangkat Desa</option>
+                        <option value="pindah_rumah">Pindah Rumah</option>
+                        <option value="tidak_diketahui">Tidak Diketahui</option>
+                      </select>
+                    ) : (
+                      <select
+                        className="form-select"
+                        value={selectedSurat.status_pembayaran}
+                        onChange={(e) => handleStatusChange(e.target.value)}
+                      >
+                        <option value="belum_bayar">Belum Bayar</option>
+                        <option value="bayar_sendiri_di_bank">Bayar Sendiri di Bank</option>
+                        <option value="bayar_lewat_perangkat_desa">Bayar Lewat Perangkat Desa</option>
+                        <option value="pindah_rumah">Pindah Rumah</option>
+                        <option value="tidak_diketahui">Tidak Diketahui</option>
+                      </select>
+                    )}
+                  </div>
+                  <div className="col-12">
+                    <label className="form-label text-muted small mb-1">Alamat Wajib Pajak</label>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={editForm.alamat_wajib_pajak || ""}
+                        onChange={(e) => handleEditFormChange("alamat_wajib_pajak", e.target.value)}
+                      />
+                    ) : (
+                      <div className="fw-semibold">{selectedSurat.alamat_wajib_pajak || "-"}</div>
+                    )}
+                  </div>
+                  <div className="col-12">
+                    <label className="form-label text-muted small mb-1">Alamat Objek Pajak</label>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={editForm.alamat_objek_pajak || ""}
+                        onChange={(e) => handleEditFormChange("alamat_objek_pajak", e.target.value)}
+                      />
+                    ) : (
+                      <div className="fw-semibold">{selectedSurat.alamat_objek_pajak}</div>
+                    )}
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label text-muted small mb-1">Luas Tanah</label>
+                    {isEditing ? (
+                      <input
+                        type="number"
+                        className="form-control"
+                        value={editForm.luas_tanah || ""}
+                        onChange={(e) => handleEditFormChange("luas_tanah", Number(e.target.value))}
+                      />
+                    ) : (
+                      <div className="fw-semibold">{selectedSurat.luas_tanah ? `${selectedSurat.luas_tanah} m²` : "-"}</div>
+                    )}
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label text-muted small mb-1">Luas Bangunan</label>
+                    {isEditing ? (
+                      <input
+                        type="number"
+                        className="form-control"
+                        value={editForm.luas_bangunan || ""}
+                        onChange={(e) => handleEditFormChange("luas_bangunan", Number(e.target.value))}
+                      />
+                    ) : (
+                      <div className="fw-semibold">{selectedSurat.luas_bangunan ? `${selectedSurat.luas_bangunan} m²` : "-"}</div>
+                    )}
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label text-muted small mb-1">Nilai Jual Objek Pajak (NJOP)</label>
+                    {isEditing ? (
+                      <input
+                        type="number"
+                        className="form-control"
+                        value={editForm.nilai_jual_objek_pajak || ""}
+                        onChange={(e) => handleEditFormChange("nilai_jual_objek_pajak", Number(e.target.value))}
+                      />
+                    ) : (
+                      <div className="fw-semibold">{selectedSurat.nilai_jual_objek_pajak ? `Rp ${Number(selectedSurat.nilai_jual_objek_pajak).toLocaleString("id-ID")}` : "-"}</div>
+                    )}
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label text-muted small mb-1">Jumlah Pajak Terhutang</label>
+                    {isEditing ? (
+                      <input
+                        type="number"
+                        className="form-control"
+                        value={editForm.jumlah_pajak_terhutang || ""}
+                        onChange={(e) => handleEditFormChange("jumlah_pajak_terhutang", Number(e.target.value))}
+                      />
+                    ) : (
+                      <div className="fw-semibold text-primary">Rp {Number(selectedSurat.jumlah_pajak_terhutang).toLocaleString("id-ID")}</div>
+                    )}
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label text-muted small mb-1">Dusun</label>
+                    <div className="fw-semibold">{selectedSurat.nama_dusun || "-"}</div>
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label text-muted small mb-1">Perangkat Desa</label>
+                    <div className="fw-semibold">{selectedSurat.nama_perangkat || "-"}</div>
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label text-muted small mb-1">Waktu Dibuat</label>
+                    <div className="small">{new Date(selectedSurat.waktu_dibuat).toLocaleString("id-ID")}</div>
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label text-muted small mb-1">Waktu Diperbarui</label>
+                    <div className="small">{new Date(selectedSurat.waktu_diperbarui).toLocaleString("id-ID")}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </>
       )}
 
@@ -1352,7 +1628,7 @@ export function DashboardSuperadminPBB() {
                           </tr>
                         </thead>
                         <tbody>
-                          {filteredPerangkat.map((perangkat) => (
+                          {filteredPerangkat.map((perangkat: PerangkatDesa) => (
                             <tr key={perangkat.id}>
                               <td>{perangkat.nama_lengkap}</td>
                               <td>{perangkat.username}</td>

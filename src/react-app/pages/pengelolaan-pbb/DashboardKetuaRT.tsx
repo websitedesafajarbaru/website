@@ -12,6 +12,8 @@ export function DashboardKetuaRT() {
   const [selectedSurat, setSelectedSurat] = useState<SuratPBB | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
   const [showStatistics, setShowStatistics] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
+  const [editForm, setEditForm] = useState<Partial<SuratPBB>>({})
   const [suratForm, setSuratForm] = useState({
     nomor_objek_pajak: "",
     nama_wajib_pajak: "",
@@ -134,6 +136,89 @@ export function DashboardKetuaRT() {
       }
     } catch (err) {
       console.error(err)
+      alert("Terjadi kesalahan")
+    }
+  }
+
+  const handleStatusChange = async (newStatus: string) => {
+    if (!selectedSurat || !token) return
+
+    try {
+      const response = await fetch(`/api/surat-pbb/${selectedSurat.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ status_pembayaran: newStatus }),
+      })
+
+      if (response.ok) {
+        setSelectedSurat({ ...selectedSurat, status_pembayaran: newStatus as SuratPBB["status_pembayaran"] })
+        setEditForm({ ...editForm, status_pembayaran: newStatus as SuratPBB["status_pembayaran"] })
+      } else {
+        alert("Gagal memperbarui status pembayaran")
+      }
+    } catch (err) {
+      console.error("Error updating status:", err)
+      alert("Terjadi kesalahan")
+    }
+  }
+
+  const handleEditFormChange = (field: string, value: string | number) => {
+    setEditForm({ ...editForm, [field]: value })
+  }
+
+  const handleSaveEdit = async () => {
+    if (!selectedSurat || !token) return
+
+    try {
+      const response = await fetch(`/api/surat-pbb/${selectedSurat.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(editForm),
+      })
+
+      if (response.ok) {
+        setSelectedSurat(editForm as SuratPBB)
+        setIsEditing(false)
+        alert("Surat PBB berhasil diperbarui")
+      } else {
+        const error = await response.json()
+        alert(error.message || "Gagal memperbarui surat PBB")
+      }
+    } catch (err) {
+      console.error("Error updating surat:", err)
+      alert("Terjadi kesalahan")
+    }
+  }
+
+  const handleCancelEdit = () => {
+    setEditForm(selectedSurat || {})
+    setIsEditing(false)
+  }
+
+  const handleDelete = async () => {
+    if (!selectedSurat || !token || !confirm("Apakah Anda yakin ingin menghapus surat PBB ini? Tindakan ini tidak dapat dibatalkan.")) return
+
+    try {
+      const response = await fetch(`/api/surat-pbb/${selectedSurat.id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      })
+
+      if (response.ok) {
+        alert("Surat PBB berhasil dihapus")
+        setSelectedSurat(null)
+      } else {
+        const error = await response.json()
+        alert(error.message || "Gagal menghapus surat PBB")
+      }
+    } catch (err) {
+      console.error("Error deleting surat:", err)
       alert("Terjadi kesalahan")
     }
   }
@@ -469,53 +554,182 @@ export function DashboardKetuaRT() {
         <div className="card">
           <div className="card-header d-flex justify-content-between align-items-center">
             <h6 className="mb-0">Detail Surat PBB - {selectedSurat.nomor_objek_pajak}</h6>
-            <button className="btn btn-sm btn-secondary" onClick={() => setSelectedSurat(null)}>
-              <i className="bi bi-arrow-left me-1"></i>Kembali ke Daftar
-            </button>
+            <div className="d-flex gap-2">
+              {user?.roles === "superadmin" && (
+                <>
+                  {!isEditing ? (
+                    <button className="btn btn-warning btn-sm" onClick={() => {
+                      setIsEditing(true)
+                      setEditForm(selectedSurat)
+                    }}>
+                      <i className="bi bi-pencil me-1"></i>Edit
+                    </button>
+                  ) : (
+                    <>
+                      <button className="btn btn-success btn-sm" onClick={handleSaveEdit}>
+                        <i className="bi bi-check me-1"></i>Simpan
+                      </button>
+                      <button className="btn btn-secondary btn-sm" onClick={handleCancelEdit}>
+                        <i className="bi bi-x me-1"></i>Batal
+                      </button>
+                    </>
+                  )}
+                  <button className="btn btn-danger btn-sm" onClick={handleDelete}>
+                    <i className="bi bi-trash me-1"></i>Hapus
+                  </button>
+                </>
+              )}
+              <button className="btn btn-secondary btn-sm" onClick={() => setSelectedSurat(null)}>
+                <i className="bi bi-arrow-left me-1"></i>Kembali ke Daftar
+              </button>
+            </div>
           </div>
           <div className="card-body">
             <div className="row g-3">
               <div className="col-md-6">
                 <label className="form-label text-muted small mb-1">Nomor Objek Pajak (NOP)</label>
-                <div className="fw-semibold font-monospace">{selectedSurat.nomor_objek_pajak}</div>
+                {isEditing ? (
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={editForm.nomor_objek_pajak || ""}
+                    onChange={(e) => handleEditFormChange("nomor_objek_pajak", e.target.value)}
+                  />
+                ) : (
+                  <div className="fw-semibold font-monospace">{selectedSurat.nomor_objek_pajak}</div>
+                )}
               </div>
               <div className="col-md-6">
                 <label className="form-label text-muted small mb-1">Tahun Pajak</label>
-                <div className="fw-semibold">{selectedSurat.tahun_pajak}</div>
+                {isEditing ? (
+                  <input
+                    type="number"
+                    className="form-control"
+                    value={editForm.tahun_pajak || ""}
+                    onChange={(e) => handleEditFormChange("tahun_pajak", Number(e.target.value))}
+                  />
+                ) : (
+                  <div className="fw-semibold">{selectedSurat.tahun_pajak}</div>
+                )}
               </div>
               <div className="col-md-6">
                 <label className="form-label text-muted small mb-1">Nama Wajib Pajak</label>
-                <div className="fw-semibold">{selectedSurat.nama_wajib_pajak}</div>
+                {isEditing ? (
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={editForm.nama_wajib_pajak || ""}
+                    onChange={(e) => handleEditFormChange("nama_wajib_pajak", e.target.value)}
+                  />
+                ) : (
+                  <div className="fw-semibold">{selectedSurat.nama_wajib_pajak}</div>
+                )}
               </div>
               <div className="col-md-6">
                 <label className="form-label text-muted small mb-1">Status Pembayaran</label>
-                <div>
-                  <span className={`badge bg-${getStatusPembayaranColor(selectedSurat.status_pembayaran)}`}>{formatStatusPembayaran(selectedSurat.status_pembayaran)}</span>
-                </div>
+                {isEditing ? (
+                  <select
+                    className="form-select"
+                    value={editForm.status_pembayaran || ""}
+                    onChange={(e) => handleEditFormChange("status_pembayaran", e.target.value)}
+                  >
+                    <option value="belum_bayar">Belum Bayar</option>
+                    <option value="bayar_sendiri_di_bank">Bayar Sendiri di Bank</option>
+                    <option value="bayar_lewat_perangkat_desa">Bayar Lewat Perangkat Desa</option>
+                    <option value="pindah_rumah">Pindah Rumah</option>
+                    <option value="tidak_diketahui">Tidak Diketahui</option>
+                  </select>
+                ) : (
+                  <select
+                    className="form-select"
+                    value={selectedSurat.status_pembayaran}
+                    onChange={(e) => handleStatusChange(e.target.value)}
+                  >
+                    <option value="belum_bayar">Belum Bayar</option>
+                    <option value="bayar_sendiri_di_bank">Bayar Sendiri di Bank</option>
+                    <option value="bayar_lewat_perangkat_desa">Bayar Lewat Perangkat Desa</option>
+                    <option value="pindah_rumah">Pindah Rumah</option>
+                    <option value="tidak_diketahui">Tidak Diketahui</option>
+                  </select>
+                )}
               </div>
               <div className="col-12">
                 <label className="form-label text-muted small mb-1">Alamat Wajib Pajak</label>
-                <div className="fw-semibold">{selectedSurat.alamat_wajib_pajak || "-"}</div>
+                {isEditing ? (
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={editForm.alamat_wajib_pajak || ""}
+                    onChange={(e) => handleEditFormChange("alamat_wajib_pajak", e.target.value)}
+                  />
+                ) : (
+                  <div className="fw-semibold">{selectedSurat.alamat_wajib_pajak || "-"}</div>
+                )}
               </div>
               <div className="col-12">
                 <label className="form-label text-muted small mb-1">Alamat Objek Pajak</label>
-                <div className="fw-semibold">{selectedSurat.alamat_objek_pajak}</div>
+                {isEditing ? (
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={editForm.alamat_objek_pajak || ""}
+                    onChange={(e) => handleEditFormChange("alamat_objek_pajak", e.target.value)}
+                  />
+                ) : (
+                  <div className="fw-semibold">{selectedSurat.alamat_objek_pajak}</div>
+                )}
               </div>
               <div className="col-md-6">
                 <label className="form-label text-muted small mb-1">Luas Tanah</label>
-                <div className="fw-semibold">{selectedSurat.luas_tanah ? `${selectedSurat.luas_tanah} m²` : "-"}</div>
+                {isEditing ? (
+                  <input
+                    type="number"
+                    className="form-control"
+                    value={editForm.luas_tanah || ""}
+                    onChange={(e) => handleEditFormChange("luas_tanah", Number(e.target.value))}
+                  />
+                ) : (
+                  <div className="fw-semibold">{selectedSurat.luas_tanah ? `${selectedSurat.luas_tanah} m²` : "-"}</div>
+                )}
               </div>
               <div className="col-md-6">
                 <label className="form-label text-muted small mb-1">Luas Bangunan</label>
-                <div className="fw-semibold">{selectedSurat.luas_bangunan ? `${selectedSurat.luas_bangunan} m²` : "-"}</div>
+                {isEditing ? (
+                  <input
+                    type="number"
+                    className="form-control"
+                    value={editForm.luas_bangunan || ""}
+                    onChange={(e) => handleEditFormChange("luas_bangunan", Number(e.target.value))}
+                  />
+                ) : (
+                  <div className="fw-semibold">{selectedSurat.luas_bangunan ? `${selectedSurat.luas_bangunan} m²` : "-"}</div>
+                )}
               </div>
               <div className="col-md-6">
                 <label className="form-label text-muted small mb-1">Nilai Jual Objek Pajak (NJOP)</label>
-                <div className="fw-semibold">{selectedSurat.nilai_jual_objek_pajak ? `Rp ${Number(selectedSurat.nilai_jual_objek_pajak).toLocaleString("id-ID")}` : "-"}</div>
+                {isEditing ? (
+                  <input
+                    type="number"
+                    className="form-control"
+                    value={editForm.nilai_jual_objek_pajak || ""}
+                    onChange={(e) => handleEditFormChange("nilai_jual_objek_pajak", Number(e.target.value))}
+                  />
+                ) : (
+                  <div className="fw-semibold">{selectedSurat.nilai_jual_objek_pajak ? `Rp ${Number(selectedSurat.nilai_jual_objek_pajak).toLocaleString("id-ID")}` : "-"}</div>
+                )}
               </div>
               <div className="col-md-6">
                 <label className="form-label text-muted small mb-1">Jumlah Pajak Terhutang</label>
-                <div className="fw-semibold text-primary">Rp {Number(selectedSurat.jumlah_pajak_terhutang).toLocaleString("id-ID")}</div>
+                {isEditing ? (
+                  <input
+                    type="number"
+                    className="form-control"
+                    value={editForm.jumlah_pajak_terhutang || ""}
+                    onChange={(e) => handleEditFormChange("jumlah_pajak_terhutang", Number(e.target.value))}
+                  />
+                ) : (
+                  <div className="fw-semibold text-primary">Rp {Number(selectedSurat.jumlah_pajak_terhutang).toLocaleString("id-ID")}</div>
+                )}
               </div>
               <div className="col-md-6">
                 <label className="form-label text-muted small mb-1">Dusun</label>
