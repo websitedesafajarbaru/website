@@ -19,6 +19,8 @@ npm install
 
 ```bash
 npx wrangler d1 execute website-desa --local --file=./schema.sql
+
+npx wrangler d1 execute website-desa --local --file=./seed.sql
 ```
 
 4. Jalanin perintah ini untuk running webnya
@@ -30,3 +32,20 @@ npm run dev
 5. Coba akses http://localhost:5173
 
 ## Note: Test dulu semuanya sebelum commit kodenya.
+
+## Informasi akun
+
+### Admin
+
+Username: admin
+Password: password123
+
+### Kepala Dusun
+
+Username: kepala_dusun
+Password: password123
+
+### Ketua RT
+
+Username: ketua_rt
+Password: password123
