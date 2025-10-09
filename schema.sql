@@ -56,7 +56,7 @@ CREATE TABLE surat_pbb (
     tahun_pajak INT NOT NULL,
     status_pembayaran TEXT NOT NULL CHECK (status_pembayaran IN ('bayar_sendiri_di_bank', 'bayar_lewat_perangkat_desa', 'belum_bayar', 'pindah_rumah', 'tidak_diketahui')),
     id_dusun INT NOT NULL,
-    id_perangkat_desa TEXT NOT NULL,
+    id_perangkat_desa TEXT,
     waktu_dibuat TEXT DEFAULT (datetime('now', '+7 hours', 'localtime')),
     waktu_diperbarui TEXT DEFAULT (datetime('now', '+7 hours', 'localtime')),
     FOREIGN KEY (id_dusun) REFERENCES dusun(id) ON DELETE CASCADE,
