@@ -51,6 +51,16 @@ suratPBBRoutes.post("/", async (c) => {
       }
     }
 
+    let idPerangkatDesa: string | null = user.userId
+    if (user.roles === "superadmin") {
+      const kepalaDusun = await c.env.DB.prepare("SELECT id FROM perangkat_desa WHERE jabatan = 'kepala_dusun' AND id_dusun = ?").bind(id_dusun).first()
+      if (kepalaDusun) {
+        idPerangkatDesa = kepalaDusun.id as string
+      } else {
+        idPerangkatDesa = null
+      }
+    }
+
     const suratId = generateId()
 
     await c.env.DB.prepare(
@@ -69,7 +79,7 @@ suratPBBRoutes.post("/", async (c) => {
         tahun_pajak,
         status_pembayaran,
         id_dusun,
-        user.userId
+        idPerangkatDesa
       )
       .run()
 
@@ -80,7 +90,8 @@ suratPBBRoutes.post("/", async (c) => {
       },
       201
     )
-  } catch {
+  } catch (error) {
+    console.error("Error in POST /api/surat-pbb:", error)
     return c.json({ error: "Terjadi kesalahan server" }, 500)
   }
 })

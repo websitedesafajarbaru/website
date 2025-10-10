@@ -1,6 +1,6 @@
 import { Hono } from "hono"
 import { authMiddleware, requireRole } from "../middleware/auth"
-import { generateToken } from "../utils/db"
+import { generateToken, generateIntId } from "../utils/db"
 
 const dusunRoutes = new Hono<{ Bindings: Env }>()
 
@@ -20,7 +20,7 @@ dusunRoutes.post("/", async (c) => {
 
     const lastDusun = await c.env.DB.prepare("SELECT id FROM dusun ORDER BY id DESC LIMIT 1").first()
 
-    const newId = lastDusun ? (lastDusun.id as number) + 1 : 1
+    const newId = generateIntId(lastDusun?.id as number)
 
     await c.env.DB.prepare("INSERT INTO dusun (id, nama_dusun, status_data_pbb) VALUES (?, ?, ?)").bind(newId, nama_dusun, "belum_lengkap").run()
 

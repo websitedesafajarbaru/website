@@ -1,5 +1,11 @@
+// Generate UUID for TEXT primary keys
 export function generateId(): string {
   return crypto.randomUUID()
+}
+
+// Generate incremental INT for INT primary keys like dusun
+export function generateIntId(lastId?: number): number {
+  return lastId ? lastId + 1 : 1
 }
 
 export function generateToken(): string {
