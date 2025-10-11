@@ -3,7 +3,7 @@ import { useAuth } from "../../contexts/AuthContext"
 import { Aduan } from "../../types"
 
 export function DashboardSuperadminPengaduan() {
-  const { token } = useAuth()
+  const { apiRequest } = useAuth()
   const [aduan, setAduan] = useState<Aduan[]>([])
   const [selectedAduan, setSelectedAduan] = useState<Aduan | null>(null)
   const [tanggapan, setTanggapan] = useState("")
@@ -15,19 +15,14 @@ export function DashboardSuperadminPengaduan() {
     try {
       setLoading(true)
       const url = statusFilter ? `/api/aduan?status=${statusFilter}` : "/api/aduan"
-      const response = await fetch(url, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      const result = await response.json()
-      if (response.ok) {
-        setAduan(result)
-      }
+      const result = await apiRequest<Aduan[]>(url)
+      setAduan(result)
     } catch (err) {
       console.error(err)
     } finally {
       setLoading(false)
     }
-  }, [statusFilter, token])
+  }, [statusFilter, apiRequest])
 
   useEffect(() => {
     fetchAduan()
@@ -35,15 +30,10 @@ export function DashboardSuperadminPengaduan() {
 
   const fetchDetail = async (id: string) => {
     try {
-      const response = await fetch(`/api/aduan/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      const result = await response.json()
-      if (response.ok) {
-        setSelectedAduan(result)
-        setTanggapan("")
-        setActiveTab("detail")
-      }
+      const result = await apiRequest<Aduan>(`/api/aduan/${id}`)
+      setSelectedAduan(result)
+      setTanggapan("")
+      setActiveTab("detail")
     } catch (err) {
       console.error(err)
     }
@@ -51,21 +41,14 @@ export function DashboardSuperadminPengaduan() {
 
   const updateStatus = async (id: string, status: string) => {
     try {
-      const response = await fetch(`/api/aduan/${id}/status`, {
+      await apiRequest(`/api/aduan/${id}/status`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
         body: JSON.stringify({ status }),
       })
-
-      if (response.ok) {
-        alert("Status berhasil diperbarui")
-        fetchAduan()
-        if (selectedAduan?.id === id) {
-          fetchDetail(id)
-        }
+      alert("Status berhasil diperbarui")
+      fetchAduan()
+      if (selectedAduan?.id === id) {
+        fetchDetail(id)
       }
     } catch (err) {
       console.error(err)
@@ -77,21 +60,14 @@ export function DashboardSuperadminPengaduan() {
     if (!selectedAduan) return
 
     try {
-      const response = await fetch(`/api/aduan/${selectedAduan.id}/tanggapan`, {
+      await apiRequest(`/api/aduan/${selectedAduan.id}/tanggapan`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
         body: JSON.stringify({ isi_tanggapan: tanggapan }),
       })
-
-      if (response.ok) {
-        alert("Tanggapan berhasil dikirim")
-        setTanggapan("")
-        fetchDetail(selectedAduan.id)
-        fetchAduan()
-      }
+      alert("Tanggapan berhasil dikirim")
+      setTanggapan("")
+      fetchDetail(selectedAduan.id)
+      fetchAduan()
     } catch (err) {
       console.error(err)
     }
