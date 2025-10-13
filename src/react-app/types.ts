@@ -4,7 +4,7 @@ export interface Aduan {
   isi: string
   isi_aduan?: string
   kategori: string
-  status: "baru" | "diproses" | "selesai"
+  status: "menunggu" | "diproses" | "selesai" | "ditolak"
   id_masyarakat: string
   waktu_dibuat: string
   waktu_diperbarui: string
@@ -57,6 +57,7 @@ export interface SuratPBB {
   waktu_diperbarui: string
   nama_dusun?: string
   nama_perangkat?: string
+  status_data_pbb?: "belum_lengkap" | "sudah_lengkap"
 }
 
 export interface Laporan {

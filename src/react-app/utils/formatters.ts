@@ -15,8 +15,6 @@ export const formatStatusPembayaran = (status: string): string => {
     bayar_lewat_perangkat_desa: "Bayar Lewat Perangkat Desa",
     pindah_rumah: "Pindah Rumah",
     tidak_diketahui: "Tidak Diketahui",
-    sudah_bayar: "Sudah Bayar",
-    terlambat: "Terlambat",
   }
   return statusMap[status] || status
 }
@@ -57,8 +55,6 @@ export const getStatusPembayaranColor = (status: string): string => {
     bayar_lewat_perangkat_desa: "success",
     pindah_rumah: "info",
     tidak_diketahui: "secondary",
-    sudah_bayar: "success",
-    terlambat: "danger",
   }
   return colorMap[status] || "secondary"
 }
