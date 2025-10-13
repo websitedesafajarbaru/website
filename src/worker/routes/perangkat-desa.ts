@@ -54,14 +54,14 @@ perangkatDesaRoutes.post("/", async (c) => {
 
     await c.env.DB.prepare(
       `INSERT INTO pengguna (id, nama_lengkap, username, password, roles, waktu_dibuat, waktu_diperbarui)
-       VALUES (?, ?, ?, ?, ?, datetime("now", "+7 hours", "localtime"), datetime("now", "+7 hours", "localtime"))`
+       VALUES (?, ?, ?, ?, ?, datetime("now"), datetime("now"))`
     )
       .bind(newId, nama_lengkap, username, hashedPassword, jabatan)
       .run()
 
     await c.env.DB.prepare(
       `INSERT INTO perangkat_desa (id, id_dusun, jabatan, waktu_dibuat, waktu_diperbarui)
-       VALUES (?, ?, ?, datetime("now", "+7 hours", "localtime"), datetime("now", "+7 hours", "localtime"))`
+       VALUES (?, ?, ?, datetime("now"), datetime("now"))`
     )
       .bind(newId, id_dusun, jabatan)
       .run()
@@ -99,7 +99,8 @@ perangkatDesaRoutes.get("/", async (c) => {
       .all()
 
     return c.json(result.results)
-  } catch {
+  } catch (error) {
+    console.error(error)
     return c.json({ error: "Terjadi kesalahan server" }, 500)
   }
 })
@@ -169,7 +170,7 @@ perangkatDesaRoutes.put("/:id", async (c) => {
       }
     }
 
-    let penggunaQuery = 'UPDATE pengguna SET waktu_diperbarui = datetime("now", "+7 hours", "localtime")'
+    let penggunaQuery = 'UPDATE pengguna SET waktu_diperbarui = datetime("now")'
     const penggunaParams: (string | number)[] = []
 
     if (nama_lengkap) {
@@ -196,7 +197,7 @@ perangkatDesaRoutes.put("/:id", async (c) => {
     penggunaQuery += " WHERE id = ?"
     penggunaParams.push(id)
 
-    let perangkatQuery = 'UPDATE perangkat_desa SET waktu_diperbarui = datetime("now", "+7 hours", "localtime")'
+    let perangkatQuery = 'UPDATE perangkat_desa SET waktu_diperbarui = datetime("now")'
     const perangkatParams: (string | number | null)[] = []
 
     if (id_dusun !== undefined) {
@@ -215,7 +216,8 @@ perangkatDesaRoutes.put("/:id", async (c) => {
     await c.env.DB.batch([c.env.DB.prepare(penggunaQuery).bind(...penggunaParams), c.env.DB.prepare(perangkatQuery).bind(...perangkatParams)])
 
     return c.json({ message: "Data perangkat desa berhasil diperbarui" })
-  } catch {
+  } catch (error) {
+    console.error(error)
     return c.json({ error: "Terjadi kesalahan server" }, 500)
   }
 })

@@ -17,7 +17,8 @@ publicRoutes.get("/cek-pembayaran/:nomor_objek_pajak", async (c) => {
     }
 
     return c.json(surat)
-  } catch {
+  } catch (error) {
+    console.error(error)
     return c.json({ error: "Terjadi kesalahan server" }, 500)
   }
 })

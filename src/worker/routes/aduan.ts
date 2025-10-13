@@ -17,7 +17,7 @@ aduanRoutes.post("/", authMiddleware, async (c) => {
     const aduanId = generateId()
 
     await c.env.DB.prepare("INSERT INTO aduan (id, judul, isi, kategori, status, id_masyarakat) VALUES (?, ?, ?, ?, ?, ?)")
-      .bind(aduanId, judul, isi, kategori, "baru", user.userId)
+      .bind(aduanId, judul, isi, kategori, "menunggu", user.userId)
       .run()
 
     return c.json(
@@ -27,7 +27,8 @@ aduanRoutes.post("/", authMiddleware, async (c) => {
       },
       201
     )
-  } catch {
+  } catch (error) {
+    console.error(error)
     return c.json({ error: "Terjadi kesalahan server" }, 500)
   }
 })
@@ -39,7 +40,8 @@ aduanRoutes.get("/saya", authMiddleware, async (c) => {
     const aduan = await c.env.DB.prepare("SELECT * FROM aduan WHERE id_masyarakat = ? ORDER BY waktu_dibuat DESC").bind(user.userId).all()
 
     return c.json(aduan.results)
-  } catch {
+  } catch (error) {
+    console.error(error)
     return c.json({ error: "Terjadi kesalahan server" }, 500)
   }
 })
@@ -64,7 +66,7 @@ aduanRoutes.get("/:id", authMiddleware, async (c) => {
     }
 
     const tanggapan = await c.env.DB.prepare(
-      "SELECT t.*, p.nama_lengkap FROM tanggapan_aduan t JOIN pengguna p ON t.id_perangkat_desa = p.id WHERE t.id_aduan = ? ORDER BY t.waktu_dibuat DESC"
+      "SELECT t.*, p.nama_lengkap FROM tanggapan_aduan t JOIN pengguna p ON t.id_pengguna = p.id WHERE t.id_aduan = ? ORDER BY t.waktu_dibuat DESC"
     )
       .bind(aduanId)
       .all()
@@ -73,7 +75,8 @@ aduanRoutes.get("/:id", authMiddleware, async (c) => {
       ...aduan,
       tanggapan: tanggapan.results,
     })
-  } catch {
+  } catch (error) {
+    console.error(error)
     return c.json({ error: "Terjadi kesalahan server" }, 500)
   }
 })
@@ -98,7 +101,8 @@ aduanRoutes.get("/", authMiddleware, async (c) => {
     const result = status ? await c.env.DB.prepare(query).bind(status).all() : await c.env.DB.prepare(query).all()
 
     return c.json(result.results)
-  } catch {
+  } catch (error) {
+    console.error(error)
     return c.json({ error: "Terjadi kesalahan server" }, 500)
   }
 })
@@ -114,14 +118,15 @@ aduanRoutes.put("/:id/status", authMiddleware, async (c) => {
     const aduanId = c.req.param("id")
     const { status } = await c.req.json()
 
-    if (!["baru", "diproses", "selesai"].includes(status)) {
+    if (!["menunggu", "diproses", "selesai"].includes(status)) {
       return c.json({ error: "Status tidak valid" }, 400)
     }
 
-    await c.env.DB.prepare('UPDATE aduan SET status = ?, waktu_diperbarui = datetime("now", "+7 hours", "localtime") WHERE id = ?').bind(status, aduanId).run()
+    await c.env.DB.prepare('UPDATE aduan SET status = ?, waktu_diperbarui = datetime("now") WHERE id = ?').bind(status, aduanId).run()
 
     return c.json({ message: "Status aduan berhasil diperbarui" })
-  } catch {
+  } catch (error) {
+    console.error(error)
     return c.json({ error: "Terjadi kesalahan server" }, 500)
   }
 })
@@ -143,9 +148,15 @@ aduanRoutes.post("/:id/tanggapan", authMiddleware, async (c) => {
 
     const tanggapanId = generateId()
 
-    await c.env.DB.prepare("INSERT INTO tanggapan_aduan (id, isi_tanggapan, id_aduan, id_perangkat_desa) VALUES (?, ?, ?, ?)")
-      .bind(tanggapanId, isi_tanggapan, aduanId, user.userId)
+    // Check if user is also a perangkat_desa
+    const perangkatDesa = await c.env.DB.prepare("SELECT id FROM perangkat_desa WHERE id = ?").bind(user.userId).first()
+
+    await c.env.DB.prepare("INSERT INTO tanggapan_aduan (id, isi_tanggapan, id_aduan, id_perangkat_desa, id_pengguna) VALUES (?, ?, ?, ?, ?)")
+      .bind(tanggapanId, isi_tanggapan, aduanId, perangkatDesa?.id || null, user.userId)
       .run()
+
+    // Update aduan waktu_diperbarui
+    await c.env.DB.prepare('UPDATE aduan SET waktu_diperbarui = datetime("now") WHERE id = ?').bind(aduanId).run()
 
     return c.json(
       {
@@ -154,7 +165,8 @@ aduanRoutes.post("/:id/tanggapan", authMiddleware, async (c) => {
       },
       201
     )
-  } catch {
+  } catch (error) {
+    console.error(error)
     return c.json({ error: "Terjadi kesalahan server" }, 500)
   }
 })

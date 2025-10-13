@@ -36,7 +36,8 @@ dusunRoutes.post("/", async (c) => {
       },
       201
     )
-  } catch {
+  } catch (error) {
+    console.error(error)
     return c.json({ error: "Terjadi kesalahan server" }, 500)
   }
 })
@@ -62,7 +63,8 @@ dusunRoutes.get("/", async (c) => {
     }
 
     return c.json(dusunWithCounts)
-  } catch {
+  } catch (error) {
+    console.error(error)
     return c.json({ error: "Terjadi kesalahan server" }, 500)
   }
 })
@@ -102,7 +104,8 @@ dusunRoutes.get("/:id", async (c) => {
       perangkat_desa: perangkatDesa.results,
       total_perangkat_desa: Number(totalPerangkatDesa?.total || 0),
     })
-  } catch {
+  } catch (error) {
+    console.error(error)
     return c.json({ error: "Terjadi kesalahan server" }, 500)
   }
 })
@@ -112,7 +115,7 @@ dusunRoutes.put("/:id", async (c) => {
     const dusunId = c.req.param("id")
     const { nama_dusun, status_data_pbb } = await c.req.json()
 
-    let query = 'UPDATE dusun SET waktu_diperbarui = datetime("now", "+7 hours", "localtime")'
+    let query = 'UPDATE dusun SET waktu_diperbarui = datetime("now")'
     const params: (string | number)[] = []
 
     if (nama_dusun) {
@@ -136,7 +139,8 @@ dusunRoutes.put("/:id", async (c) => {
       .run()
 
     return c.json({ message: "Dusun berhasil diperbarui" })
-  } catch {
+  } catch (error) {
+    console.error(error)
     return c.json({ error: "Terjadi kesalahan server" }, 500)
   }
 })
@@ -148,7 +152,8 @@ dusunRoutes.delete("/:id", async (c) => {
     await c.env.DB.prepare("DELETE FROM dusun WHERE id = ?").bind(dusunId).run()
 
     return c.json({ message: "Dusun berhasil dihapus" })
-  } catch {
+  } catch (error) {
+    console.error(error)
     return c.json({ error: "Terjadi kesalahan server" }, 500)
   }
 })
@@ -164,7 +169,8 @@ dusunRoutes.get("/:id/tokens", async (c) => {
       tokenKepalaDusun,
       tokenKetuaRT,
     })
-  } catch {
+  } catch (error) {
+    console.error(error)
     return c.json({ error: "Terjadi kesalahan server" }, 500)
   }
 })

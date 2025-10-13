@@ -106,7 +106,7 @@ suratPBBRoutes.get("/", async (c) => {
     const currentYear = activeYear ? parseInt(activeYear) : new Date().getFullYear()
 
     let query =
-      "SELECT s.*, d.nama_dusun, p.nama_lengkap as nama_perangkat FROM surat_pbb s JOIN dusun d ON s.id_dusun = d.id JOIN pengguna p ON s.id_perangkat_desa = p.id WHERE s.tahun_pajak = ?"
+      "SELECT s.*, d.nama_dusun, d.status_data_pbb, p.nama_lengkap as nama_perangkat FROM surat_pbb s JOIN dusun d ON s.id_dusun = d.id JOIN pengguna p ON s.id_perangkat_desa = p.id WHERE s.tahun_pajak = ?"
     const params: (string | number)[] = [currentYear]
 
     if (user.roles !== "superadmin") {
@@ -149,7 +149,8 @@ suratPBBRoutes.get("/", async (c) => {
       active_year: currentYear,
       surat_pbb: result.results,
     })
-  } catch {
+  } catch (error) {
+    console.error(error)
     return c.json({ error: "Terjadi kesalahan server" }, 500)
   }
 })
@@ -159,7 +160,7 @@ suratPBBRoutes.get("/:id", async (c) => {
     const suratId = c.req.param("id")
 
     const surat = await c.env.DB.prepare(
-      "SELECT s.*, d.nama_dusun, p.nama_lengkap as nama_perangkat FROM surat_pbb s JOIN dusun d ON s.id_dusun = d.id JOIN pengguna p ON s.id_perangkat_desa = p.id WHERE s.id = ?"
+      "SELECT s.*, d.nama_dusun, d.status_data_pbb, p.nama_lengkap as nama_perangkat FROM surat_pbb s JOIN dusun d ON s.id_dusun = d.id JOIN pengguna p ON s.id_perangkat_desa = p.id WHERE s.id = ?"
     )
       .bind(suratId)
       .first()
@@ -169,7 +170,8 @@ suratPBBRoutes.get("/:id", async (c) => {
     }
 
     return c.json(surat)
-  } catch {
+  } catch (error) {
+    console.error(error)
     return c.json({ error: "Terjadi kesalahan server" }, 500)
   }
 })
@@ -196,6 +198,21 @@ suratPBBRoutes.put("/:id", async (c) => {
     const updateFields: string[] = []
     const params: (string | number)[] = []
 
+    // Validasi khusus untuk status_pembayaran
+    if (updates.status_pembayaran && user.roles !== "superadmin") {
+      // Cek status data PBB dusun
+      const dusunStatus = await c.env.DB.prepare("SELECT d.status_data_pbb FROM dusun d JOIN surat_pbb s ON d.id = s.id_dusun WHERE s.id = ?").bind(suratId).first()
+
+      if (dusunStatus?.status_data_pbb !== "sudah_lengkap") {
+        return c.json(
+          {
+            error: "Status pembayaran tidak dapat diubah karena data dusun belum diset sebagai lengkap oleh superadmin",
+          },
+          403
+        )
+      }
+    }
+
     for (const [key, value] of Object.entries(updates)) {
       if (allowedFields.includes(key)) {
         updateFields.push(`${key} = ?`)
@@ -207,7 +224,7 @@ suratPBBRoutes.put("/:id", async (c) => {
       return c.json({ error: "Tidak ada field yang valid untuk diperbarui" }, 400)
     }
 
-    updateFields.push('waktu_diperbarui = datetime("now", "+7 hours", "localtime")')
+    updateFields.push('waktu_diperbarui = datetime("now")')
     updateFields.push("id_perangkat_desa = ?")
     params.push(user.userId)
     params.push(suratId)
@@ -218,7 +235,8 @@ suratPBBRoutes.put("/:id", async (c) => {
       .run()
 
     return c.json({ message: "Surat PBB berhasil diperbarui" })
-  } catch {
+  } catch (error) {
+    console.error(error)
     return c.json({ error: "Terjadi kesalahan server" }, 500)
   }
 })
@@ -235,7 +253,8 @@ suratPBBRoutes.delete("/:id", async (c) => {
     await c.env.DB.prepare("DELETE FROM surat_pbb WHERE id = ?").bind(suratId).run()
 
     return c.json({ message: "Surat PBB berhasil dihapus" })
-  } catch {
+  } catch (error) {
+    console.error(error)
     return c.json({ error: "Terjadi kesalahan server" }, 500)
   }
 })

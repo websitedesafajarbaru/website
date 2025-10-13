@@ -43,7 +43,8 @@ authRoutes.post("/login", async (c) => {
         roles: user.roles,
       },
     })
-  } catch {
+  } catch (error) {
+    console.error(error)
     return c.json({ error: "Terjadi kesalahan server" }, 500)
   }
 })
@@ -62,7 +63,8 @@ authRoutes.post("/logout", async (c) => {
     }
 
     return c.json({ message: "Logout berhasil" })
-  } catch {
+  } catch (error) {
+    console.error(error)
     return c.json({ error: "Terjadi kesalahan server" }, 500)
   }
 })

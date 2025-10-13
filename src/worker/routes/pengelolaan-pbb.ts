@@ -65,7 +65,8 @@ pengelolaanPBBRoutes.post("/registrasi", async (c) => {
       },
       201
     )
-  } catch {
+  } catch (error) {
+    console.error(error)
     return c.json({ error: "Terjadi kesalahan server" }, 500)
   }
 })
