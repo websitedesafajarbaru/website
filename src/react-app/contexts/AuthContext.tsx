@@ -47,7 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null)
   }
 
-  const authenticatedApiRequest = async <T = unknown>(url: string, options: RequestInit = {}): Promise<T> => {
+  const authenticatedApiRequest = async <T = unknown,>(url: string, options: RequestInit = {}): Promise<T> => {
     try {
       return await apiRequest<T>(url, options, logout)
     } catch (error) {
@@ -58,14 +58,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  return <AuthContext.Provider value={{
-    user,
-    token,
-    login,
-    logout,
-    isAuthenticated: !!token,
-    apiRequest: authenticatedApiRequest
-  }}>{children}</AuthContext.Provider>
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        token,
+        login,
+        logout,
+        isAuthenticated: !!token,
+        apiRequest: authenticatedApiRequest,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  )
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
