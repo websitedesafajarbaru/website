@@ -39,8 +39,15 @@ export function RegistrasiMasyarakat() {
         throw new Error(result.error || "Terjadi kesalahan")
       }
 
-      alert("Registrasi berhasil! Silakan login")
-      navigate("/pengaduan-masyarakat/login")
+      Swal.fire({
+        icon: "success",
+        title: "Berhasil!",
+        text: "Registrasi berhasil! Silakan login",
+        timer: 2000,
+        showConfirmButton: false,
+      }).then(() => {
+        navigate("/pengaduan-masyarakat/login")
+      })
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Terjadi kesalahan"
       setError(errorMessage)

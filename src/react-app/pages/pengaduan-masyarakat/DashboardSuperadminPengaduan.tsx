@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react"
 import { useAuth } from "../../contexts/AuthContext"
 import { Aduan } from "../../types"
+import { formatToWIB } from "../../utils/time"
 
 export function DashboardSuperadminPengaduan() {
   const { apiRequest } = useAuth()
@@ -45,7 +46,13 @@ export function DashboardSuperadminPengaduan() {
         method: "PUT",
         body: JSON.stringify({ status }),
       })
-      alert("Status berhasil diperbarui")
+      Swal.fire({
+        icon: "success",
+        title: "Berhasil!",
+        text: "Status berhasil diperbarui",
+        timer: 2000,
+        showConfirmButton: false,
+      })
       fetchAduan()
       if (selectedAduan?.id === id) {
         fetchDetail(id)
@@ -64,7 +71,13 @@ export function DashboardSuperadminPengaduan() {
         method: "POST",
         body: JSON.stringify({ isi_tanggapan: tanggapan }),
       })
-      alert("Tanggapan berhasil dikirim")
+      Swal.fire({
+        icon: "success",
+        title: "Berhasil!",
+        text: "Tanggapan berhasil dikirim",
+        timer: 2000,
+        showConfirmButton: false,
+      })
       setTanggapan("")
       fetchDetail(selectedAduan.id)
       fetchAduan()
@@ -79,21 +92,8 @@ export function DashboardSuperadminPengaduan() {
         return "success"
       case "diproses":
         return "warning"
-      default:
+      case "menunggu":
         return "secondary"
-    }
-  }
-
-  const kategoriBadgeColor = (kategori: string) => {
-    switch (kategori) {
-      case "Infrastruktur":
-        return "primary"
-      case "Lingkungan":
-        return "success"
-      case "Pelayanan":
-        return "info"
-      case "Keamanan":
-        return "danger"
       default:
         return "secondary"
     }
@@ -137,7 +137,7 @@ export function DashboardSuperadminPengaduan() {
                   <div className="d-flex align-items-center">
                     <div className="flex-grow-1">
                       <div className="text-muted small">Baru</div>
-                      <div className="h4 mb-0 text-secondary">{aduan.filter((a) => a.status === "baru").length}</div>
+                      <div className="h4 mb-0 text-secondary">{aduan.filter((a) => a.status === "menunggu").length}</div>
                     </div>
                     <i className="bi bi-inbox-fill text-secondary" style={{ fontSize: "2rem" }}></i>
                   </div>
@@ -179,7 +179,7 @@ export function DashboardSuperadminPengaduan() {
                   <label className="form-label small mb-1">Filter Status</label>
                   <select className="form-select form-select-sm" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
                     <option value="">Semua Status</option>
-                    <option value="baru">Baru</option>
+                    <option value="menunggu">Baru</option>
                     <option value="diproses">Sedang Diproses</option>
                     <option value="selesai">Selesai</option>
                   </select>
@@ -213,11 +213,10 @@ export function DashboardSuperadminPengaduan() {
                 <thead>
                   <tr>
                     <th style={{ minWidth: "50px" }}>No</th>
-                    <th style={{ minWidth: "250px" }}>Judul Aduan</th>
-                    <th style={{ minWidth: "180px" }}>Pelapor</th>
+                    <th style={{ minWidth: "150px" }}>Tanggal</th>
+                    <th style={{ minWidth: "250px" }}>Judul</th>
                     <th style={{ minWidth: "150px" }}>Kategori</th>
                     <th style={{ minWidth: "120px" }}>Status</th>
-                    <th style={{ minWidth: "150px" }}>Tanggal Dibuat</th>
                     <th style={{ minWidth: "300px", textAlign: "right" }}>Aksi</th>
                   </tr>
                 </thead>
@@ -225,21 +224,18 @@ export function DashboardSuperadminPengaduan() {
                   {aduan.map((item, idx) => (
                     <tr key={item.id}>
                       <td>{idx + 1}</td>
+                      <td>{formatToWIB(item.waktu_dibuat)}</td>
                       <td>
                         <strong>{item.judul}</strong>
                       </td>
-                      <td>{item.nama_lengkap}</td>
-                      <td>
-                        <span className={`badge bg-${kategoriBadgeColor(item.kategori)}`}>{item.kategori}</span>
-                      </td>
+                      <td>{item.kategori}</td>
                       <td>
                         <span className={`badge bg-${statusBadgeColor(item.status)}`}>{item.status.toUpperCase()}</span>
                       </td>
-                      <td>{new Date(item.waktu_dibuat).toLocaleDateString("id-ID")}</td>
                       <td>
                         <div className="action-buttons">
                           <button className="btn btn-sm btn-primary" onClick={() => fetchDetail(item.id)}>
-                            <i className="bi bi-eye me-1"></i>Lihat
+                            <i className="bi bi-eye me-1"></i>Lihat Detail
                           </button>
                         </div>
                       </td>
@@ -278,7 +274,7 @@ export function DashboardSuperadminPengaduan() {
                     <i className="bi bi-tag-fill text-primary me-2 mt-1"></i>
                     <div>
                       <small className="text-muted d-block">Kategori</small>
-                      <span className={`badge bg-${kategoriBadgeColor(selectedAduan.kategori)}`}>{selectedAduan.kategori}</span>
+                      <span>{selectedAduan.kategori}</span>
                     </div>
                   </div>
                 </div>
@@ -287,13 +283,7 @@ export function DashboardSuperadminPengaduan() {
                     <i className="bi bi-calendar-fill text-primary me-2 mt-1"></i>
                     <div>
                       <small className="text-muted d-block">Tanggal</small>
-                      <strong>
-                        {new Date(selectedAduan.waktu_dibuat).toLocaleDateString("id-ID", {
-                          day: "numeric",
-                          month: "long",
-                          year: "numeric",
-                        })}
-                      </strong>
+                      <strong>{formatToWIB(selectedAduan.waktu_dibuat)}</strong>
                     </div>
                   </div>
                 </div>
@@ -317,7 +307,7 @@ export function DashboardSuperadminPengaduan() {
               <div className="row align-items-center">
                 <div className="col-md-4">
                   <select className="form-select" value={selectedAduan.status} onChange={(e) => updateStatus(selectedAduan.id, e.target.value)}>
-                    <option value="baru">Baru</option>
+                    <option value="menunggu">Menunggu</option>
                     <option value="diproses">Sedang Diproses</option>
                     <option value="selesai">Selesai</option>
                   </select>
@@ -352,7 +342,7 @@ export function DashboardSuperadminPengaduan() {
                   Riwayat Tanggapan ({selectedAduan.tanggapan.length})
                 </h6>
                 <div className="timeline">
-                  {selectedAduan.tanggapan.map((t: { id: string; nama_lengkap: string; waktu_dibuat: string; isi_tanggapan: string }, index: number) => (
+                  {[...selectedAduan.tanggapan].sort((a, b) => new Date(a.waktu_dibuat).getTime() - new Date(b.waktu_dibuat).getTime()).map((t: { id: string; nama_lengkap: string; waktu_dibuat: string; isi_tanggapan: string }, index: number) => (
                     <div key={t.id} className="mb-3">
                       <div className="card border-left-primary">
                         <div className="card-body">
@@ -368,13 +358,7 @@ export function DashboardSuperadminPengaduan() {
                                 <strong className="d-block">{t.nama_lengkap}</strong>
                                 <small className="text-muted">
                                   <i className="bi bi-clock me-1"></i>
-                                  {new Date(t.waktu_dibuat).toLocaleString("id-ID", {
-                                    day: "numeric",
-                                    month: "short",
-                                    year: "numeric",
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  })}
+                                  {formatToWIB(t.waktu_dibuat)}
                                 </small>
                               </div>
                             </div>

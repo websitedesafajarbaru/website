@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import { useAuth } from "../../contexts/AuthContext"
 import { Aduan } from "../../types"
+import { formatToWIB } from "../../utils/time"
 
 export function DashboardMasyarakat() {
   const { user } = useAuth()
@@ -23,7 +24,7 @@ export function DashboardMasyarakat() {
     try {
       setLoading(true)
       const token = localStorage.getItem("token")
-      const response = await fetch("/api/pengaduan-masyarakat/aduan", {
+      const response = await fetch("/api/aduan/saya", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -31,7 +32,7 @@ export function DashboardMasyarakat() {
 
       if (response.ok) {
         const data = await response.json()
-        setAduan(data.data || [])
+        setAduan(data)
       }
     } catch (error) {
       console.error("Error:", error)
@@ -43,7 +44,7 @@ export function DashboardMasyarakat() {
   const fetchDetail = async (id: string) => {
     try {
       const token = localStorage.getItem("token")
-      const response = await fetch(`/api/pengaduan-masyarakat/aduan/${id}`, {
+      const response = await fetch(`/api/aduan/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -51,7 +52,7 @@ export function DashboardMasyarakat() {
 
       if (response.ok) {
         const data = await response.json()
-        setSelectedAduan(data.data)
+        setSelectedAduan(data)
         setActiveTab("detail")
       }
     } catch (error) {
@@ -63,13 +64,17 @@ export function DashboardMasyarakat() {
     e.preventDefault()
     try {
       const token = localStorage.getItem("token")
-      const response = await fetch("/api/pengaduan-masyarakat/aduan", {
+      const response = await fetch("/api/aduan", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          judul: formData.judul,
+          isi: formData.isi_aduan,
+          kategori: formData.kategori,
+        }),
       })
 
       if (response.ok) {
@@ -89,18 +94,6 @@ export function DashboardMasyarakat() {
       item.isi_aduan?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.isi?.toLowerCase().includes(searchTerm.toLowerCase())
   )
-
-  const kategoriBadgeColor = (kategori: string) => {
-    const colors: { [key: string]: string } = {
-      INFRASTRUKTUR: "warning",
-      PELAYANAN: "info",
-      LINGKUNGAN: "success",
-      SOSIAL: "primary",
-      EKONOMI: "secondary",
-      LAINNYA: "light",
-    }
-    return colors[kategori] || "secondary"
-  }
 
   const statusBadgeColor = (status: string) => {
     const colors: { [key: string]: string } = {
@@ -185,44 +178,27 @@ export function DashboardMasyarakat() {
                     <table className="table table-hover mb-0">
                       <thead className="table-light">
                         <tr>
-                          <th>No</th>
+                          <th>Tanggal</th>
                           <th>Judul</th>
                           <th>Kategori</th>
                           <th>Status</th>
-                          <th>Tanggal</th>
-                          <th>Tanggapan</th>
                           <th>Aksi</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {filteredAduan.map((item, index) => (
+                        {filteredAduan.map((item) => (
                           <tr key={item.id} className="align-middle">
-                            <td>{index + 1}</td>
                             <td>
-                              <div className="fw-semibold">{item.judul}</div>
-                              <small className="text-muted">{(item.isi_aduan || item.isi)?.substring(0, 50)}...</small>
+                              <small>{formatToWIB(item.created_at || item.waktu_dibuat)}</small>
                             </td>
-                            <td>
-                              <span className={`badge bg-${kategoriBadgeColor(item.kategori)}`}>{item.kategori}</span>
-                            </td>
+                            <td>{item.judul}</td>
+                            <td>{item.kategori}</td>
                             <td>
                               <span className={`badge bg-${statusBadgeColor(item.status)}`}>{item.status.toUpperCase()}</span>
                             </td>
                             <td>
-                              <small>
-                                {new Date(item.created_at || item.waktu_dibuat).toLocaleDateString("id-ID", {
-                                  day: "numeric",
-                                  month: "short",
-                                  year: "numeric",
-                                })}
-                              </small>
-                            </td>
-                            <td>
-                              <span className="badge bg-info">{Array.isArray(item.tanggapan) ? item.tanggapan.length : 0}</span>
-                            </td>
-                            <td>
-                              <button className="btn btn-sm btn-outline-primary" onClick={() => fetchDetail(item.id)} title="Lihat Detail">
-                                <i className="bi bi-eye"></i>
+                              <button className="btn btn-sm btn-outline-primary" onClick={() => fetchDetail(item.id)}>
+                                <i className="bi bi-eye me-1"></i>Lihat Detail
                               </button>
                             </td>
                           </tr>
@@ -320,7 +296,7 @@ export function DashboardMasyarakat() {
                     <i className="bi bi-tag-fill text-primary me-2 mt-1"></i>
                     <div>
                       <small className="text-muted d-block">Kategori</small>
-                      <span className={`badge bg-${kategoriBadgeColor(selectedAduan.kategori)}`}>{selectedAduan.kategori}</span>
+                      <span>{selectedAduan.kategori}</span>
                     </div>
                   </div>
                 </div>
@@ -338,13 +314,7 @@ export function DashboardMasyarakat() {
                     <i className="bi bi-calendar-fill text-primary me-2 mt-1"></i>
                     <div>
                       <small className="text-muted d-block">Tanggal Dibuat</small>
-                      <strong>
-                        {new Date(selectedAduan.created_at || selectedAduan.waktu_dibuat).toLocaleDateString("id-ID", {
-                          day: "numeric",
-                          month: "long",
-                          year: "numeric",
-                        })}
-                      </strong>
+                      <strong>{formatToWIB(selectedAduan.created_at || selectedAduan.waktu_dibuat)}</strong>
                     </div>
                   </div>
                 </div>
@@ -391,13 +361,7 @@ export function DashboardMasyarakat() {
                                   <strong className="d-block">{t.nama_lengkap}</strong>
                                   <small className="text-muted">
                                     <i className="bi bi-clock me-1"></i>
-                                    {new Date(t.waktu_dibuat).toLocaleString("id-ID", {
-                                      day: "numeric",
-                                      month: "short",
-                                      year: "numeric",
-                                      hour: "2-digit",
-                                      minute: "2-digit",
-                                    })}
+                                    {formatToWIB(t.waktu_dibuat)}
                                   </small>
                                 </div>
                               </div>
@@ -421,30 +385,14 @@ export function DashboardMasyarakat() {
                     <i className="bi bi-calendar-plus me-1"></i>
                     Dibuat
                   </small>
-                  <strong>
-                    {new Date(selectedAduan.created_at || selectedAduan.waktu_dibuat).toLocaleString("id-ID", {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </strong>
+                  <strong>{formatToWIB(selectedAduan.created_at || selectedAduan.waktu_dibuat)}</strong>
                 </div>
                 <div className="col-md-6">
                   <small className="text-muted d-block mb-1">
                     <i className="bi bi-calendar-check me-1"></i>
                     Terakhir Update
                   </small>
-                  <strong>
-                    {new Date(selectedAduan.updated_at || selectedAduan.waktu_diperbarui).toLocaleString("id-ID", {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </strong>
+                  <strong>{formatToWIB(selectedAduan.updated_at || selectedAduan.waktu_diperbarui)}</strong>
                 </div>
               </div>
             </div>
