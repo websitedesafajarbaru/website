@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react"
 import { useAuth } from "../../contexts/AuthContext"
 import { SuratPBB } from "../../types"
 import { formatStatusPembayaran, getStatusPembayaranColor } from "../../utils/formatters"
+import { formatToWIB } from "../../utils/time"
 
 interface DusunStatistik {
   dusun: {
@@ -207,14 +208,29 @@ export function DashboardKepalaDusun() {
           const ketuaList = result.filter((p: PerangkatDesa) => p.jabatan === "ketua_rt")
           setKetuaRT(ketuaList)
         }
-        alert("Ketua RT berhasil ditambahkan!")
+        Swal.fire({
+          title: "Berhasil!",
+          text: "Ketua RT berhasil ditambahkan!",
+          icon: "success",
+          confirmButtonText: "OK",
+        })
       } else {
         const error = await response.json()
-        alert(error.message || "Gagal menambahkan ketua RT")
+        Swal.fire({
+          title: "Error",
+          text: error.message || "Gagal menambahkan ketua RT",
+          icon: "error",
+          confirmButtonText: "OK",
+        })
       }
     } catch (err) {
       console.error(err)
-      alert("Terjadi kesalahan")
+      Swal.fire({
+        title: "Error",
+        text: "Terjadi kesalahan",
+        icon: "error",
+        confirmButtonText: "OK",
+      })
     }
   }
 
@@ -257,14 +273,29 @@ export function DashboardKepalaDusun() {
           tahun_pajak: activeYear.toString(),
           status_pembayaran: "belum_bayar",
         })
-        alert("Surat PBB berhasil ditambahkan!")
+        Swal.fire({
+          title: "Berhasil!",
+          text: "Surat PBB berhasil ditambahkan!",
+          icon: "success",
+          confirmButtonText: "OK",
+        })
       } else {
         const error = await response.json()
-        alert(error.message || "Gagal menambahkan surat PBB")
+        Swal.fire({
+          title: "Error",
+          text: error.message || "Gagal menambahkan surat PBB",
+          icon: "error",
+          confirmButtonText: "OK",
+        })
       }
     } catch (err) {
       console.error(err)
-      alert("Terjadi kesalahan")
+      Swal.fire({
+        title: "Error",
+        text: "Terjadi kesalahan",
+        icon: "error",
+        confirmButtonText: "OK",
+      })
     }
   }
 
@@ -285,11 +316,21 @@ export function DashboardKepalaDusun() {
         setSelectedSurat({ ...selectedSurat, status_pembayaran: newStatus as SuratPBB["status_pembayaran"] })
         setEditForm({ ...editForm, status_pembayaran: newStatus as SuratPBB["status_pembayaran"] })
       } else {
-        alert("Gagal memperbarui status pembayaran")
+        Swal.fire({
+          title: "Error",
+          text: "Gagal memperbarui status pembayaran",
+          icon: "error",
+          confirmButtonText: "OK",
+        })
       }
     } catch (err) {
       console.error("Error updating status:", err)
-      alert("Terjadi kesalahan")
+      Swal.fire({
+        title: "Error",
+        text: "Terjadi kesalahan",
+        icon: "error",
+        confirmButtonText: "OK",
+      })
     }
   }
 
@@ -313,14 +354,29 @@ export function DashboardKepalaDusun() {
       if (response.ok) {
         setSelectedSurat(editForm as SuratPBB)
         setIsEditing(false)
-        alert("Surat PBB berhasil diperbarui")
+        Swal.fire({
+          title: "Berhasil!",
+          text: "Surat PBB berhasil diperbarui",
+          icon: "success",
+          confirmButtonText: "OK",
+        })
       } else {
         const error = await response.json()
-        alert(error.message || "Gagal memperbarui surat PBB")
+        Swal.fire({
+          title: "Error",
+          text: error.message || "Gagal memperbarui surat PBB",
+          icon: "error",
+          confirmButtonText: "OK",
+        })
       }
     } catch (err) {
       console.error("Error updating surat:", err)
-      alert("Terjadi kesalahan")
+      Swal.fire({
+        title: "Error",
+        text: "Terjadi kesalahan",
+        icon: "error",
+        confirmButtonText: "OK",
+      })
     }
   }
 
@@ -330,7 +386,20 @@ export function DashboardKepalaDusun() {
   }
 
   const handleDelete = async () => {
-    if (!selectedSurat || !token || !confirm("Apakah Anda yakin ingin menghapus surat PBB ini? Tindakan ini tidak dapat dibatalkan.")) return
+    if (!selectedSurat || !token) return
+
+    const result = await Swal.fire({
+      title: "Konfirmasi Hapus",
+      text: "Apakah Anda yakin ingin menghapus surat PBB ini? Tindakan ini tidak dapat dibatalkan.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Ya, Hapus",
+      cancelButtonText: "Batal",
+    })
+
+    if (!result.isConfirmed) return
 
     try {
       const response = await fetch(`/api/surat-pbb/${selectedSurat.id}`, {
@@ -339,16 +408,31 @@ export function DashboardKepalaDusun() {
       })
 
       if (response.ok) {
-        alert("Surat PBB berhasil dihapus")
+        Swal.fire({
+          title: "Berhasil!",
+          text: "Surat PBB berhasil dihapus",
+          icon: "success",
+          confirmButtonText: "OK",
+        })
         setSelectedSurat(null)
         setActiveTab("laporan")
       } else {
         const error = await response.json()
-        alert(error.message || "Gagal menghapus surat PBB")
+        Swal.fire({
+          title: "Error",
+          text: error.message || "Gagal menghapus surat PBB",
+          icon: "error",
+          confirmButtonText: "OK",
+        })
       }
     } catch (err) {
       console.error("Error deleting surat:", err)
-      alert("Terjadi kesalahan")
+      Swal.fire({
+        title: "Error",
+        text: "Terjadi kesalahan",
+        icon: "error",
+        confirmButtonText: "OK",
+      })
     }
   }
 
@@ -592,13 +676,16 @@ export function DashboardKepalaDusun() {
               <div className="card-header d-flex justify-content-between align-items-center">
                 <h6 className="mb-0">Detail Surat PBB - {selectedSurat.nomor_objek_pajak}</h6>
                 <div className="d-flex gap-2">
-                  {user?.roles === "superadmin" && (
+                  {(user?.roles === "superadmin" || user?.roles === "kepala_dusun") && (
                     <>
                       {!isEditing ? (
-                        <button className="btn btn-warning btn-sm" onClick={() => {
-                          setIsEditing(true)
-                          setEditForm(selectedSurat)
-                        }}>
+                        <button
+                          className="btn btn-warning btn-sm"
+                          onClick={() => {
+                            setIsEditing(true)
+                            setEditForm(selectedSurat)
+                          }}
+                        >
                           <i className="bi bi-pencil me-1"></i>Edit
                         </button>
                       ) : (
@@ -665,22 +752,32 @@ export function DashboardKepalaDusun() {
                   <div className="col-md-6">
                     <label className="form-label text-muted small mb-1">Status Pembayaran</label>
                     {isEditing ? (
-                      <select
-                        className="form-select"
-                        value={editForm.status_pembayaran || ""}
-                        onChange={(e) => handleEditFormChange("status_pembayaran", e.target.value)}
-                      >
-                        <option value="belum_bayar">Belum Bayar</option>
-                        <option value="bayar_sendiri_di_bank">Bayar Sendiri di Bank</option>
-                        <option value="bayar_lewat_perangkat_desa">Bayar Lewat Perangkat Desa</option>
-                        <option value="pindah_rumah">Pindah Rumah</option>
-                        <option value="tidak_diketahui">Tidak Diketahui</option>
-                      </select>
+                      <>
+                        <select
+                          className="form-select"
+                          value={editForm.status_pembayaran || ""}
+                          onChange={(e) => handleEditFormChange("status_pembayaran", e.target.value)}
+                          disabled={user?.roles !== "superadmin" && selectedSurat?.status_data_pbb !== "sudah_lengkap"}
+                        >
+                          <option value="belum_bayar">Belum Bayar</option>
+                          <option value="bayar_sendiri_di_bank">Bayar Sendiri di Bank</option>
+                          <option value="bayar_lewat_perangkat_desa">Bayar Lewat Perangkat Desa</option>
+                          <option value="pindah_rumah">Pindah Rumah</option>
+                          <option value="tidak_diketahui">Tidak Diketahui</option>
+                        </select>
+                        {user?.roles !== "superadmin" && selectedSurat?.status_data_pbb !== "sudah_lengkap" && (
+                          <div className="form-text text-warning">
+                            <i className="bi bi-info-circle me-1"></i>
+                            Status pembayaran hanya dapat diubah setelah data dusun diset sebagai lengkap oleh superadmin
+                          </div>
+                        )}
+                      </>
                     ) : (
                       <select
                         className="form-select"
                         value={selectedSurat.status_pembayaran}
                         onChange={(e) => handleStatusChange(e.target.value)}
+                        disabled={user?.roles !== "superadmin" && selectedSurat?.status_data_pbb !== "sudah_lengkap"}
                       >
                         <option value="belum_bayar">Belum Bayar</option>
                         <option value="bayar_sendiri_di_bank">Bayar Sendiri di Bank</option>
@@ -688,6 +785,12 @@ export function DashboardKepalaDusun() {
                         <option value="pindah_rumah">Pindah Rumah</option>
                         <option value="tidak_diketahui">Tidak Diketahui</option>
                       </select>
+                    )}
+                    {user?.roles !== "superadmin" && selectedSurat?.status_data_pbb !== "sudah_lengkap" && !isEditing && (
+                      <div className="form-text text-warning">
+                        <i className="bi bi-info-circle me-1"></i>
+                        Status pembayaran hanya dapat diubah setelah data dusun diset sebagai lengkap oleh superadmin
+                      </div>
                     )}
                   </div>
                   <div className="col-12">
@@ -778,11 +881,11 @@ export function DashboardKepalaDusun() {
                   </div>
                   <div className="col-md-6">
                     <label className="form-label text-muted small mb-1">Waktu Dibuat</label>
-                    <div className="small">{new Date(selectedSurat.waktu_dibuat).toLocaleString("id-ID")}</div>
+                    <div className="small">{formatToWIB(selectedSurat.waktu_dibuat)}</div>
                   </div>
                   <div className="col-md-6">
                     <label className="form-label text-muted small mb-1">Waktu Diperbarui</label>
-                    <div className="small">{new Date(selectedSurat.waktu_diperbarui).toLocaleString("id-ID")}</div>
+                    <div className="small">{formatToWIB(selectedSurat.waktu_diperbarui)}</div>
                   </div>
                 </div>
               </div>
@@ -903,7 +1006,10 @@ export function DashboardKepalaDusun() {
                   <label className="form-label">Status Pembayaran</label>
                   <select className="form-select" value={suratForm.status_pembayaran} onChange={(e) => setSuratForm({ ...suratForm, status_pembayaran: e.target.value })}>
                     <option value="belum_bayar">Belum Bayar</option>
-                    <option value="sudah_bayar">Sudah Bayar</option>
+                    <option value="bayar_sendiri_di_bank">Bayar Sendiri di Bank</option>
+                    <option value="bayar_lewat_perangkat_desa">Bayar Lewat Perangkat Desa</option>
+                    <option value="pindah_rumah">Pindah Rumah</option>
+                    <option value="tidak_diketahui">Tidak Diketahui</option>
                   </select>
                 </div>
                 <div className="col-12">
@@ -1051,11 +1157,11 @@ export function DashboardKepalaDusun() {
               </div>
               <div className="col-md-6">
                 <label className="form-label text-muted small mb-1">Waktu Dibuat</label>
-                <div className="small">{new Date(selectedSurat.waktu_dibuat).toLocaleString("id-ID")}</div>
+                <div className="small">{formatToWIB(selectedSurat.waktu_dibuat)}</div>
               </div>
               <div className="col-md-6">
                 <label className="form-label text-muted small mb-1">Waktu Diperbarui</label>
-                <div className="small">{new Date(selectedSurat.waktu_diperbarui).toLocaleString("id-ID")}</div>
+                <div className="small">{formatToWIB(selectedSurat.waktu_diperbarui)}</div>
               </div>
             </div>
           </div>

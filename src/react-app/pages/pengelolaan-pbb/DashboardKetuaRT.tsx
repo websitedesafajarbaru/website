@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react"
 import { useAuth } from "../../contexts/AuthContext"
 import { SuratPBB } from "../../types"
 import { formatStatusPembayaran, getStatusPembayaranColor } from "../../utils/formatters"
+import { formatToWIB } from "../../utils/time"
 
 export function DashboardKetuaRT() {
   const { token, user } = useAuth()
@@ -129,14 +130,28 @@ export function DashboardKetuaRT() {
           status_pembayaran: "belum_bayar",
         })
         fetchSuratPBB()
-        alert("Surat PBB berhasil ditambahkan!")
+        Swal.fire({
+          icon: "success",
+          title: "Berhasil!",
+          text: "Surat PBB berhasil ditambahkan!",
+          timer: 2000,
+          showConfirmButton: false,
+        })
       } else {
         const error = await response.json()
-        alert(error.message || "Gagal menambahkan surat PBB")
+        Swal.fire({
+          icon: "error",
+          title: "Gagal!",
+          text: error.message || "Gagal menambahkan surat PBB",
+        })
       }
     } catch (err) {
       console.error(err)
-      alert("Terjadi kesalahan")
+      Swal.fire({
+        icon: "error",
+        title: "Terjadi Kesalahan!",
+        text: "Terjadi kesalahan saat menambahkan surat PBB",
+      })
     }
   }
 
@@ -157,11 +172,19 @@ export function DashboardKetuaRT() {
         setSelectedSurat({ ...selectedSurat, status_pembayaran: newStatus as SuratPBB["status_pembayaran"] })
         setEditForm({ ...editForm, status_pembayaran: newStatus as SuratPBB["status_pembayaran"] })
       } else {
-        alert("Gagal memperbarui status pembayaran")
+        Swal.fire({
+          icon: "error",
+          title: "Gagal!",
+          text: "Gagal memperbarui status pembayaran",
+        })
       }
     } catch (err) {
       console.error("Error updating status:", err)
-      alert("Terjadi kesalahan")
+      Swal.fire({
+        icon: "error",
+        title: "Terjadi Kesalahan!",
+        text: "Terjadi kesalahan saat memperbarui status pembayaran",
+      })
     }
   }
 
@@ -185,14 +208,28 @@ export function DashboardKetuaRT() {
       if (response.ok) {
         setSelectedSurat(editForm as SuratPBB)
         setIsEditing(false)
-        alert("Surat PBB berhasil diperbarui")
+        Swal.fire({
+          icon: "success",
+          title: "Berhasil!",
+          text: "Surat PBB berhasil diperbarui",
+          timer: 2000,
+          showConfirmButton: false,
+        })
       } else {
         const error = await response.json()
-        alert(error.message || "Gagal memperbarui surat PBB")
+        Swal.fire({
+          icon: "error",
+          title: "Gagal!",
+          text: error.message || "Gagal memperbarui surat PBB",
+        })
       }
     } catch (err) {
       console.error("Error updating surat:", err)
-      alert("Terjadi kesalahan")
+      Swal.fire({
+        icon: "error",
+        title: "Terjadi Kesalahan!",
+        text: "Terjadi kesalahan saat memperbarui surat PBB",
+      })
     }
   }
 
@@ -202,7 +239,18 @@ export function DashboardKetuaRT() {
   }
 
   const handleDelete = async () => {
-    if (!selectedSurat || !token || !confirm("Apakah Anda yakin ingin menghapus surat PBB ini? Tindakan ini tidak dapat dibatalkan.")) return
+    const result = await Swal.fire({
+      title: "Apakah Anda yakin?",
+      text: "Apakah Anda yakin ingin menghapus surat PBB ini? Tindakan ini tidak dapat dibatalkan.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Ya, Hapus!",
+      cancelButtonText: "Batal",
+    })
+
+    if (!result.isConfirmed || !selectedSurat || !token) return
 
     try {
       const response = await fetch(`/api/surat-pbb/${selectedSurat.id}`, {
@@ -211,15 +259,29 @@ export function DashboardKetuaRT() {
       })
 
       if (response.ok) {
-        alert("Surat PBB berhasil dihapus")
+        Swal.fire({
+          icon: "success",
+          title: "Berhasil!",
+          text: "Surat PBB berhasil dihapus",
+          timer: 2000,
+          showConfirmButton: false,
+        })
         setSelectedSurat(null)
       } else {
         const error = await response.json()
-        alert(error.message || "Gagal menghapus surat PBB")
+        Swal.fire({
+          icon: "error",
+          title: "Gagal!",
+          text: error.message || "Gagal menghapus surat PBB",
+        })
       }
     } catch (err) {
       console.error("Error deleting surat:", err)
-      alert("Terjadi kesalahan")
+      Swal.fire({
+        icon: "error",
+        title: "Terjadi Kesalahan!",
+        text: "Terjadi kesalahan saat menghapus surat PBB",
+      })
     }
   }
 
@@ -466,7 +528,10 @@ export function DashboardKetuaRT() {
                   <label className="form-label">Status Pembayaran</label>
                   <select className="form-select" value={suratForm.status_pembayaran} onChange={(e) => setSuratForm({ ...suratForm, status_pembayaran: e.target.value })}>
                     <option value="belum_bayar">Belum Bayar</option>
-                    <option value="sudah_bayar">Sudah Bayar</option>
+                    <option value="bayar_sendiri_di_bank">Bayar Sendiri di Bank</option>
+                    <option value="bayar_lewat_perangkat_desa">Bayar Lewat Perangkat Desa</option>
+                    <option value="pindah_rumah">Pindah Rumah</option>
+                    <option value="tidak_diketahui">Tidak Diketahui</option>
                   </select>
                 </div>
                 <div className="col-12">
@@ -558,10 +623,13 @@ export function DashboardKetuaRT() {
               {user?.roles === "superadmin" && (
                 <>
                   {!isEditing ? (
-                    <button className="btn btn-warning btn-sm" onClick={() => {
-                      setIsEditing(true)
-                      setEditForm(selectedSurat)
-                    }}>
+                    <button
+                      className="btn btn-warning btn-sm"
+                      onClick={() => {
+                        setIsEditing(true)
+                        setEditForm(selectedSurat)
+                      }}
+                    >
                       <i className="bi bi-pencil me-1"></i>Edit
                     </button>
                   ) : (
@@ -602,12 +670,7 @@ export function DashboardKetuaRT() {
               <div className="col-md-6">
                 <label className="form-label text-muted small mb-1">Tahun Pajak</label>
                 {isEditing ? (
-                  <input
-                    type="number"
-                    className="form-control"
-                    value={editForm.tahun_pajak || ""}
-                    onChange={(e) => handleEditFormChange("tahun_pajak", Number(e.target.value))}
-                  />
+                  <input type="number" className="form-control" value={editForm.tahun_pajak || ""} onChange={(e) => handleEditFormChange("tahun_pajak", Number(e.target.value))} />
                 ) : (
                   <div className="fw-semibold">{selectedSurat.tahun_pajak}</div>
                 )}
@@ -615,12 +678,7 @@ export function DashboardKetuaRT() {
               <div className="col-md-6">
                 <label className="form-label text-muted small mb-1">Nama Wajib Pajak</label>
                 {isEditing ? (
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={editForm.nama_wajib_pajak || ""}
-                    onChange={(e) => handleEditFormChange("nama_wajib_pajak", e.target.value)}
-                  />
+                  <input type="text" className="form-control" value={editForm.nama_wajib_pajak || ""} onChange={(e) => handleEditFormChange("nama_wajib_pajak", e.target.value)} />
                 ) : (
                   <div className="fw-semibold">{selectedSurat.nama_wajib_pajak}</div>
                 )}
@@ -628,29 +686,47 @@ export function DashboardKetuaRT() {
               <div className="col-md-6">
                 <label className="form-label text-muted small mb-1">Status Pembayaran</label>
                 {isEditing ? (
-                  <select
-                    className="form-select"
-                    value={editForm.status_pembayaran || ""}
-                    onChange={(e) => handleEditFormChange("status_pembayaran", e.target.value)}
-                  >
-                    <option value="belum_bayar">Belum Bayar</option>
-                    <option value="bayar_sendiri_di_bank">Bayar Sendiri di Bank</option>
-                    <option value="bayar_lewat_perangkat_desa">Bayar Lewat Perangkat Desa</option>
-                    <option value="pindah_rumah">Pindah Rumah</option>
-                    <option value="tidak_diketahui">Tidak Diketahui</option>
-                  </select>
+                  <>
+                    <select
+                      className="form-select"
+                      value={editForm.status_pembayaran || ""}
+                      onChange={(e) => handleEditFormChange("status_pembayaran", e.target.value)}
+                      disabled={user?.roles !== "superadmin" && selectedSurat?.status_data_pbb !== "sudah_lengkap"}
+                    >
+                      <option value="belum_bayar">Belum Bayar</option>
+                      <option value="bayar_sendiri_di_bank">Bayar Sendiri di Bank</option>
+                      <option value="bayar_lewat_perangkat_desa">Bayar Lewat Perangkat Desa</option>
+                      <option value="pindah_rumah">Pindah Rumah</option>
+                      <option value="tidak_diketahui">Tidak Diketahui</option>
+                    </select>
+                    {user?.roles !== "superadmin" && selectedSurat?.status_data_pbb !== "sudah_lengkap" && (
+                      <div className="form-text text-warning">
+                        <i className="bi bi-info-circle me-1"></i>
+                        Status pembayaran hanya dapat diubah setelah data dusun diset sebagai lengkap oleh superadmin
+                      </div>
+                    )}
+                  </>
                 ) : (
-                  <select
-                    className="form-select"
-                    value={selectedSurat.status_pembayaran}
-                    onChange={(e) => handleStatusChange(e.target.value)}
-                  >
-                    <option value="belum_bayar">Belum Bayar</option>
-                    <option value="bayar_sendiri_di_bank">Bayar Sendiri di Bank</option>
-                    <option value="bayar_lewat_perangkat_desa">Bayar Lewat Perangkat Desa</option>
-                    <option value="pindah_rumah">Pindah Rumah</option>
-                    <option value="tidak_diketahui">Tidak Diketahui</option>
-                  </select>
+                  <>
+                    <select
+                      className="form-select"
+                      value={selectedSurat.status_pembayaran}
+                      onChange={(e) => handleStatusChange(e.target.value)}
+                      disabled={user?.roles !== "superadmin" && selectedSurat?.status_data_pbb !== "sudah_lengkap"}
+                    >
+                      <option value="belum_bayar">Belum Bayar</option>
+                      <option value="bayar_sendiri_di_bank">Bayar Sendiri di Bank</option>
+                      <option value="bayar_lewat_perangkat_desa">Bayar Lewat Perangkat Desa</option>
+                      <option value="pindah_rumah">Pindah Rumah</option>
+                      <option value="tidak_diketahui">Tidak Diketahui</option>
+                    </select>
+                    {user?.roles !== "superadmin" && selectedSurat?.status_data_pbb !== "sudah_lengkap" && (
+                      <div className="form-text text-warning">
+                        <i className="bi bi-info-circle me-1"></i>
+                        Status pembayaran hanya dapat diubah setelah data dusun diset sebagai lengkap oleh superadmin
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
               <div className="col-12">
@@ -682,12 +758,7 @@ export function DashboardKetuaRT() {
               <div className="col-md-6">
                 <label className="form-label text-muted small mb-1">Luas Tanah</label>
                 {isEditing ? (
-                  <input
-                    type="number"
-                    className="form-control"
-                    value={editForm.luas_tanah || ""}
-                    onChange={(e) => handleEditFormChange("luas_tanah", Number(e.target.value))}
-                  />
+                  <input type="number" className="form-control" value={editForm.luas_tanah || ""} onChange={(e) => handleEditFormChange("luas_tanah", Number(e.target.value))} />
                 ) : (
                   <div className="fw-semibold">{selectedSurat.luas_tanah ? `${selectedSurat.luas_tanah} m²` : "-"}</div>
                 )}
@@ -741,11 +812,11 @@ export function DashboardKetuaRT() {
               </div>
               <div className="col-md-6">
                 <label className="form-label text-muted small mb-1">Waktu Dibuat</label>
-                <div className="small">{new Date(selectedSurat.waktu_dibuat).toLocaleString("id-ID")}</div>
+                <div className="small">{formatToWIB(selectedSurat.waktu_dibuat)}</div>
               </div>
               <div className="col-md-6">
                 <label className="form-label text-muted small mb-1">Waktu Diperbarui</label>
-                <div className="small">{new Date(selectedSurat.waktu_diperbarui).toLocaleString("id-ID")}</div>
+                <div className="small">{formatToWIB(selectedSurat.waktu_diperbarui)}</div>
               </div>
             </div>
           </div>

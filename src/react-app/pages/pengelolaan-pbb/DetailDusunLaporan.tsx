@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom"
 import { useAuth } from "../../contexts/AuthContext"
 import { SuratPBB } from "../../types"
 import { formatStatusPembayaran, getStatusPembayaranColor } from "../../utils/formatters"
+import { formatToWIB } from "../../utils/time"
 
 interface DusunStatistik {
   dusun: {
@@ -55,11 +56,19 @@ export function DetailDusunLaporan() {
         if (response.ok) {
           setStatistik(data)
         } else {
-          alert("Gagal mengambil data dusun")
+          Swal.fire({
+            icon: "error",
+            title: "Gagal!",
+            text: "Gagal mengambil data dusun",
+          })
         }
       } catch (err) {
         console.error(err)
-        alert("Terjadi kesalahan")
+        Swal.fire({
+          icon: "error",
+          title: "Terjadi Kesalahan!",
+          text: "Terjadi kesalahan saat mengambil data dusun",
+        })
       } finally {
         setLoading(false)
       }
@@ -326,11 +335,11 @@ export function DetailDusunLaporan() {
               </div>
               <div className="col-md-6">
                 <label className="form-label text-muted small mb-1">Waktu Dibuat</label>
-                <div className="small">{new Date(selectedSurat.waktu_dibuat).toLocaleString("id-ID")}</div>
+                <div className="small">{formatToWIB(selectedSurat.waktu_dibuat)}</div>
               </div>
               <div className="col-md-6">
                 <label className="form-label text-muted small mb-1">Waktu Diperbarui</label>
-                <div className="small">{new Date(selectedSurat.waktu_diperbarui).toLocaleString("id-ID")}</div>
+                <div className="small">{formatToWIB(selectedSurat.waktu_diperbarui)}</div>
               </div>
             </div>
           </div>

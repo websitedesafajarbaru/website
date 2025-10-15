@@ -30,7 +30,12 @@ export function RegistrasiPerangkatDesa() {
         throw new Error(result.error || "Terjadi kesalahan")
       }
 
-      alert(`Registrasi berhasil sebagai ${result.jabatan === "kepala_dusun" ? "Kepala Dusun" : "Ketua RT"}! Silakan login`)
+      Swal.fire({
+        title: "Registrasi Berhasil!",
+        text: `Registrasi berhasil sebagai ${result.jabatan === "kepala_dusun" ? "Kepala Dusun" : "Ketua RT"}! Silakan login`,
+        icon: "success",
+        confirmButtonText: "OK",
+      })
       navigate("/pengelolaan-pbb/login")
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Terjadi kesalahan"

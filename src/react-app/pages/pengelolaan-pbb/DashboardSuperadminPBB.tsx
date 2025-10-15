@@ -3,13 +3,15 @@ import { useNavigate } from "react-router-dom"
 import { useAuth } from "../../contexts/AuthContext"
 import { Dusun, SuratPBB, Laporan } from "../../types"
 import { formatStatusPembayaran, getStatusPembayaranColor } from "../../utils/formatters"
+import { formatToWIB } from "../../utils/time"
 
 interface PerangkatDesa {
   id: string
   nama_lengkap: string
   username: string
+  jabatan: string
   id_dusun?: number
-  jabatan: "kepala_dusun" | "ketua_rt"
+  nama_dusun?: string
 }
 
 export function DashboardSuperadminPBB() {
@@ -58,6 +60,8 @@ export function DashboardSuperadminPBB() {
   const [searchStatistik, setSearchStatistik] = useState("")
   const [searchPerangkat, setSearchPerangkat] = useState("")
   const [showStatistics, setShowStatistics] = useState(false)
+  const [dusunTokens, setDusunTokens] = useState<{ tokenKepalaDusun: string; tokenKetuaRT: string } | null>(null)
+  const [perangkatDesa, setPerangkatDesa] = useState<PerangkatDesa[]>([])
 
   const filteredDusun = dusun.filter((d) => {
     const searchLower = searchDusun.toLowerCase()
@@ -93,7 +97,10 @@ export function DashboardSuperadminPBB() {
       )
     }) || []
 
-  const filteredPerangkat: PerangkatDesa[] = []
+  const filteredPerangkat: PerangkatDesa[] = perangkatDesa.filter((p) => {
+    const searchLower = searchPerangkat.toLowerCase()
+    return p.nama_lengkap.toLowerCase().includes(searchLower) || p.username.toLowerCase().includes(searchLower) || p.jabatan.toLowerCase().includes(searchLower)
+  })
 
   const fetchActiveYear = useCallback(async () => {
     try {
@@ -126,11 +133,21 @@ export function DashboardSuperadminPBB() {
         fetchLaporan()
       } else {
         const error = await response.json()
-        alert(error.message || "Gagal mengatur tahun aktif")
+        Swal.fire({
+          title: "Error",
+          text: error.message || "Gagal mengatur tahun aktif",
+          icon: "error",
+          confirmButtonText: "OK",
+        })
       }
     } catch (error) {
       console.error("Error setting active year:", error)
-      alert("Terjadi kesalahan saat mengatur tahun aktif")
+      Swal.fire({
+        title: "Error",
+        text: "Terjadi kesalahan saat mengatur tahun aktif",
+        icon: "error",
+        confirmButtonText: "OK",
+      })
     }
   }
 
@@ -206,6 +223,24 @@ export function DashboardSuperadminPBB() {
         setIsEditingDusun(false)
         setIsAddingPerangkat(false)
         setActiveTab("detail-dusun")
+
+        // Fetch tokens for this dusun
+        const tokenResponse = await fetch(`/api/dusun/${dusunId}/tokens`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        if (tokenResponse.ok) {
+          const tokenData = await tokenResponse.json()
+          setDusunTokens(tokenData)
+        }
+
+        // Fetch perangkat desa for this dusun
+        const perangkatResponse = await fetch(`/api/perangkat-desa?dusun_id=${dusunId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        if (perangkatResponse.ok) {
+          const perangkatData = await perangkatResponse.json()
+          setPerangkatDesa(perangkatData)
+        }
       }
     } catch (error) {
       console.error("Error fetching dusun detail:", error)
@@ -239,17 +274,29 @@ export function DashboardSuperadminPBB() {
         setActiveTab("dusun")
         setDusunForm({ nama_dusun: "" })
         fetchDusun()
-        const result = await response.json()
-        alert(
-          `Dusun berhasil ditambahkan!\n\nToken Kepala Dusun: ${result.tokenKepalaDusun}\nToken Ketua RT: ${result.tokenKetuaRT}\n\nSimpan token ini untuk registrasi perangkat desa!`
-        )
+        Swal.fire({
+          title: "Berhasil!",
+          text: "Dusun berhasil ditambahkan!",
+          icon: "success",
+          confirmButtonText: "OK",
+        })
       } else {
         const error = await response.json()
-        alert(error.message || "Gagal menambahkan dusun")
+        Swal.fire({
+          title: "Error",
+          text: error.message || "Gagal menambahkan dusun",
+          icon: "error",
+          confirmButtonText: "OK",
+        })
       }
     } catch (err) {
       console.error(err)
-      alert("Terjadi kesalahan")
+      Swal.fire({
+        title: "Error",
+        text: "Terjadi kesalahan",
+        icon: "error",
+        confirmButtonText: "OK",
+      })
     }
   }
 
@@ -292,14 +339,29 @@ export function DashboardSuperadminPBB() {
           status_pembayaran: "belum_bayar",
         })
         fetchSuratPBB()
-        alert("Surat PBB berhasil ditambahkan!")
+        Swal.fire({
+          title: "Berhasil!",
+          text: "Surat PBB berhasil ditambahkan!",
+          icon: "success",
+          confirmButtonText: "OK",
+        })
       } else {
         const error = await response.json()
-        alert(error.message || "Gagal menambahkan surat PBB")
+        Swal.fire({
+          title: "Error",
+          text: error.message || "Gagal menambahkan surat PBB",
+          icon: "error",
+          confirmButtonText: "OK",
+        })
       }
     } catch (err) {
       console.error(err)
-      alert("Terjadi kesalahan")
+      Swal.fire({
+        title: "Error",
+        text: "Terjadi kesalahan",
+        icon: "error",
+        confirmButtonText: "OK",
+      })
     }
   }
 
@@ -333,14 +395,29 @@ export function DashboardSuperadminPBB() {
         if (selectedDusun) {
           openDusunDetail(selectedDusun.id)
         }
-        alert("Perangkat desa berhasil ditambahkan!")
+        Swal.fire({
+          title: "Berhasil!",
+          text: "Perangkat desa berhasil ditambahkan!",
+          icon: "success",
+          confirmButtonText: "OK",
+        })
       } else {
         const error = await response.json()
-        alert(error.message || "Gagal menambahkan perangkat desa")
+        Swal.fire({
+          title: "Error",
+          text: error.message || "Gagal menambahkan perangkat desa",
+          icon: "error",
+          confirmButtonText: "OK",
+        })
       }
     } catch (err) {
       console.error(err)
-      alert("Terjadi kesalahan")
+      Swal.fire({
+        title: "Error",
+        text: "Terjadi kesalahan",
+        icon: "error",
+        confirmButtonText: "OK",
+      })
     }
   }
 
@@ -376,18 +453,33 @@ export function DashboardSuperadminPBB() {
       })
 
       if (response.ok) {
-        alert("Data perangkat desa berhasil diperbarui!")
+        Swal.fire({
+          title: "Berhasil!",
+          text: "Data perangkat desa berhasil diperbarui!",
+          icon: "success",
+          confirmButtonText: "OK",
+        })
         setActiveTab("detail-dusun")
         if (selectedDusun) {
           openDusunDetail(selectedDusun.id)
         }
       } else {
         const error = await response.json()
-        alert(error.message || "Gagal memperbarui data perangkat desa")
+        Swal.fire({
+          title: "Error",
+          text: error.message || "Gagal memperbarui data perangkat desa",
+          icon: "error",
+          confirmButtonText: "OK",
+        })
       }
     } catch (err) {
       console.error(err)
-      alert("Terjadi kesalahan")
+      Swal.fire({
+        title: "Error",
+        text: "Terjadi kesalahan",
+        icon: "error",
+        confirmButtonText: "OK",
+      })
     }
   }
 
@@ -395,8 +487,18 @@ export function DashboardSuperadminPBB() {
     const targetPerangkat = perangkat || selectedPerangkat
     if (!targetPerangkat) return
 
-    const confirmation = confirm(`Apakah Anda yakin ingin menghapus perangkat desa "${targetPerangkat.nama_lengkap}"? Tindakan ini tidak dapat dibatalkan.`)
-    if (!confirmation) return
+    const result = await Swal.fire({
+      title: "Konfirmasi Hapus",
+      text: `Apakah Anda yakin ingin menghapus perangkat desa "${targetPerangkat.nama_lengkap}"? Tindakan ini tidak dapat dibatalkan.`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Ya, Hapus",
+      cancelButtonText: "Batal",
+    })
+
+    if (!result.isConfirmed) return
 
     try {
       const response = await fetch(`/api/perangkat-desa/${targetPerangkat.id}`, {
@@ -407,28 +509,51 @@ export function DashboardSuperadminPBB() {
       })
 
       if (response.ok) {
-        alert("Perangkat desa berhasil dihapus!")
+        Swal.fire({
+          title: "Berhasil!",
+          text: "Perangkat desa berhasil dihapus!",
+          icon: "success",
+          confirmButtonText: "OK",
+        })
         setActiveTab("detail-dusun")
         if (selectedDusun) {
           openDusunDetail(selectedDusun.id)
         }
       } else {
         const error = await response.json()
-        alert(error.message || "Gagal menghapus perangkat desa")
+        Swal.fire({
+          title: "Error",
+          text: error.message || "Gagal menghapus perangkat desa",
+          icon: "error",
+          confirmButtonText: "OK",
+        })
       }
     } catch (err) {
       console.error(err)
-      alert("Terjadi kesalahan")
+      Swal.fire({
+        title: "Error",
+        text: "Terjadi kesalahan",
+        icon: "error",
+        confirmButtonText: "OK",
+      })
     }
   }
 
   const deleteDusun = async () => {
     if (!selectedDusun) return
 
-    const confirmation = confirm(
-      `Apakah Anda yakin ingin menghapus dusun "${selectedDusun.nama_dusun}"? Semua data terkait (surat PBB, perangkat desa, dll.) akan dihapus permanen. Tindakan ini tidak dapat dibatalkan.`
-    )
-    if (!confirmation) return
+    const result = await Swal.fire({
+      title: "Konfirmasi Hapus",
+      text: `Apakah Anda yakin ingin menghapus dusun "${selectedDusun.nama_dusun}"? Semua data terkait (surat PBB, perangkat desa, dll.) akan dihapus permanen. Tindakan ini tidak dapat dibatalkan.`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Ya, Hapus",
+      cancelButtonText: "Batal",
+    })
+
+    if (!result.isConfirmed) return
 
     try {
       const response = await fetch(`/api/dusun/${selectedDusun.id}`, {
@@ -439,16 +564,31 @@ export function DashboardSuperadminPBB() {
       })
 
       if (response.ok) {
-        alert("Dusun berhasil dihapus!")
+        Swal.fire({
+          title: "Berhasil!",
+          text: "Dusun berhasil dihapus!",
+          icon: "success",
+          confirmButtonText: "OK",
+        })
         setActiveTab("dusun")
         fetchDusun()
       } else {
         const error = await response.json()
-        alert(error.message || "Gagal menghapus dusun")
+        Swal.fire({
+          title: "Error",
+          text: error.message || "Gagal menghapus dusun",
+          icon: "error",
+          confirmButtonText: "OK",
+        })
       }
     } catch (err) {
       console.error(err)
-      alert("Terjadi kesalahan")
+      Swal.fire({
+        title: "Error",
+        text: "Terjadi kesalahan",
+        icon: "error",
+        confirmButtonText: "OK",
+      })
     }
   }
 
@@ -460,7 +600,12 @@ export function DashboardSuperadminPBB() {
 
   const saveEditDusun = async () => {
     if (!selectedDusun || !editDusunName.trim()) {
-      alert("Nama dusun tidak boleh kosong")
+      Swal.fire({
+        title: "Error",
+        text: "Nama dusun tidak boleh kosong",
+        icon: "error",
+        confirmButtonText: "OK",
+      })
       return
     }
 
@@ -475,17 +620,32 @@ export function DashboardSuperadminPBB() {
       })
 
       if (response.ok) {
-        alert("Nama dusun berhasil diperbarui!")
+        Swal.fire({
+          title: "Berhasil!",
+          text: "Nama dusun berhasil diperbarui!",
+          icon: "success",
+          confirmButtonText: "OK",
+        })
         setIsEditingDusun(false)
         setEditDusunName("")
         openDusunDetail(selectedDusun.id)
       } else {
         const error = await response.json()
-        alert(error.message || "Gagal memperbarui nama dusun")
+        Swal.fire({
+          title: "Error",
+          text: error.message || "Gagal memperbarui nama dusun",
+          icon: "error",
+          confirmButtonText: "OK",
+        })
       }
     } catch (err) {
       console.error(err)
-      alert("Terjadi kesalahan")
+      Swal.fire({
+        title: "Error",
+        text: "Terjadi kesalahan",
+        icon: "error",
+        confirmButtonText: "OK",
+      })
     }
   }
 
@@ -528,15 +688,30 @@ export function DashboardSuperadminPBB() {
       })
 
       if (response.ok) {
-        alert("Status data PBB berhasil diperbarui!")
+        Swal.fire({
+          title: "Berhasil!",
+          text: "Status data PBB berhasil diperbarui!",
+          icon: "success",
+          confirmButtonText: "OK",
+        })
         fetchLaporan()
       } else {
         const error = await response.json()
-        alert(error.message || "Gagal memperbarui status data PBB")
+        Swal.fire({
+          title: "Error",
+          text: error.message || "Gagal memperbarui status data PBB",
+          icon: "error",
+          confirmButtonText: "OK",
+        })
       }
     } catch (err) {
       console.error(err)
-      alert("Terjadi kesalahan")
+      Swal.fire({
+        title: "Error",
+        text: "Terjadi kesalahan",
+        icon: "error",
+        confirmButtonText: "OK",
+      })
     }
   }
 
@@ -557,11 +732,21 @@ export function DashboardSuperadminPBB() {
         setSelectedSurat({ ...selectedSurat, status_pembayaran: newStatus as SuratPBB["status_pembayaran"] })
         setEditForm({ ...editForm, status_pembayaran: newStatus as SuratPBB["status_pembayaran"] })
       } else {
-        alert("Gagal memperbarui status pembayaran")
+        Swal.fire({
+          title: "Error",
+          text: "Gagal memperbarui status pembayaran",
+          icon: "error",
+          confirmButtonText: "OK",
+        })
       }
     } catch (err) {
       console.error("Error updating status:", err)
-      alert("Terjadi kesalahan")
+      Swal.fire({
+        title: "Error",
+        text: "Terjadi kesalahan",
+        icon: "error",
+        confirmButtonText: "OK",
+      })
     }
   }
 
@@ -585,14 +770,29 @@ export function DashboardSuperadminPBB() {
       if (response.ok) {
         setSelectedSurat(editForm as SuratPBB)
         setIsEditing(false)
-        alert("Surat PBB berhasil diperbarui")
+        Swal.fire({
+          title: "Berhasil!",
+          text: "Surat PBB berhasil diperbarui",
+          icon: "success",
+          confirmButtonText: "OK",
+        })
       } else {
         const error = await response.json()
-        alert(error.message || "Gagal memperbarui surat PBB")
+        Swal.fire({
+          title: "Error",
+          text: error.message || "Gagal memperbarui surat PBB",
+          icon: "error",
+          confirmButtonText: "OK",
+        })
       }
     } catch (err) {
       console.error("Error updating surat:", err)
-      alert("Terjadi kesalahan")
+      Swal.fire({
+        title: "Error",
+        text: "Terjadi kesalahan",
+        icon: "error",
+        confirmButtonText: "OK",
+      })
     }
   }
 
@@ -602,7 +802,20 @@ export function DashboardSuperadminPBB() {
   }
 
   const handleDelete = async () => {
-    if (!selectedSurat || !token || !confirm("Apakah Anda yakin ingin menghapus surat PBB ini? Tindakan ini tidak dapat dibatalkan.")) return
+    if (!selectedSurat || !token) return
+
+    const result = await Swal.fire({
+      title: "Konfirmasi Hapus",
+      text: "Apakah Anda yakin ingin menghapus surat PBB ini? Tindakan ini tidak dapat dibatalkan.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Ya, Hapus",
+      cancelButtonText: "Batal",
+    })
+
+    if (!result.isConfirmed) return
 
     try {
       const response = await fetch(`/api/surat-pbb/${selectedSurat.id}`, {
@@ -611,16 +824,31 @@ export function DashboardSuperadminPBB() {
       })
 
       if (response.ok) {
-        alert("Surat PBB berhasil dihapus")
+        Swal.fire({
+          title: "Berhasil!",
+          text: "Surat PBB berhasil dihapus",
+          icon: "success",
+          confirmButtonText: "OK",
+        })
         setSelectedSurat(null)
         fetchSuratPBB()
       } else {
         const error = await response.json()
-        alert(error.message || "Gagal menghapus surat PBB")
+        Swal.fire({
+          title: "Error",
+          text: error.message || "Gagal menghapus surat PBB",
+          icon: "error",
+          confirmButtonText: "OK",
+        })
       }
     } catch (err) {
       console.error("Error deleting surat:", err)
-      alert("Terjadi kesalahan")
+      Swal.fire({
+        title: "Error",
+        text: "Terjadi kesalahan",
+        icon: "error",
+        confirmButtonText: "OK",
+      })
     }
   }
 
@@ -769,10 +997,13 @@ export function DashboardSuperadminPBB() {
                 <h6 className="mb-0">Detail Surat PBB - {selectedSurat.nomor_objek_pajak}</h6>
                 <div className="d-flex gap-2">
                   {!isEditing ? (
-                    <button className="btn btn-warning btn-sm" onClick={() => {
-                      setIsEditing(true)
-                      setEditForm(selectedSurat)
-                    }}>
+                    <button
+                      className="btn btn-warning btn-sm"
+                      onClick={() => {
+                        setIsEditing(true)
+                        setEditForm(selectedSurat)
+                      }}
+                    >
                       <i className="bi bi-pencil me-1"></i>Edit
                     </button>
                   ) : (
@@ -837,11 +1068,7 @@ export function DashboardSuperadminPBB() {
                   <div className="col-md-6">
                     <label className="form-label text-muted small mb-1">Status Pembayaran</label>
                     {isEditing ? (
-                      <select
-                        className="form-select"
-                        value={editForm.status_pembayaran || ""}
-                        onChange={(e) => handleEditFormChange("status_pembayaran", e.target.value)}
-                      >
+                      <select className="form-select" value={editForm.status_pembayaran || ""} onChange={(e) => handleEditFormChange("status_pembayaran", e.target.value)}>
                         <option value="belum_bayar">Belum Bayar</option>
                         <option value="bayar_sendiri_di_bank">Bayar Sendiri di Bank</option>
                         <option value="bayar_lewat_perangkat_desa">Bayar Lewat Perangkat Desa</option>
@@ -849,11 +1076,7 @@ export function DashboardSuperadminPBB() {
                         <option value="tidak_diketahui">Tidak Diketahui</option>
                       </select>
                     ) : (
-                      <select
-                        className="form-select"
-                        value={selectedSurat.status_pembayaran}
-                        onChange={(e) => handleStatusChange(e.target.value)}
-                      >
+                      <select className="form-select" value={selectedSurat.status_pembayaran} onChange={(e) => handleStatusChange(e.target.value)}>
                         <option value="belum_bayar">Belum Bayar</option>
                         <option value="bayar_sendiri_di_bank">Bayar Sendiri di Bank</option>
                         <option value="bayar_lewat_perangkat_desa">Bayar Lewat Perangkat Desa</option>
@@ -950,11 +1173,11 @@ export function DashboardSuperadminPBB() {
                   </div>
                   <div className="col-md-6">
                     <label className="form-label text-muted small mb-1">Waktu Dibuat</label>
-                    <div className="small">{new Date(selectedSurat.waktu_dibuat).toLocaleString("id-ID")}</div>
+                    <div className="small">{formatToWIB(selectedSurat.waktu_dibuat)}</div>
                   </div>
                   <div className="col-md-6">
                     <label className="form-label text-muted small mb-1">Waktu Diperbarui</label>
-                    <div className="small">{new Date(selectedSurat.waktu_diperbarui).toLocaleString("id-ID")}</div>
+                    <div className="small">{formatToWIB(selectedSurat.waktu_diperbarui)}</div>
                   </div>
                 </div>
               </div>
@@ -1338,7 +1561,9 @@ export function DashboardSuperadminPBB() {
                   </label>
                   <select className="form-select" value={suratForm.status_pembayaran} onChange={(e) => setSuratForm({ ...suratForm, status_pembayaran: e.target.value })} required>
                     <option value="belum_bayar">Belum Bayar</option>
-                    <option value="sudah_bayar">Sudah Bayar</option>
+                    <option value="bayar_sendiri_di_bank">Bayar Sendiri di Bank</option>
+                    <option value="bayar_lewat_perangkat_desa">Bayar Lewat Perangkat Desa</option>
+                    <option value="pindah_rumah">Pindah Rumah</option>
                     <option value="tidak_diketahui">Tidak Diketahui</option>
                   </select>
                 </div>
@@ -1444,7 +1669,13 @@ export function DashboardSuperadminPBB() {
         <div className="card">
           <div className="card-header d-flex justify-content-between align-items-center">
             <h6 className="mb-0">Detail Dusun: {selectedDusun.nama_dusun}</h6>
-            <button className="btn btn-sm btn-secondary" onClick={() => setActiveTab("dusun")}>
+            <button
+              className="btn btn-sm btn-secondary"
+              onClick={() => {
+                setActiveTab("dusun")
+                setDusunTokens(null)
+              }}
+            >
               <i className="bi bi-arrow-left me-1"></i>Kembali ke Daftar
             </button>
           </div>
@@ -1511,6 +1742,80 @@ export function DashboardSuperadminPBB() {
                         </div>
                       </div>
                     )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="col-12">
+                <div className="card border-warning mb-3">
+                  <div className="card-header bg-warning text-dark">
+                    <h6 className="mb-0">
+                      <i className="bi bi-key me-2"></i>Token Registrasi Perangkat Desa
+                    </h6>
+                  </div>
+                  <div className="card-body">
+                    <div className="alert alert-info">
+                      <i className="bi bi-info-circle me-2"></i>
+                      Token ini digunakan oleh perangkat desa untuk mendaftar ke sistem. Berikan token yang sesuai dengan jabatan kepada calon perangkat desa.
+                    </div>
+                    <div className="row g-3">
+                      <div className="col-md-6">
+                        <label className="form-label fw-bold text-success">
+                          <i className="bi bi-person-check me-1"></i>Token Kepala Dusun
+                        </label>
+                        <div className="input-group">
+                          <input type="text" className="form-control font-monospace" value={dusunTokens?.tokenKepalaDusun || "Token tidak tersedia"} readOnly />
+                          <button
+                            className="btn btn-outline-secondary"
+                            type="button"
+                            onClick={() => {
+                              if (dusunTokens?.tokenKepalaDusun) {
+                                navigator.clipboard.writeText(dusunTokens.tokenKepalaDusun)
+                                Swal.fire({
+                                  title: "Berhasil!",
+                                  text: "Token berhasil disalin!",
+                                  icon: "success",
+                                  confirmButtonText: "OK",
+                                  timer: 1500,
+                                  showConfirmButton: false,
+                                })
+                              }
+                            }}
+                            disabled={!dusunTokens?.tokenKepalaDusun}
+                          >
+                            <i className="bi bi-clipboard me-1"></i>Salin
+                          </button>
+                        </div>
+                      </div>
+                      <div className="col-md-6">
+                        <label className="form-label fw-bold text-warning">
+                          <i className="bi bi-people me-1"></i>Token Ketua RT
+                        </label>
+                        <div className="input-group">
+                          <input type="text" className="form-control font-monospace" value={dusunTokens?.tokenKetuaRT || "Token tidak tersedia"} readOnly />
+                          <button
+                            className="btn btn-outline-secondary"
+                            type="button"
+                            onClick={() => {
+                              if (dusunTokens?.tokenKetuaRT) {
+                                navigator.clipboard.writeText(dusunTokens.tokenKetuaRT)
+                                Swal.fire({
+                                  title: "Berhasil!",
+                                  text: "Token berhasil disalin!",
+                                  icon: "success",
+                                  confirmButtonText: "OK",
+                                  timer: 1500,
+                                  showConfirmButton: false,
+                                })
+                              }
+                            }}
+                            disabled={!dusunTokens?.tokenKetuaRT}
+                          >
+                            <i className="bi bi-clipboard me-1"></i>Salin
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1644,11 +1949,19 @@ export function DashboardSuperadminPBB() {
                                   </button>
                                   <button
                                     className="btn btn-sm btn-danger"
-                                    onClick={() => {
-                                      const confirmation = confirm(
-                                        `Apakah Anda yakin ingin menghapus perangkat desa "${perangkat.nama_lengkap}"? Tindakan ini tidak dapat dibatalkan.`
-                                      )
-                                      if (confirmation) {
+                                    onClick={async () => {
+                                      const result = await Swal.fire({
+                                        title: "Konfirmasi Hapus",
+                                        text: `Apakah Anda yakin ingin menghapus perangkat desa "${perangkat.nama_lengkap}"? Tindakan ini tidak dapat dibatalkan.`,
+                                        icon: "warning",
+                                        showCancelButton: true,
+                                        confirmButtonColor: "#d33",
+                                        cancelButtonColor: "#3085d6",
+                                        confirmButtonText: "Ya, Hapus",
+                                        cancelButtonText: "Batal",
+                                      })
+
+                                      if (result.isConfirmed) {
                                         deletePerangkatDesa(perangkat)
                                       }
                                     }}

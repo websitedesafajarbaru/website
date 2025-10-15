@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { useAuth } from "../../contexts/AuthContext"
 import { SuratPBB } from "../../types"
+import { formatToWIB } from "../../utils/time"
 
 export function DetailSuratPBB() {
   const { id } = useParams<{ id: string }>()
@@ -57,11 +58,21 @@ export function DetailSuratPBB() {
         setSurat({ ...surat, status_pembayaran: newStatus as SuratPBB["status_pembayaran"] })
         setEditForm({ ...editForm, status_pembayaran: newStatus as SuratPBB["status_pembayaran"] })
       } else {
-        alert("Gagal memperbarui status pembayaran")
+        Swal.fire({
+          title: "Error",
+          text: "Gagal memperbarui status pembayaran",
+          icon: "error",
+          confirmButtonText: "OK",
+        })
       }
     } catch (err) {
       console.error("Error updating status:", err)
-      alert("Terjadi kesalahan")
+      Swal.fire({
+        title: "Error",
+        text: "Terjadi kesalahan",
+        icon: "error",
+        confirmButtonText: "OK",
+      })
     }
   }
 
@@ -85,14 +96,29 @@ export function DetailSuratPBB() {
       if (response.ok) {
         setSurat(editForm as SuratPBB)
         setIsEditing(false)
-        alert("Surat PBB berhasil diperbarui")
+        Swal.fire({
+          title: "Berhasil!",
+          text: "Surat PBB berhasil diperbarui",
+          icon: "success",
+          confirmButtonText: "OK",
+        })
       } else {
         const error = await response.json()
-        alert(error.message || "Gagal memperbarui surat PBB")
+        Swal.fire({
+          title: "Error",
+          text: error.message || "Gagal memperbarui surat PBB",
+          icon: "error",
+          confirmButtonText: "OK",
+        })
       }
     } catch (err) {
       console.error("Error updating surat:", err)
-      alert("Terjadi kesalahan")
+      Swal.fire({
+        title: "Error",
+        text: "Terjadi kesalahan",
+        icon: "error",
+        confirmButtonText: "OK",
+      })
     }
   }
 
@@ -102,7 +128,20 @@ export function DetailSuratPBB() {
   }
 
   const handleDelete = async () => {
-    if (!surat || !token || !confirm("Apakah Anda yakin ingin menghapus surat PBB ini? Tindakan ini tidak dapat dibatalkan.")) return
+    if (!surat || !token) return
+
+    const result = await Swal.fire({
+      title: "Konfirmasi Hapus",
+      text: "Apakah Anda yakin ingin menghapus surat PBB ini? Tindakan ini tidak dapat dibatalkan.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Ya, Hapus",
+      cancelButtonText: "Batal",
+    })
+
+    if (!result.isConfirmed) return
 
     try {
       const response = await fetch(`/api/surat-pbb/${id}`, {
@@ -111,15 +150,30 @@ export function DetailSuratPBB() {
       })
 
       if (response.ok) {
-        alert("Surat PBB berhasil dihapus")
+        Swal.fire({
+          title: "Berhasil!",
+          text: "Surat PBB berhasil dihapus",
+          icon: "success",
+          confirmButtonText: "OK",
+        })
         navigate(-1)
       } else {
         const error = await response.json()
-        alert(error.message || "Gagal menghapus surat PBB")
+        Swal.fire({
+          title: "Error",
+          text: error.message || "Gagal menghapus surat PBB",
+          icon: "error",
+          confirmButtonText: "OK",
+        })
       }
     } catch (err) {
       console.error("Error deleting surat:", err)
-      alert("Terjadi kesalahan")
+      Swal.fire({
+        title: "Error",
+        text: "Terjadi kesalahan",
+        icon: "error",
+        confirmButtonText: "OK",
+      })
     }
   }
 
@@ -153,7 +207,7 @@ export function DetailSuratPBB() {
           </p>
         </div>
         <div className="d-flex gap-2">
-          {user?.roles === "superadmin" && (
+          {(user?.roles === "superadmin" || user?.roles === "kepala_dusun") && (
             <>
               {!isEditing ? (
                 <button className="btn btn-warning" onClick={() => setIsEditing(true)}>
@@ -186,12 +240,7 @@ export function DetailSuratPBB() {
             <div className="col-md-6">
               <label className="form-label text-muted small mb-1">Nomor Objek Pajak (NOP)</label>
               {isEditing ? (
-                <input
-                  type="text"
-                  className="form-control"
-                  value={editForm.nomor_objek_pajak || ""}
-                  onChange={(e) => handleEditFormChange("nomor_objek_pajak", e.target.value)}
-                />
+                <input type="text" className="form-control" value={editForm.nomor_objek_pajak || ""} onChange={(e) => handleEditFormChange("nomor_objek_pajak", e.target.value)} />
               ) : (
                 <div className="fw-semibold font-monospace">{surat.nomor_objek_pajak}</div>
               )}
@@ -199,12 +248,7 @@ export function DetailSuratPBB() {
             <div className="col-md-6">
               <label className="form-label text-muted small mb-1">Tahun Pajak</label>
               {isEditing ? (
-                <input
-                  type="number"
-                  className="form-control"
-                  value={editForm.tahun_pajak || ""}
-                  onChange={(e) => handleEditFormChange("tahun_pajak", Number(e.target.value))}
-                />
+                <input type="number" className="form-control" value={editForm.tahun_pajak || ""} onChange={(e) => handleEditFormChange("tahun_pajak", Number(e.target.value))} />
               ) : (
                 <div className="fw-semibold">{surat.tahun_pajak}</div>
               )}
@@ -212,12 +256,7 @@ export function DetailSuratPBB() {
             <div className="col-md-6">
               <label className="form-label text-muted small mb-1">Nama Wajib Pajak</label>
               {isEditing ? (
-                <input
-                  type="text"
-                  className="form-control"
-                  value={editForm.nama_wajib_pajak || ""}
-                  onChange={(e) => handleEditFormChange("nama_wajib_pajak", e.target.value)}
-                />
+                <input type="text" className="form-control" value={editForm.nama_wajib_pajak || ""} onChange={(e) => handleEditFormChange("nama_wajib_pajak", e.target.value)} />
               ) : (
                 <div className="fw-semibold">{surat.nama_wajib_pajak}</div>
               )}
@@ -225,11 +264,7 @@ export function DetailSuratPBB() {
             <div className="col-md-6">
               <label className="form-label text-muted small mb-1">Status Pembayaran</label>
               {isEditing ? (
-                <select
-                  className="form-select"
-                  value={editForm.status_pembayaran || ""}
-                  onChange={(e) => handleEditFormChange("status_pembayaran", e.target.value)}
-                >
+                <select className="form-select" value={editForm.status_pembayaran || ""} onChange={(e) => handleEditFormChange("status_pembayaran", e.target.value)}>
                   <option value="belum_bayar">Belum Bayar</option>
                   <option value="bayar_sendiri_di_bank">Bayar Sendiri di Bank</option>
                   <option value="bayar_lewat_perangkat_desa">Bayar Lewat Perangkat Desa</option>
@@ -237,17 +272,26 @@ export function DetailSuratPBB() {
                   <option value="tidak_diketahui">Tidak Diketahui</option>
                 </select>
               ) : (
-                <select
-                  className="form-select"
-                  value={surat.status_pembayaran}
-                  onChange={(e) => handleStatusChange(e.target.value)}
-                >
-                  <option value="belum_bayar">Belum Bayar</option>
-                  <option value="bayar_sendiri_di_bank">Bayar Sendiri di Bank</option>
-                  <option value="bayar_lewat_perangkat_desa">Bayar Lewat Perangkat Desa</option>
-                  <option value="pindah_rumah">Pindah Rumah</option>
-                  <option value="tidak_diketahui">Tidak Diketahui</option>
-                </select>
+                <>
+                  <select
+                    className="form-select"
+                    value={surat.status_pembayaran}
+                    onChange={(e) => handleStatusChange(e.target.value)}
+                    disabled={user?.roles !== "superadmin" && surat.status_data_pbb !== "sudah_lengkap"}
+                  >
+                    <option value="belum_bayar">Belum Bayar</option>
+                    <option value="bayar_sendiri_di_bank">Bayar Sendiri di Bank</option>
+                    <option value="bayar_lewat_perangkat_desa">Bayar Lewat Perangkat Desa</option>
+                    <option value="pindah_rumah">Pindah Rumah</option>
+                    <option value="tidak_diketahui">Tidak Diketahui</option>
+                  </select>
+                  {user?.roles !== "superadmin" && surat.status_data_pbb !== "sudah_lengkap" && (
+                    <div className="form-text text-warning">
+                      <i className="bi bi-info-circle me-1"></i>
+                      Status pembayaran hanya dapat diubah setelah data dusun diset sebagai lengkap oleh superadmin
+                    </div>
+                  )}
+                </>
               )}
             </div>
             <div className="col-12">
@@ -279,12 +323,7 @@ export function DetailSuratPBB() {
             <div className="col-md-6">
               <label className="form-label text-muted small mb-1">Luas Tanah</label>
               {isEditing ? (
-                <input
-                  type="number"
-                  className="form-control"
-                  value={editForm.luas_tanah || ""}
-                  onChange={(e) => handleEditFormChange("luas_tanah", Number(e.target.value))}
-                />
+                <input type="number" className="form-control" value={editForm.luas_tanah || ""} onChange={(e) => handleEditFormChange("luas_tanah", Number(e.target.value))} />
               ) : (
                 <div className="fw-semibold">{surat.luas_tanah ? `${surat.luas_tanah} m²` : "-"}</div>
               )}
@@ -338,11 +377,11 @@ export function DetailSuratPBB() {
             </div>
             <div className="col-md-6">
               <label className="form-label text-muted small mb-1">Waktu Dibuat</label>
-              <div className="small">{new Date(surat.waktu_dibuat).toLocaleString("id-ID")}</div>
+              <div className="small">{formatToWIB(surat.waktu_dibuat)}</div>
             </div>
             <div className="col-md-6">
               <label className="form-label text-muted small mb-1">Waktu Diperbarui</label>
-              <div className="small">{new Date(surat.waktu_diperbarui).toLocaleString("id-ID")}</div>
+              <div className="small">{formatToWIB(surat.waktu_diperbarui)}</div>
             </div>
           </div>
         </div>
