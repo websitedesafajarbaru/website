@@ -11,7 +11,7 @@ CREATE TABLE pengguna (
     nama_lengkap TEXT NOT NULL,
     username TEXT NOT NULL UNIQUE,
     password TEXT NOT NULL,
-    roles TEXT NOT NULL CHECK (roles IN ('superadmin', 'kepala_dusun', 'ketua_rt', 'masyarakat')),
+    roles TEXT NOT NULL CHECK (roles IN ('admin', 'kepala_dusun', 'ketua_rt', 'masyarakat')),
     waktu_dibuat TEXT DEFAULT (datetime('now')),
     waktu_diperbarui TEXT DEFAULT (datetime('now'))
 );

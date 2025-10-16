@@ -1,2 +1,2 @@
 -- Seed data untuk tabel pengguna
-INSERT INTO pengguna (id, nama_lengkap, username, password, roles, waktu_dibuat, waktu_diperbarui) VALUES ('superadmin', 'Super Admin', 'superadmin', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'superadmin', datetime('now'), datetime('now'));
+INSERT INTO pengguna (id, nama_lengkap, username, password, roles, waktu_dibuat, waktu_diperbarui) VALUES ('superadmin', 'Pak Solihin', 'admin', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'admin', datetime('now'), datetime('now'));
