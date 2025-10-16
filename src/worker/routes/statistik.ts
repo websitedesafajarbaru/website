@@ -23,8 +23,8 @@ statistikRoutes.post("/active-year", async (c) => {
   try {
     const user = c.get("user") as JWTPayload
 
-    if (user.roles !== "superadmin") {
-      return c.json({ error: "Hanya superadmin yang dapat mengatur tahun aktif" }, 403)
+    if (user.roles !== "admin") {
+      return c.json({ error: "Hanya admin yang dapat mengatur tahun aktif" }, 403)
     }
 
     const { year } = await c.req.json()
@@ -127,8 +127,8 @@ statistikRoutes.get("/laporan", async (c) => {
   try {
     const user = c.get("user") as JWTPayload
 
-    if (user.roles !== "superadmin") {
-      return c.json({ error: "Hanya superadmin yang dapat mengakses laporan" }, 403)
+    if (user.roles !== "admin") {
+      return c.json({ error: "Hanya admin yang dapat mengakses laporan" }, 403)
     }
 
     const activeYear = await c.env.KV.get("active_year")

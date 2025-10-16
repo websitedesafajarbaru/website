@@ -16,7 +16,7 @@ perangkatDesaRoutes.post("/", async (c) => {
       return c.json({ error: "Semua field harus diisi" }, 400)
     }
 
-    if (user.roles !== "superadmin") {
+    if (user.roles !== "admin") {
       if (user.roles === "kepala_dusun") {
         if (jabatan !== "ketua_rt") {
           return c.json({ error: "Kepala dusun hanya dapat menambahkan ketua rt" }, 403)
@@ -44,7 +44,11 @@ perangkatDesaRoutes.post("/", async (c) => {
     if (jabatan === "kepala_dusun") {
       const existingKepalaDusun = await c.env.DB.prepare("SELECT id FROM perangkat_desa WHERE id_dusun = ? AND jabatan = 'kepala_dusun'").bind(id_dusun).first()
       if (existingKepalaDusun) {
-        return c.json({ error: "Kepala dusun untuk dusun ini sudah ada. Setiap dusun hanya boleh memiliki satu kepala dusun." }, 400)
+        // Demote existing kepala_dusun to ketua_rt
+        await c.env.DB.batch([
+          c.env.DB.prepare("UPDATE pengguna SET roles = 'ketua_rt', waktu_diperbarui = datetime('now') WHERE id = ?").bind(existingKepalaDusun.id),
+          c.env.DB.prepare("UPDATE perangkat_desa SET jabatan = 'ketua_rt', waktu_diperbarui = datetime('now') WHERE id = ?").bind(existingKepalaDusun.id),
+        ])
       }
     }
 
@@ -82,7 +86,7 @@ perangkatDesaRoutes.get("/", async (c) => {
       FROM perangkat_desa pd
       INNER JOIN pengguna p ON pd.id = p.id
       LEFT JOIN dusun d ON pd.id_dusun = d.id
-      WHERE p.roles != 'superadmin'
+      WHERE p.roles != 'admin'
     `
 
     const params: (string | number)[] = []
@@ -146,7 +150,7 @@ perangkatDesaRoutes.put("/:id", async (c) => {
     const id = c.req.param("id")
     const { nama_lengkap, username, password, id_dusun, jabatan } = await c.req.json()
 
-    if (user.roles !== "superadmin") {
+    if (user.roles !== "admin") {
       if (user.roles === "kepala_dusun") {
         if (jabatan && jabatan !== "ketua_rt") {
           return c.json({ error: "Kepala dusun hanya dapat mengelola ketua rt" }, 403)
@@ -166,7 +170,11 @@ perangkatDesaRoutes.put("/:id", async (c) => {
     if (jabatan === "kepala_dusun") {
       const existingKepalaDusun = await c.env.DB.prepare("SELECT id FROM perangkat_desa WHERE id_dusun = ? AND jabatan = 'kepala_dusun' AND id != ?").bind(id_dusun, id).first()
       if (existingKepalaDusun) {
-        return c.json({ error: "Kepala dusun untuk dusun ini sudah ada. Setiap dusun hanya boleh memiliki satu kepala dusun." }, 400)
+        // Demote existing kepala_dusun to ketua_rt
+        await c.env.DB.batch([
+          c.env.DB.prepare("UPDATE pengguna SET roles = 'ketua_rt', waktu_diperbarui = datetime('now') WHERE id = ?").bind(existingKepalaDusun.id),
+          c.env.DB.prepare("UPDATE perangkat_desa SET jabatan = 'ketua_rt', waktu_diperbarui = datetime('now') WHERE id = ?").bind(existingKepalaDusun.id),
+        ])
       }
     }
 
@@ -222,14 +230,14 @@ perangkatDesaRoutes.put("/:id", async (c) => {
   }
 })
 
-perangkatDesaRoutes.delete("/:id", requireRole("superadmin"), async (c) => {
+perangkatDesaRoutes.delete("/:id", requireRole("admin"), async (c) => {
   try {
     const id = c.req.param("id")
 
     const user = await c.env.DB.prepare("SELECT roles FROM pengguna WHERE id = ?").bind(id).first()
 
-    if (user && user.roles === "superadmin") {
-      return c.json({ error: "Tidak dapat menghapus akun superadmin" }, 400)
+    if (user && user.roles === "admin") {
+      return c.json({ error: "Tidak dapat menghapus akun admin" }, 400)
     }
 
     const existingUser = await c.env.DB.prepare("SELECT id FROM pengguna WHERE id = ?").bind(id).first()

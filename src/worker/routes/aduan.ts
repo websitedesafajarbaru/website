@@ -61,7 +61,7 @@ aduanRoutes.get("/:id", authMiddleware, async (c) => {
       return c.json({ error: "Aduan tidak ditemukan" }, 404)
     }
 
-    if (user.roles !== "superadmin" && aduan.id_masyarakat !== user.userId) {
+    if (user.roles !== "admin" && aduan.id_masyarakat !== user.userId) {
       return c.json({ error: "Tidak memiliki akses" }, 403)
     }
 
@@ -85,8 +85,8 @@ aduanRoutes.get("/", authMiddleware, async (c) => {
   try {
     const user = c.get("user") as JWTPayload
 
-    if (user.roles !== "superadmin") {
-      return c.json({ error: "Hanya superadmin yang dapat mengakses" }, 403)
+    if (user.roles !== "admin") {
+      return c.json({ error: "Hanya admin yang dapat mengakses" }, 403)
     }
 
     const status = c.req.query("status")
@@ -111,8 +111,8 @@ aduanRoutes.put("/:id/status", authMiddleware, async (c) => {
   try {
     const user = c.get("user") as JWTPayload
 
-    if (user.roles !== "superadmin") {
-      return c.json({ error: "Hanya superadmin yang dapat mengubah status" }, 403)
+    if (user.roles !== "admin") {
+      return c.json({ error: "Hanya admin yang dapat mengubah status" }, 403)
     }
 
     const aduanId = c.req.param("id")
@@ -135,8 +135,8 @@ aduanRoutes.post("/:id/tanggapan", authMiddleware, async (c) => {
   try {
     const user = c.get("user") as JWTPayload
 
-    if (user.roles !== "superadmin") {
-      return c.json({ error: "Hanya superadmin yang dapat memberikan tanggapan" }, 403)
+    if (user.roles !== "admin") {
+      return c.json({ error: "Hanya admin yang dapat memberikan tanggapan" }, 403)
     }
 
     const aduanId = c.req.param("id")

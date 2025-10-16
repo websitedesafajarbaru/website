@@ -5,7 +5,7 @@ import { generateToken, generateIntId } from "../utils/db"
 const dusunRoutes = new Hono<{ Bindings: Env }>()
 
 dusunRoutes.use("/*", authMiddleware)
-dusunRoutes.use("/*", requireRole("superadmin"))
+dusunRoutes.use("/*", requireRole("admin"))
 
 dusunRoutes.post("/", async (c) => {
   try {
@@ -168,6 +168,27 @@ dusunRoutes.get("/:id/tokens", async (c) => {
     return c.json({
       tokenKepalaDusun,
       tokenKetuaRT,
+    })
+  } catch (error) {
+    console.error(error)
+    return c.json({ error: "Terjadi kesalahan server" }, 500)
+  }
+})
+
+dusunRoutes.post("/:id/regenerate-tokens", async (c) => {
+  try {
+    const dusunId = c.req.param("id")
+
+    const newTokenKepalaDusun = generateToken()
+    const newTokenKetuaRT = generateToken()
+
+    await c.env.KV.put(`token:kepala_dusun:${dusunId}`, newTokenKepalaDusun)
+    await c.env.KV.put(`token:ketua_rt:${dusunId}`, newTokenKetuaRT)
+
+    return c.json({
+      message: "Token berhasil diregenerate",
+      tokenKepalaDusun: newTokenKepalaDusun,
+      tokenKetuaRT: newTokenKetuaRT,
     })
   } catch (error) {
     console.error(error)

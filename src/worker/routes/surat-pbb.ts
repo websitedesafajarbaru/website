@@ -40,19 +40,29 @@ suratPBBRoutes.post("/", async (c) => {
       return c.json({ error: "Semua field harus diisi" }, 400)
     }
 
-    if (user.roles !== "superadmin") {
-      if (user.roles === "kepala_dusun") {
-        const kepalaDusunData = await c.env.DB.prepare("SELECT id_dusun FROM perangkat_desa WHERE id = ? AND jabatan = 'kepala_dusun'").bind(user.userId).first()
+    if (user.roles !== "admin") {
+      console.log("User roles:", user.roles, "userId:", user.userId)
+      const role = user.roles.trim().toLowerCase()
+      if (role === "kepala_dusun") {
+        const kepalaDusunData = await c.env.DB.prepare("SELECT id_dusun FROM perangkat_desa WHERE id = ?").bind(user.userId).first()
+        console.log("Kepala dusun data:", kepalaDusunData, "id_dusun from request:", id_dusun)
         if (!kepalaDusunData || kepalaDusunData.id_dusun !== id_dusun) {
           return c.json({ error: "Anda hanya dapat menambahkan surat PBB untuk dusun yang Anda kelola" }, 403)
         }
+      } else if (role === "ketua_rt") {
+        const ketuaRTData = await c.env.DB.prepare("SELECT id_dusun FROM perangkat_desa WHERE id = ?").bind(user.userId).first()
+        console.log("Ketua RT data:", ketuaRTData, "id_dusun from request:", id_dusun)
+        if (!ketuaRTData || ketuaRTData.id_dusun !== id_dusun) {
+          return c.json({ error: "Anda hanya dapat menambahkan surat PBB untuk dusun yang Anda kelola" }, 403)
+        }
       } else {
+        console.log("Role not allowed:", user.roles)
         return c.json({ error: "Anda tidak memiliki izin untuk menambahkan surat PBB" }, 403)
       }
     }
 
     let idPerangkatDesa: string | null = user.userId
-    if (user.roles === "superadmin") {
+    if (user.roles === "admin") {
       const kepalaDusun = await c.env.DB.prepare("SELECT id FROM perangkat_desa WHERE jabatan = 'kepala_dusun' AND id_dusun = ?").bind(id_dusun).first()
       if (kepalaDusun) {
         idPerangkatDesa = kepalaDusun.id as string
@@ -109,7 +119,7 @@ suratPBBRoutes.get("/", async (c) => {
       "SELECT s.*, d.nama_dusun, d.status_data_pbb, p.nama_lengkap as nama_perangkat FROM surat_pbb s JOIN dusun d ON s.id_dusun = d.id JOIN pengguna p ON s.id_perangkat_desa = p.id WHERE s.tahun_pajak = ?"
     const params: (string | number)[] = [currentYear]
 
-    if (user.roles !== "superadmin") {
+    if (user.roles !== "admin") {
       const perangkat = await c.env.DB.prepare("SELECT jabatan FROM perangkat_desa WHERE id = ?").bind(user.userId).first()
 
       if (perangkat?.jabatan === "kepala_dusun") {
@@ -120,11 +130,11 @@ suratPBBRoutes.get("/", async (c) => {
           params.push(perangkatData.id_dusun as string)
         }
       } else if (perangkat?.jabatan === "ketua_rt") {
-        const dusunKetua = await c.env.DB.prepare("SELECT id_dusun FROM surat_pbb WHERE id_perangkat_desa = ? LIMIT 1").bind(user.userId).first()
+        const perangkatData = await c.env.DB.prepare("SELECT id_dusun FROM perangkat_desa WHERE id = ?").bind(user.userId).first()
 
-        if (dusunKetua) {
+        if (perangkatData && perangkatData.id_dusun) {
           query += " AND s.id_dusun = ?"
-          params.push(dusunKetua.id_dusun as string)
+          params.push(perangkatData.id_dusun as string)
         }
       }
     } else {
@@ -182,6 +192,8 @@ suratPBBRoutes.put("/:id", async (c) => {
     const suratId = c.req.param("id")
     const updates = await c.req.json()
 
+    const originalSurat = await c.env.DB.prepare("SELECT status_pembayaran FROM surat_pbb WHERE id = ?").bind(suratId).first()
+
     const allowedFields = [
       "nomor_objek_pajak",
       "nama_wajib_pajak",
@@ -199,14 +211,14 @@ suratPBBRoutes.put("/:id", async (c) => {
     const params: (string | number)[] = []
 
     // Validasi khusus untuk status_pembayaran
-    if (updates.status_pembayaran && user.roles !== "superadmin") {
+    if (updates.status_pembayaran !== undefined && updates.status_pembayaran !== originalSurat?.status_pembayaran && user.roles !== "admin") {
       // Cek status data PBB dusun
       const dusunStatus = await c.env.DB.prepare("SELECT d.status_data_pbb FROM dusun d JOIN surat_pbb s ON d.id = s.id_dusun WHERE s.id = ?").bind(suratId).first()
 
       if (dusunStatus?.status_data_pbb !== "sudah_lengkap") {
         return c.json(
           {
-            error: "Status pembayaran tidak dapat diubah karena data dusun belum diset sebagai lengkap oleh superadmin",
+            error: "Status pembayaran tidak dapat diubah karena data dusun belum diset sebagai lengkap oleh admin",
           },
           403
         )
@@ -244,12 +256,30 @@ suratPBBRoutes.put("/:id", async (c) => {
 suratPBBRoutes.delete("/:id", async (c) => {
   try {
     const user = c.get("user") as JWTPayload
+    const suratId = c.req.param("id")
 
-    if (user.roles !== "superadmin") {
-      return c.json({ error: "Hanya superadmin yang dapat menghapus surat" }, 403)
+    if (user.roles !== "admin") {
+      const perangkat = await c.env.DB.prepare("SELECT jabatan FROM perangkat_desa WHERE id = ?").bind(user.userId).first()
+
+      if (perangkat?.jabatan === "kepala_dusun") {
+        const perangkatData = await c.env.DB.prepare("SELECT id_dusun FROM perangkat_desa WHERE id = ?").bind(user.userId).first()
+        const suratDusun = await c.env.DB.prepare("SELECT id_dusun FROM surat_pbb WHERE id = ?").bind(suratId).first()
+
+        if (!perangkatData || !suratDusun || perangkatData.id_dusun !== suratDusun.id_dusun) {
+          return c.json({ error: "Anda hanya dapat menghapus surat PBB di dusun yang Anda kelola" }, 403)
+        }
+      } else if (perangkat?.jabatan === "ketua_rt") {
+        const perangkatData = await c.env.DB.prepare("SELECT id_dusun FROM perangkat_desa WHERE id = ?").bind(user.userId).first()
+        const suratDusun = await c.env.DB.prepare("SELECT id_dusun FROM surat_pbb WHERE id = ?").bind(suratId).first()
+
+        if (!perangkatData || !suratDusun || perangkatData.id_dusun !== suratDusun.id_dusun) {
+          return c.json({ error: "Anda hanya dapat menghapus surat PBB di dusun yang Anda kelola" }, 403)
+        }
+      } else {
+        return c.json({ error: "Anda tidak memiliki izin untuk menghapus surat" }, 403)
+      }
     }
 
-    const suratId = c.req.param("id")
     await c.env.DB.prepare("DELETE FROM surat_pbb WHERE id = ?").bind(suratId).run()
 
     return c.json({ message: "Surat PBB berhasil dihapus" })
