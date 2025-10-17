@@ -1,63 +1,71 @@
 import { Link } from "react-router-dom"
+import logo from "../assets/logo.png"
 
 export function LandingPage() {
   return (
-    <div className="container-wide">
-      <div className="card mb-4">
-        <div className="card-body text-center py-4">
-          <i className="bi bi-building text-primary" style={{ fontSize: "3rem" }}></i>
-          <h1 className="h2 fw-bold mt-3 mb-2">Desa Fajar Baru</h1>
-          <p className="text-muted mb-0">Portal Informasi dan Layanan Digital Untuk Warga Desa</p>
-        </div>
-      </div>
-
-      <div className="row g-3">
-        <div className="col-md-4">
-          <div className="card h-100">
-            <div className="card-body">
-              <div className="d-flex align-items-center mb-3">
-                <i className="bi bi-receipt-cutoff text-primary me-3" style={{ fontSize: "2rem" }}></i>
-                <h5 className="card-title mb-0">Cek Pembayaran PBB</h5>
-              </div>
-              <p className="card-text text-muted small mb-3">Cek status pembayaran Pajak Bumi dan Bangunan secara online</p>
-              <Link to="/cek-pembayaran" className="btn btn-sm btn-primary">
-                Cek Sekarang
-              </Link>
-            </div>
+    <div>
+      {/* Hero Section */}
+      <section className="hero-section bg-primary text-white py-5">
+        <div className="container-wide text-center">
+          <img src={logo} alt="Logo SIFABAR" className="mb-3" style={{ height: "80px" }} />
+          <h1 className="display-4 fw-bold mb-3">SIFABAR</h1>
+          <p className="lead mb-4">Sistem Informasi Desa Fajar Baru - Portal Informasi dan Layanan Digital Untuk Warga Desa</p>
+          <div className="d-flex justify-content-center gap-3">
+            <Link to="/cek-pembayaran" className="btn btn-light btn-lg">
+              Cek Pembayaran PBB
+            </Link>
+            <Link to="/pengaduan-masyarakat/login" className="btn btn-outline-light btn-lg">
+              Pengaduan Masyarakat
+            </Link>
           </div>
         </div>
+      </section>
 
-        <div className="col-md-4">
-          <div className="card h-100">
-            <div className="card-body">
-              <div className="d-flex align-items-center mb-3">
-                <i className="bi bi-megaphone text-success me-3" style={{ fontSize: "2rem" }}></i>
-                <h5 className="card-title mb-0">Pengaduan Masyarakat</h5>
-              </div>
-              <p className="card-text text-muted small mb-3">Sampaikan keluhan dan aspirasi kepada pemerintah desa</p>
-              <div className="d-flex gap-2">
-                <Link to="/pengaduan-masyarakat/login" className="btn btn-sm btn-success">
-                  Login
-                </Link>
-                <Link to="/pengaduan-masyarakat/registrasi" className="btn btn-sm btn-outline-success">
-                  Daftar
+      {/* Services Section */}
+      <div className="container-wide py-5">
+        <h2 className="text-center mb-4">Layanan Kami</h2>
+        <div className="row g-4">
+          <div className="col-md-4">
+            <div className="card h-100 shadow-sm">
+              <div className="card-body text-center">
+                <i className="bi bi-receipt-cutoff text-primary mb-3" style={{ fontSize: "3rem" }}></i>
+                <h5 className="card-title">Cek Pembayaran PBB</h5>
+                <p className="card-text text-muted">Cek status pembayaran Pajak Bumi dan Bangunan secara online dengan mudah dan cepat.</p>
+                <Link to="/cek-pembayaran" className="btn btn-primary">
+                  Cek Sekarang
                 </Link>
               </div>
             </div>
           </div>
-        </div>
 
-        <div className="col-md-4">
-          <div className="card h-100">
-            <div className="card-body">
-              <div className="d-flex align-items-center mb-3">
-                <i className="bi bi-briefcase text-info me-3" style={{ fontSize: "2rem" }}></i>
-                <h5 className="card-title mb-0">Pengelolaan PBB</h5>
+          <div className="col-md-4">
+            <div className="card h-100 shadow-sm">
+              <div className="card-body text-center">
+                <i className="bi bi-megaphone text-success mb-3" style={{ fontSize: "3rem" }}></i>
+                <h5 className="card-title">Pengaduan Masyarakat</h5>
+                <p className="card-text text-muted">Sampaikan keluhan dan aspirasi Anda kepada pemerintah desa melalui platform digital.</p>
+                <div className="d-flex justify-content-center gap-2">
+                  <Link to="/pengaduan-masyarakat/login" className="btn btn-success">
+                    Login
+                  </Link>
+                  <Link to="/pengaduan-masyarakat/registrasi" className="btn btn-outline-success">
+                    Daftar
+                  </Link>
+                </div>
               </div>
-              <p className="card-text text-muted small mb-3">Layanan khusus perangkat desa untuk mengelola data PBB</p>
-              <Link to="/pengelolaan-pbb/login" className="btn btn-sm btn-info">
-                Login Perangkat
-              </Link>
+            </div>
+          </div>
+
+          <div className="col-md-4">
+            <div className="card h-100 shadow-sm">
+              <div className="card-body text-center">
+                <i className="bi bi-briefcase text-info mb-3" style={{ fontSize: "3rem" }}></i>
+                <h5 className="card-title">Pengelolaan PBB</h5>
+                <p className="card-text text-muted">Layanan khusus perangkat desa untuk mengelola data Pajak Bumi dan Bangunan.</p>
+                <Link to="/pengelolaan-pbb/login" className="btn btn-info">
+                  Login Perangkat
+                </Link>
+              </div>
             </div>
           </div>
         </div>

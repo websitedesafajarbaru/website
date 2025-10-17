@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "react-router-dom"
 import { useAuth } from "../contexts/AuthContext"
+import logo from "../assets/logo.png"
 
 export function Navbar() {
   const { isAuthenticated, user, logout } = useAuth()
@@ -13,13 +14,15 @@ export function Navbar() {
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-white">
       <div className="container-wide">
-        <Link className="navbar-brand" to="/">
-          <i className="bi bi-building me-2"></i>
-          Desa Fajar Baru
-        </Link>
-        <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-          <span className="navbar-toggler-icon"></span>
-        </button>
+        <div className="d-flex align-items-center">
+          <Link className="navbar-brand" to="/">
+            <img src={logo} alt="Logo" className="me-2" style={{ height: "24px" }} />
+            SIFABAR
+          </Link>
+          <button className="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span className="navbar-toggler-icon"></span>
+          </button>
+        </div>
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav ms-auto align-items-lg-center">
             <li className="nav-item">
@@ -71,20 +74,20 @@ export function Navbar() {
               </>
             ) : (
               <>
-                {(user?.roles === "superadmin" || user?.roles === "masyarakat") && (
+                {(user?.roles === "admin" || user?.roles === "masyarakat") && (
                   <li className="nav-item">
-                    <Link className="nav-link" to={user?.roles === "superadmin" ? "/pengaduan-masyarakat/dashboard-superadmin" : "/pengaduan-masyarakat/dashboard-masyarakat"}>
+                    <Link className="nav-link" to={user?.roles === "admin" ? "/pengaduan-masyarakat/dashboard-admin" : "/pengaduan-masyarakat/dashboard-masyarakat"}>
                       Dashboard Pengaduan
                     </Link>
                   </li>
                 )}
-                {(user?.roles === "superadmin" || user?.roles === "kepala_dusun" || user?.roles === "ketua_rt") && (
+                {(user?.roles === "admin" || user?.roles === "kepala_dusun" || user?.roles === "ketua_rt") && (
                   <li className="nav-item">
                     <Link
                       className="nav-link"
                       to={
-                        user?.roles === "superadmin"
-                          ? "/pengelolaan-pbb/dashboard-superadmin"
+                        user?.roles === "admin"
+                          ? "/pengelolaan-pbb/dashboard-admin"
                           : user?.roles === "kepala_dusun"
                             ? "/pengelolaan-pbb/dashboard-kepala-dusun"
                             : "/pengelolaan-pbb/dashboard-ketua-rt"

@@ -7,14 +7,12 @@ import { CekPembayaran } from "./pages/CekPembayaran"
 import { RegistrasiMasyarakat } from "./pages/pengaduan-masyarakat/RegistrasiMasyarakat"
 import { LoginPengaduan } from "./pages/pengaduan-masyarakat/LoginPengaduan"
 import { DashboardMasyarakat } from "./pages/pengaduan-masyarakat/DashboardMasyarakat"
-import { DashboardSuperadminPengaduan } from "./pages/pengaduan-masyarakat/DashboardSuperadminPengaduan"
+import { DashboardAdminPengaduan } from "./pages/pengaduan-masyarakat/DashboardAdminPengaduan"
 import { RegistrasiPerangkatDesa } from "./pages/pengelolaan-pbb/RegistrasiPerangkatDesa"
 import { LoginPBB } from "./pages/pengelolaan-pbb/LoginPBB"
-import { DashboardSuperadminPBB } from "./pages/pengelolaan-pbb/DashboardSuperadminPBB"
+import { DashboardAdminPBB } from "./pages/pengelolaan-pbb/DashboardAdminPBB"
 import { DashboardKepalaDusun } from "./pages/pengelolaan-pbb/DashboardKepalaDusun"
 import { DashboardKetuaRT } from "./pages/pengelolaan-pbb/DashboardKetuaRT"
-import { DetailDusunLaporan } from "./pages/pengelolaan-pbb/DetailDusunLaporan"
-import { DetailSuratPBB } from "./pages/pengelolaan-pbb/DetailSuratPBB"
 
 function App() {
   return (
@@ -36,10 +34,10 @@ function App() {
               }
             />
             <Route
-              path="/pengaduan-masyarakat/dashboard-superadmin"
+              path="/pengaduan-masyarakat/dashboard-admin"
               element={
-                <ProtectedRoute allowedRoles={["superadmin"]}>
-                  <DashboardSuperadminPengaduan />
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <DashboardAdminPengaduan />
                 </ProtectedRoute>
               }
             />
@@ -47,10 +45,10 @@ function App() {
             <Route path="/pengelolaan-pbb/registrasi" element={<RegistrasiPerangkatDesa />} />
             <Route path="/pengelolaan-pbb/login" element={<LoginPBB />} />
             <Route
-              path="/pengelolaan-pbb/dashboard-superadmin"
+              path="/pengelolaan-pbb/dashboard-admin"
               element={
-                <ProtectedRoute allowedRoles={["superadmin"]}>
-                  <DashboardSuperadminPBB />
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <DashboardAdminPBB />
                 </ProtectedRoute>
               }
             />
@@ -67,22 +65,6 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={["ketua_rt"]}>
                   <DashboardKetuaRT />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard/pbb/laporan/dusun/:id"
-              element={
-                <ProtectedRoute allowedRoles={["superadmin", "kepala_dusun"]}>
-                  <DetailDusunLaporan />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard/pbb/surat/:id"
-              element={
-                <ProtectedRoute allowedRoles={["superadmin", "kepala_dusun", "ketua_rt"]}>
-                  <DetailSuratPBB />
                 </ProtectedRoute>
               }
             />

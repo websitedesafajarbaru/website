@@ -1,6 +1,6 @@
 export const formatRole = (role: string): string => {
   const roleMap: Record<string, string> = {
-    superadmin: "Superadmin",
+    admin: "Admin",
     kepala_dusun: "Kepala Dusun",
     ketua_rt: "Ketua RT",
     masyarakat: "Masyarakat",
@@ -79,7 +79,7 @@ export const getStatusAduanColor = (status: string): string => {
 
 export const getRoleColor = (role: string): string => {
   const colorMap: Record<string, string> = {
-    superadmin: "danger",
+    admin: "danger",
     kepala_dusun: "primary",
     ketua_rt: "info",
     masyarakat: "secondary",
