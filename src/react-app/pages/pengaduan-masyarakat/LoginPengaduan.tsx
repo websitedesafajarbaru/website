@@ -39,8 +39,8 @@ export function LoginPengaduan() {
 
       login(result.token, result.user)
 
-      if (result.user.roles === "superadmin") {
-        navigate("/pengaduan-masyarakat/dashboard-superadmin")
+      if (result.user.roles === "admin") {
+        navigate("/pengaduan-masyarakat/dashboard-admin")
       } else {
         navigate("/pengaduan-masyarakat/dashboard-masyarakat")
       }
