@@ -79,7 +79,7 @@ export function RegistrasiPerangkatDesa() {
                   value={formData.token}
                   onChange={(e) => setFormData({ ...formData, token: e.target.value })}
                   required
-                  placeholder="Token dari superadmin"
+                  placeholder="Token dari admin"
                 />
                 <small className="text-muted">
                   <i className="bi bi-info-circle me-1"></i>

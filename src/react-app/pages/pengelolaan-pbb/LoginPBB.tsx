@@ -32,8 +32,8 @@ export function LoginPBB() {
 
       login(result.token, result.user)
 
-      if (result.user.roles === "superadmin") {
-        navigate("/pengelolaan-pbb/dashboard-superadmin")
+      if (result.user.roles === "admin") {
+        navigate("/pengelolaan-pbb/dashboard-admin")
       } else if (result.user.roles === "kepala_dusun") {
         navigate("/pengelolaan-pbb/dashboard-kepala-dusun")
       } else if (result.user.roles === "ketua_rt") {
