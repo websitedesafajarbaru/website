@@ -37,39 +37,10 @@ export function Navbar() {
             </li>
             {!isAuthenticated ? (
               <>
-                <li className="nav-item dropdown">
-                  <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                    Pengaduan
-                  </a>
-                  <ul className="dropdown-menu dropdown-menu-end">
-                    <li>
-                      <Link className="dropdown-item" to="/pengaduan-masyarakat/login">
-                        Login
-                      </Link>
-                    </li>
-                    <li>
-                      <Link className="dropdown-item" to="/pengaduan-masyarakat/registrasi">
-                        Registrasi
-                      </Link>
-                    </li>
-                  </ul>
-                </li>
-                <li className="nav-item dropdown">
-                  <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                    PBB
-                  </a>
-                  <ul className="dropdown-menu dropdown-menu-end">
-                    <li>
-                      <Link className="dropdown-item" to="/pengelolaan-pbb/login">
-                        Login
-                      </Link>
-                    </li>
-                    <li>
-                      <Link className="dropdown-item" to="/pengelolaan-pbb/registrasi">
-                        Registrasi
-                      </Link>
-                    </li>
-                  </ul>
+                <li className="nav-item">
+                  <Link className="nav-link" to="/login">
+                    Login
+                  </Link>
                 </li>
               </>
             ) : (
@@ -97,10 +68,34 @@ export function Navbar() {
                     </Link>
                   </li>
                 )}
-                <li className="nav-item">
-                  <button className="nav-link" onClick={handleLogout}>
-                    Logout
-                  </button>
+                <li className="nav-item dropdown">
+                  <a
+                    className="nav-link dropdown-toggle"
+                    href="#"
+                    id="userDropdown"
+                    role="button"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                  >
+                    {user?.nama_lengkap || "User"}
+                  </a>
+                  <ul className="dropdown-menu" aria-labelledby="userDropdown">
+                    <li>
+                      <Link className="dropdown-item" to="/settings">
+                        <i className="bi bi-gear me-2"></i>
+                        Pengaturan
+                      </Link>
+                    </li>
+                    <li>
+                      <hr className="dropdown-divider" />
+                    </li>
+                    <li>
+                      <button className="dropdown-item" onClick={handleLogout}>
+                        <i className="bi bi-box-arrow-right me-2"></i>
+                        Logout
+                      </button>
+                    </li>
+                  </ul>
                 </li>
               </>
             )}

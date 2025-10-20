@@ -20,9 +20,24 @@ export interface Tanggapan {
   id: string
   isi_tanggapan: string
   id_aduan: string
-  id_perangkat_desa: string
+  id_perangkat_desa?: string
+  id_pengguna: string
   waktu_dibuat: string
   nama_lengkap: string
+  roles?: string
+}
+
+export interface Masyarakat {
+  id: string
+  nama_lengkap: string
+  username: string
+  roles: string
+  alamat_rumah: string
+  nomor_telepon: string
+  email?: string
+  status: "active" | "banned"
+  waktu_dibuat: string
+  waktu_diperbarui: string
 }
 
 export interface Dusun {
@@ -52,7 +67,7 @@ export interface SuratPBB {
   tahun_pajak: number
   status_pembayaran: "belum_bayar" | "bayar_sendiri_di_bank" | "bayar_lewat_perangkat_desa" | "pindah_rumah" | "tidak_diketahui"
   id_dusun: number
-  id_perangkat_desa: string
+  id_pengguna: string
   waktu_dibuat: string
   waktu_diperbarui: string
   nama_dusun?: string
