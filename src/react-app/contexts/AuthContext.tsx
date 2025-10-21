@@ -13,6 +13,7 @@ interface AuthContextType {
   token: string | null
   login: (token: string, user: User) => void
   logout: () => void
+  updateUser: (user: User) => void
   isAuthenticated: boolean
   apiRequest: <T = unknown>(url: string, options?: RequestInit) => Promise<T>
 }
@@ -47,6 +48,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null)
   }
 
+  const updateUser = (newUser: User) => {
+    localStorage.setItem("user", JSON.stringify(newUser))
+    setUser(newUser)
+  }
+
   const authenticatedApiRequest = async <T = unknown,>(url: string, options: RequestInit = {}): Promise<T> => {
     try {
       return await apiRequest<T>(url, options, logout)
@@ -65,6 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         token,
         login,
         logout,
+        updateUser,
         isAuthenticated: !!token,
         apiRequest: authenticatedApiRequest,
       }}
