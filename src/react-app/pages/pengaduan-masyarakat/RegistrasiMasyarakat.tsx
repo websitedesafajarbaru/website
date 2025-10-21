@@ -46,7 +46,7 @@ export function RegistrasiMasyarakat() {
         timer: 2000,
         showConfirmButton: false,
       }).then(() => {
-        navigate("/pengaduan-masyarakat/login")
+        navigate("/login")
       })
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Terjadi kesalahan"
@@ -103,7 +103,7 @@ export function RegistrasiMasyarakat() {
             </form>
 
             <div className="mt-3 text-center">
-              <Link to="/pengaduan-masyarakat/login">Sudah punya akun? Login</Link>
+              <Link to="/login">Sudah punya akun? Login</Link>
             </div>
           </div>
         </div>
