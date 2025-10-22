@@ -282,7 +282,6 @@ export function DashboardKepalaDusun() {
           password: "",
         })
 
-        // Reload ketua RT
         const response = await fetch(`/api/perangkat-desa?dusun_id=${dusunId}`, {
           headers: { Authorization: `Bearer ${token}` },
         })
@@ -339,7 +338,6 @@ export function DashboardKepalaDusun() {
       })
 
       if (response.ok) {
-        // Reload ketua RT
         const response = await fetch(`/api/perangkat-desa?dusun_id=${dusunId}`, {
           headers: { Authorization: `Bearer ${token}` },
         })
@@ -416,7 +414,6 @@ export function DashboardKepalaDusun() {
           dusun_id: dusunId?.toString() || "",
         })
 
-        // Reload statistik after adding surat PBB
         if (dusunId) {
           const statistikResponse = await fetch(`/api/statistik/dusun/${dusunId}`, {
             headers: { Authorization: `Bearer ${token}` },

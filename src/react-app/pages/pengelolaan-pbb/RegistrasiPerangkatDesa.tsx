@@ -34,9 +34,10 @@ export function RegistrasiPerangkatDesa() {
         title: "Registrasi Berhasil!",
         text: `Registrasi berhasil sebagai ${result.jabatan === "kepala_dusun" ? "Kepala Dusun" : "Ketua RT"}! Silakan login`,
         icon: "success",
-        confirmButtonText: "OK",
+        timer: 3000,
+        showConfirmButton: false,
       })
-      navigate("/pengelolaan-pbb/login")
+      navigate("/login")
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Terjadi kesalahan"
       setError(errorMessage)
@@ -93,7 +94,7 @@ export function RegistrasiPerangkatDesa() {
             </form>
 
             <div className="mt-3 text-center">
-              <Link to="/pengelolaan-pbb/login">Sudah punya akun? Login</Link>
+              <Link to="/login">Sudah punya akun? Login</Link>
             </div>
           </div>
         </div>
