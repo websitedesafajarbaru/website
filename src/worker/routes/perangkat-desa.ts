@@ -31,7 +31,7 @@ perangkatDesaRoutes.post("/", async (c) => {
       }
     }
 
-    const existingUser = await c.env.DB.prepare("SELECT id FROM pengguna WHERE username = ?").bind(username).first()
+    const existingUser = await c.env.DB.prepare("SELECT id FROM pengguna WHERE LOWER(username) = ?").bind(username.toLowerCase()).first()
     if (existingUser) {
       return c.json({ error: "Username sudah digunakan" }, 400)
     }
@@ -59,7 +59,7 @@ perangkatDesaRoutes.post("/", async (c) => {
       `INSERT INTO pengguna (id, nama_lengkap, username, password, roles, waktu_dibuat, waktu_diperbarui)
        VALUES (?, ?, ?, ?, ?, datetime("now"), datetime("now"))`
     )
-      .bind(newId, nama_lengkap, username, hashedPassword, jabatan)
+      .bind(newId, nama_lengkap, username.toLowerCase(), hashedPassword, jabatan)
       .run()
 
     await c.env.DB.prepare(
@@ -185,8 +185,13 @@ perangkatDesaRoutes.put("/:id", async (c) => {
     }
 
     if (username) {
+      const lowerUsername = username.toLowerCase()
+      const existingUser = await c.env.DB.prepare("SELECT id FROM pengguna WHERE LOWER(username) = ? AND id != ?").bind(lowerUsername, id).first()
+      if (existingUser) {
+        return c.json({ error: "Username sudah digunakan" }, 400)
+      }
       penggunaQuery += ", username = ?"
-      penggunaParams.push(username)
+      penggunaParams.push(lowerUsername)
     }
 
     if (password) {

@@ -14,7 +14,7 @@ authRoutes.post("/login", async (c) => {
       return c.json({ error: "Username dan password harus diisi" }, 400)
     }
 
-    const user = await c.env.DB.prepare("SELECT id, nama_lengkap, username, password, roles FROM pengguna WHERE username = ?").bind(username).first()
+    const user = await c.env.DB.prepare("SELECT id, nama_lengkap, username, password, roles FROM pengguna WHERE LOWER(username) = ?").bind(username.toLowerCase()).first()
 
     if (!user) {
       return c.json({ error: "Username atau password salah" }, 401)
@@ -87,7 +87,7 @@ authRoutes.put("/profile", authMiddleware, async (c) => {
       return c.json({ error: "Nama lengkap dan username harus diisi" }, 400)
     }
 
-    const existingUser = await c.env.DB.prepare("SELECT id FROM pengguna WHERE username = ? AND id != ?").bind(username, user.userId).first()
+    const existingUser = await c.env.DB.prepare("SELECT id FROM pengguna WHERE LOWER(username) = ? AND id != ?").bind(username.toLowerCase(), user.userId).first()
     if (existingUser) {
       return c.json({ error: "Username sudah digunakan" }, 400)
     }
@@ -99,7 +99,7 @@ authRoutes.put("/profile", authMiddleware, async (c) => {
     values.push(nama_lengkap)
 
     updates.push("username = ?")
-    values.push(username)
+    values.push(username.toLowerCase())
 
     if (password) {
       const hashedPassword = await hashPassword(password)
