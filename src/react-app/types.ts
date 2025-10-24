@@ -14,6 +14,7 @@ export interface Aduan {
   alamat_rumah?: string
   nomor_telepon?: string
   tanggapan?: Tanggapan[] | string
+  jumlah_tanggapan?: number
 }
 
 export interface Tanggapan {
