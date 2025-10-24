@@ -28,6 +28,7 @@ export function DashboardMasyarakat() {
     isi_aduan: "",
   })
   const [tanggapan, setTanggapan] = useState("")
+  const [readAduan, setReadAduan] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     fetchAduan()
@@ -72,6 +73,7 @@ export function DashboardMasyarakat() {
         setSelectedAduan(data)
         setTanggapan("")
         setActiveTab("detail")
+        setReadAduan((prev) => new Set(prev).add(id))
       }
     } catch (error) {
       console.error("Error:", error)
@@ -195,6 +197,7 @@ export function DashboardMasyarakat() {
             itemsPerPage={itemsPerPage}
             totalItems={filteredAduan.length}
             onPageChange={setCurrentPage}
+            readAduan={readAduan}
           />
         </>
       )}
