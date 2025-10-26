@@ -68,13 +68,6 @@ export function Navbar() {
                     </Link>
                   </li>
                 )}
-                {user?.roles === "admin" && (
-                  <li className="nav-item">
-                    <Link className="nav-link" to="/tracking">
-                      Tracking Data
-                    </Link>
-                  </li>
-                )}
                 <li className="nav-item dropdown">
                   <a className="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                     {user?.nama_lengkap || "User"}
