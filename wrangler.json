@@ -59,8 +59,5 @@
       "binding": "KV",
       "id": "983bddfbdbbc4415b04afdc4edc3a433"
     }
-  ],
-  "triggers": {
-    "crons": ["0 0 * * *"]
-  }
+  ]
 }

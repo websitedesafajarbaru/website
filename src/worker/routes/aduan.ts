@@ -201,15 +201,7 @@ aduanRoutes.post("/upload-image", authMiddleware, async (c) => {
     const arrayBuffer = await file.arrayBuffer()
 
     // Store in D1 as base64 to avoid binary issues
-    // Convert arrayBuffer to base64 in chunks to avoid stack overflow
-    const uint8Array = new Uint8Array(arrayBuffer)
-    let binaryString = ''
-    const chunkSize = 8192
-    for (let i = 0; i < uint8Array.length; i += chunkSize) {
-      const chunk = uint8Array.slice(i, i + chunkSize)
-      binaryString += String.fromCharCode(...chunk)
-    }
-    const base64Data = btoa(binaryString)
+    const base64Data = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)))
 
     await c.env.DB.prepare("INSERT INTO gambar_aduan (id, nama_file, tipe_file, data) VALUES (?, ?, ?, ?)").bind(imageId, file.name, file.type, base64Data).run()
 
