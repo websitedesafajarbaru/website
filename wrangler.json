@@ -4,7 +4,7 @@
  */
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "v1",
+  "name": "website-desa",
   "main": "./src/worker/index.ts",
   "compatibility_date": "2025-10-08",
   "compatibility_flags": ["nodejs_compat"],
@@ -50,14 +50,14 @@
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "production",
-      "database_id": "1c9bc36c-c0ae-43c1-80ab-7bbd34b4ad92"
+      "database_name": "website-desa",
+      "database_id": "d07e7e7a-a510-4603-9610-2df94a48d4bc"
     }
   ],
   "kv_namespaces": [
     {
       "binding": "KV",
-      "id": "983bddfbdbbc4415b04afdc4edc3a433"
+      "id": "1a9a37cc4cb74c9388a3bb8ecc9388cf"
     }
   ]
 }

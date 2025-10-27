@@ -68,13 +68,7 @@ pengelolaanPBBRoutes.post("/registrasi", async (c) => {
     const hashedPassword = await hashPassword(password)
 
     await c.env.DB.batch([
-      c.env.DB.prepare("INSERT INTO pengguna (id, nama_lengkap, username, password, roles) VALUES (?, ?, ?, ?, ?)").bind(
-        userId,
-        nama_lengkap,
-        lowerUsername,
-        hashedPassword,
-        jabatan
-      ),
+      c.env.DB.prepare("INSERT INTO pengguna (id, nama_lengkap, username, password, roles) VALUES (?, ?, ?, ?, ?)").bind(userId, nama_lengkap, lowerUsername, hashedPassword, jabatan),
       c.env.DB.prepare("INSERT INTO perangkat_desa (id, jabatan, id_dusun) VALUES (?, ?, ?)").bind(userId, jabatan, dusunId),
     ])
 
