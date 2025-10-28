@@ -73,7 +73,7 @@ export function DashboardMasyarakat() {
         setSelectedAduan(data)
         setTanggapan("")
         setActiveTab("detail")
-        setReadAduan((prev) => new Set(prev).add(id))
+        setReadAduan(prev => new Set(prev).add(id))
       }
     } catch (error) {
       console.error("Error:", error)
