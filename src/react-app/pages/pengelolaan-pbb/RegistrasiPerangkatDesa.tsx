@@ -34,8 +34,7 @@ export function RegistrasiPerangkatDesa() {
         title: "Registrasi Berhasil!",
         text: `Registrasi berhasil sebagai ${result.jabatan === "kepala_dusun" ? "Kepala Dusun" : "Ketua RT"}! Silakan login`,
         icon: "success",
-        timer: 3000,
-        showConfirmButton: false,
+        confirmButtonText: "OK",
       })
       navigate("/login")
     } catch (err) {
