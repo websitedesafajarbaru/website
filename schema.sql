@@ -20,8 +20,6 @@ CREATE TABLE masyarakat (
     id TEXT PRIMARY KEY,
     alamat_rumah TEXT NOT NULL,
     nomor_telepon TEXT NOT NULL,
-    email TEXT,
-    status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'banned')),
     waktu_dibuat TEXT DEFAULT (datetime('now')),
     waktu_diperbarui TEXT DEFAULT (datetime('now')),
     FOREIGN KEY (id) REFERENCES pengguna(id) ON DELETE CASCADE
