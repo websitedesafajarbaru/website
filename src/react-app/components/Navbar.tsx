@@ -37,10 +37,39 @@ export function Navbar() {
             </li>
             {!isAuthenticated ? (
               <>
-                <li className="nav-item">
-                  <Link className="nav-link" to="/login">
-                    Login
-                  </Link>
+                <li className="nav-item dropdown">
+                  <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                    Pengaduan
+                  </a>
+                  <ul className="dropdown-menu dropdown-menu-end">
+                    <li>
+                      <Link className="dropdown-item" to="/pengaduan-masyarakat/login">
+                        Login
+                      </Link>
+                    </li>
+                    <li>
+                      <Link className="dropdown-item" to="/pengaduan-masyarakat/registrasi">
+                        Registrasi
+                      </Link>
+                    </li>
+                  </ul>
+                </li>
+                <li className="nav-item dropdown">
+                  <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                    PBB
+                  </a>
+                  <ul className="dropdown-menu dropdown-menu-end">
+                    <li>
+                      <Link className="dropdown-item" to="/pengelolaan-pbb/login">
+                        Login
+                      </Link>
+                    </li>
+                    <li>
+                      <Link className="dropdown-item" to="/pengelolaan-pbb/registrasi">
+                        Registrasi
+                      </Link>
+                    </li>
+                  </ul>
                 </li>
               </>
             ) : (
@@ -68,11 +97,6 @@ export function Navbar() {
                     </Link>
                   </li>
                 )}
-                <li className="nav-item">
-                  <Link className="nav-link" to="/settings">
-                    Pengaturan
-                  </Link>
-                </li>
                 <li className="nav-item">
                   <button className="nav-link" onClick={handleLogout}>
                     Logout

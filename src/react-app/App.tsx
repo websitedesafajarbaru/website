@@ -3,17 +3,16 @@ import { AuthProvider } from "./contexts/AuthContext"
 import { Layout } from "./components/Layout"
 import { ProtectedRoute } from "./components/ProtectedRoute"
 import { LandingPage } from "./pages/LandingPage"
-import { Login } from "./pages/Login"
-import { ForgotPassword } from "./pages/ForgotPassword"
 import { CekPembayaran } from "./pages/CekPembayaran"
 import { RegistrasiMasyarakat } from "./pages/pengaduan-masyarakat/RegistrasiMasyarakat"
+import { LoginPengaduan } from "./pages/pengaduan-masyarakat/LoginPengaduan"
 import { DashboardMasyarakat } from "./pages/pengaduan-masyarakat/DashboardMasyarakat"
 import { DashboardAdminPengaduan } from "./pages/pengaduan-masyarakat/DashboardAdminPengaduan"
 import { RegistrasiPerangkatDesa } from "./pages/pengelolaan-pbb/RegistrasiPerangkatDesa"
+import { LoginPBB } from "./pages/pengelolaan-pbb/LoginPBB"
 import { DashboardAdminPBB } from "./pages/pengelolaan-pbb/DashboardAdminPBB"
 import { DashboardKepalaDusun } from "./pages/pengelolaan-pbb/DashboardKepalaDusun"
 import { DashboardKetuaRT } from "./pages/pengelolaan-pbb/DashboardKetuaRT"
-import { Settings } from "./pages/Settings"
 
 function App() {
   return (
@@ -22,11 +21,10 @@ function App() {
         <Routes>
           <Route element={<Layout />}>
             <Route path="/" element={<LandingPage />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/lupa-password" element={<ForgotPassword />} />
             <Route path="/cek-pembayaran" element={<CekPembayaran />} />
 
             <Route path="/pengaduan-masyarakat/registrasi" element={<RegistrasiMasyarakat />} />
+            <Route path="/pengaduan-masyarakat/login" element={<LoginPengaduan />} />
             <Route
               path="/pengaduan-masyarakat/dashboard-masyarakat"
               element={
@@ -45,6 +43,7 @@ function App() {
             />
 
             <Route path="/pengelolaan-pbb/registrasi" element={<RegistrasiPerangkatDesa />} />
+            <Route path="/pengelolaan-pbb/login" element={<LoginPBB />} />
             <Route
               path="/pengelolaan-pbb/dashboard-admin"
               element={
@@ -66,14 +65,6 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={["ketua_rt"]}>
                   <DashboardKetuaRT />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/settings"
-              element={
-                <ProtectedRoute allowedRoles={["admin", "kepala_dusun", "ketua_rt", "masyarakat"]}>
-                  <Settings />
                 </ProtectedRoute>
               }
             />
