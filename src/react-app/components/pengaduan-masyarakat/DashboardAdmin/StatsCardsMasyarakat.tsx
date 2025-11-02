@@ -1,4 +1,5 @@
 import { Masyarakat } from "../../../types"
+import { User } from "lucide-react"
 
 interface StatsCardsMasyarakatProps {
   masyarakat: Masyarakat[]
@@ -15,7 +16,7 @@ export function StatsCardsMasyarakat({ masyarakat }: StatsCardsMasyarakatProps) 
                 <div className="text-muted small">Total Masyarakat</div>
                 <div className="h4 mb-0">{masyarakat.length}</div>
               </div>
-              <i className="bi bi-people text-primary" style={{ fontSize: "2rem" }}></i>
+              <User className="text-primary" style={{ fontSize: "2rem" }} />
             </div>
           </div>
         </div>

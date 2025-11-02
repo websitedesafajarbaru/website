@@ -1,5 +1,6 @@
 import { SuratPBB } from "../../types"
 import { formatStatusPembayaran, getStatusPembayaranColor } from "../../utils/formatters"
+import { Package, Eye } from "lucide-react"
 
 interface TabelSuratPBBProps {
   suratPBB: SuratPBB[]
@@ -28,9 +29,12 @@ export function TabelSuratPBB({ suratPBB, searchTerm, onSearchChange, onSuratCli
         <input type="text" className="form-control" placeholder="Cari surat PBB..." value={searchTerm} onChange={(e) => onSearchChange(e.target.value)} />
       </div>
       {filteredSuratPBB.length === 0 ? (
-        <div className="p-4 text-center text-muted">
-          <i className="bi bi-inbox" style={{ fontSize: "3rem", opacity: 0.3 }}></i>
-          <p className="mt-2 mb-0">{searchTerm ? "Tidak ada surat PBB yang cocok dengan pencarian" : "Belum ada surat PBB yang terdaftar"}</p>
+        <div className="card">
+          <div className="card-body text-center py-5">
+            <Package style={{ fontSize: "3rem", color: "#ccc" }} />
+            <h4 className="mt-3">{searchTerm ? "Tidak Ada Surat PBB" : "Belum Ada Surat PBB"}</h4>
+            <p className="text-muted">{searchTerm ? "Tidak ada surat PBB yang cocok dengan pencarian" : "Belum ada surat PBB yang terdaftar"}</p>
+          </div>
         </div>
       ) : (
         <div className="table-responsive mx-auto" style={{ maxHeight: "500px", overflowY: "auto", maxWidth: "100%" }}>
@@ -59,7 +63,8 @@ export function TabelSuratPBB({ suratPBB, searchTerm, onSearchChange, onSuratCli
                   </td>
                   <td>
                     <button className="btn btn-sm btn-outline-primary" onClick={() => onSuratClick(s)}>
-                      <i className="bi bi-eye me-1"></i>Detail
+                      <Eye className="me-1" />
+                      Detail
                     </button>
                   </td>
                 </tr>

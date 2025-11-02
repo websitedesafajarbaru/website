@@ -4,15 +4,12 @@ import timezone from "dayjs/plugin/timezone"
 import localizedFormat from "dayjs/plugin/localizedFormat"
 import "dayjs/locale/id"
 
-// Extend dayjs with necessary plugins
 dayjs.extend(utc)
 dayjs.extend(timezone)
 dayjs.extend(localizedFormat)
 
-// Set default timezone helper (Asia/Jakarta)
 const WIB_TZ = "Asia/Jakarta"
 
-// Map for fallback English -> Indonesian day/month names (if needed)
 const DAY_MAP: Record<string, string> = {
   monday: "Senin",
   tuesday: "Selasa",
@@ -52,7 +49,6 @@ export function formatToWIB(input?: string | number | Date | null): string {
   const d = dayjs.utc(input)
   if (!d.isValid()) return "-"
 
-  // ensure locale is Indonesian for day/month names
   const formatted = d.tz(WIB_TZ).locale("id").format("dddd, D MMMM YYYY HH:mm")
   return `${capitalizeFirst(formatted)} WIB`
 }

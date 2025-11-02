@@ -76,7 +76,7 @@ export function DashboardKetuaRT() {
 
         if (response.ok && perangkat.id_dusun) {
           setDusunId(perangkat.id_dusun)
-          await fetchSuratPBB() // Fetch surat after dusunId is set
+          await fetchSuratPBB()
         }
       } catch (err) {
         console.error(err)

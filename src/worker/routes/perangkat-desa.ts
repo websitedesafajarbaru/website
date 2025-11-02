@@ -44,7 +44,6 @@ perangkatDesaRoutes.post("/", async (c) => {
     if (jabatan === "kepala_dusun") {
       const existingKepalaDusun = await c.env.DB.prepare("SELECT id FROM perangkat_desa WHERE id_dusun = ? AND jabatan = 'kepala_dusun'").bind(id_dusun).first()
       if (existingKepalaDusun) {
-        // Demote existing kepala_dusun to ketua_rt
         await c.env.DB.batch([
           c.env.DB.prepare("UPDATE pengguna SET roles = 'ketua_rt', waktu_diperbarui = datetime('now') WHERE id = ?").bind(existingKepalaDusun.id),
           c.env.DB.prepare("UPDATE perangkat_desa SET jabatan = 'ketua_rt', waktu_diperbarui = datetime('now') WHERE id = ?").bind(existingKepalaDusun.id),
@@ -170,7 +169,6 @@ perangkatDesaRoutes.put("/:id", async (c) => {
     if (jabatan === "kepala_dusun") {
       const existingKepalaDusun = await c.env.DB.prepare("SELECT id FROM perangkat_desa WHERE id_dusun = ? AND jabatan = 'kepala_dusun' AND id != ?").bind(id_dusun, id).first()
       if (existingKepalaDusun) {
-        // Demote existing kepala_dusun to ketua_rt
         await c.env.DB.batch([
           c.env.DB.prepare("UPDATE pengguna SET roles = 'ketua_rt', waktu_diperbarui = datetime('now') WHERE id = ?").bind(existingKepalaDusun.id),
           c.env.DB.prepare("UPDATE perangkat_desa SET jabatan = 'ketua_rt', waktu_diperbarui = datetime('now') WHERE id = ?").bind(existingKepalaDusun.id),

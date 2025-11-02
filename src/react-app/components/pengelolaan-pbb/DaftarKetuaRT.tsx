@@ -1,3 +1,5 @@
+import { Box, Pencil, Trash2 } from "lucide-react"
+
 interface PerangkatDesa {
   id: string
   nama_lengkap: string
@@ -37,9 +39,12 @@ export function DaftarKetuaRT({ ketuaRT, searchTerm, onSearchChange, onEdit, onD
         <input type="text" className="form-control" placeholder="Cari ketua RT..." value={searchTerm} onChange={(e) => onSearchChange(e.target.value)} />
       </div>
       {filteredKetuaRT.length === 0 ? (
-        <div className="p-4 text-center text-muted">
-          <i className="bi bi-inbox" style={{ fontSize: "3rem", opacity: 0.3 }}></i>
-          <p className="mt-2 mb-0">{searchTerm ? "Tidak ada ketua RT yang cocok dengan pencarian" : "Belum ada ketua RT yang terdaftar"}</p>
+        <div className="card">
+          <div className="card-body text-center py-5">
+            <Box size={64} className="text-muted mb-3" />
+            <h4 className="mt-3">{searchTerm ? "Tidak Ada Ketua RT" : "Belum Ada Ketua RT"}</h4>
+            <p className="text-muted">{searchTerm ? "Tidak ada ketua RT yang cocok dengan pencarian" : "Belum ada ketua RT yang terdaftar"}</p>
+          </div>
         </div>
       ) : (
         <div className="table-responsive mx-auto" style={{ maxHeight: "500px", overflowY: "auto", maxWidth: "100%" }}>
@@ -62,10 +67,10 @@ export function DaftarKetuaRT({ ketuaRT, searchTerm, onSearchChange, onEdit, onD
                   </td>
                   <td>
                     <button className="btn btn-sm btn-outline-primary me-2" onClick={() => onEdit(k)} title="Edit">
-                      <i className="bi bi-pencil"></i>
+                      <Pencil size={16} />
                     </button>
                     <button className="btn btn-sm btn-outline-danger" onClick={() => onDelete(k)} title="Hapus">
-                      <i className="bi bi-trash"></i>
+                      <Trash2 size={16} />
                     </button>
                   </td>
                 </tr>

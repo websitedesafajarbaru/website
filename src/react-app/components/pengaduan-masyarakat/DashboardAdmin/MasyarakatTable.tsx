@@ -1,27 +1,19 @@
-import { Masyarakat } from "../../types"
+import { Masyarakat } from "../../../types"
 import { formatToWIB } from "../../../utils/time"
+import { Box, Pencil, X, Check } from "lucide-react"
 
 interface MasyarakatTableProps {
   masyarakat: Masyarakat[]
   loading: boolean
   onEdit: (masyarakat: Masyarakat) => void
-  onDelete: (id: string) => void
+  onToggleBan: (id: string, currentStatus: string) => void
   currentPage: number
   itemsPerPage: number
   totalItems: number
   onPageChange: (page: number) => void
 }
 
-export function MasyarakatTable({
-  masyarakat,
-  loading,
-  onEdit,
-  onDelete,
-  currentPage,
-  itemsPerPage,
-  totalItems,
-  onPageChange,
-}: MasyarakatTableProps) {
+export function MasyarakatTable({ masyarakat, loading, onEdit, onToggleBan, currentPage, itemsPerPage, totalItems, onPageChange }: MasyarakatTableProps) {
   const paginatedMasyarakat = masyarakat.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
   const totalPages = Math.ceil(totalItems / itemsPerPage)
 
@@ -39,7 +31,7 @@ export function MasyarakatTable({
   const renderEmptyState = () => (
     <div className="card">
       <div className="card-body text-center py-5">
-        <i className="bi bi-inbox" style={{ fontSize: "3rem", color: "#ccc" }}></i>
+        <Box size={64} className="text-muted mb-3" />
         <h4 className="mt-3">Tidak Ada Masyarakat</h4>
         <p className="text-muted">Belum ada data masyarakat yang terdaftar</p>
       </div>
@@ -51,12 +43,13 @@ export function MasyarakatTable({
       <table className="table table-hover">
         <thead className="table-light" style={{ position: "sticky", top: 0, zIndex: 1 }}>
           <tr>
-            <th style={{ width: "20%" }}>Nama Lengkap</th>
-            <th style={{ width: "15%" }}>Username</th>
-            <th style={{ width: "25%" }}>Alamat Rumah</th>
-            <th style={{ width: "15%" }}>No. Telepon</th>
-            <th style={{ width: "15%" }}>Tanggal Dibuat</th>
-            <th style={{ width: "10%" }}>Aksi</th>
+            <th style={{ width: "18%" }}>Nama Lengkap</th>
+            <th style={{ width: "13%" }}>Username</th>
+            <th style={{ width: "20%" }}>Alamat Rumah</th>
+            <th style={{ width: "13%" }}>No. Telepon</th>
+            <th style={{ width: "12%" }}>Status</th>
+            <th style={{ width: "12%" }}>Tanggal Dibuat</th>
+            <th style={{ width: "12%" }}>Aksi</th>
           </tr>
         </thead>
         <tbody>
@@ -66,14 +59,18 @@ export function MasyarakatTable({
               <td>{item.username}</td>
               <td>{item.alamat_rumah}</td>
               <td>{item.nomor_telepon}</td>
+              <td>
+                <span className={`badge ${item.status === "active" ? "bg-success" : "bg-danger"}`}>{item.status === "active" ? "Aktif" : "Diblokir"}</span>
+              </td>
               <td>{formatToWIB(item.waktu_dibuat)}</td>
               <td>
                 <div className="action-buttons d-flex justify-content-center gap-2">
                   <button className="btn btn-sm btn-outline-primary" onClick={() => onEdit(item)}>
-                    <i className="bi bi-pencil"></i>
+                    <Pencil size={16} />
                   </button>
-                  <button className="btn btn-sm btn-outline-danger" onClick={() => onDelete(item.id)}>
-                    <i className="bi bi-trash"></i>
+                  <button className={`btn btn-sm ${item.status === "active" ? "btn-outline-warning" : "btn-outline-success"}`} onClick={() => onToggleBan(item.id, item.status)}>
+                    {item.status === "active" ? <X size={16} /> : <Check size={16} />}
+                    {item.status === "active" ? "Ban" : "Unban"}
                   </button>
                 </div>
               </td>

@@ -52,7 +52,6 @@ export async function apiRequest<T = unknown>(url: string, options: RequestInit 
   }
 }
 
-// Convenience methods
 export const api = {
   get: <T = unknown>(url: string, logout?: () => void) => apiRequest<T>(url, { method: "GET" }, logout),
 

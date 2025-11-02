@@ -1,4 +1,5 @@
 import React from "react"
+import { ArrowLeft, Save } from "lucide-react"
 
 interface FormTambahSuratPBBProps {
   suratForm: {
@@ -27,7 +28,8 @@ export function FormTambahSuratPBB({ suratForm, onFormChange, onSubmit, onCancel
       <div className="card-header d-flex justify-content-between align-items-center">
         <h6 className="mb-0">Tambah Surat PBB Baru</h6>
         <button className="btn btn-sm btn-secondary" onClick={onCancel}>
-          <i className="bi bi-arrow-left me-1"></i>Kembali ke Daftar
+          <ArrowLeft className="me-1" />
+          Kembali ke Daftar
         </button>
       </div>
       <div className="card-body">
@@ -129,7 +131,8 @@ export function FormTambahSuratPBB({ suratForm, onFormChange, onSubmit, onCancel
           </div>
           <div className="d-flex gap-2 mt-4">
             <button type="submit" className="btn btn-primary">
-              <i className="bi bi-save me-1"></i>Simpan
+              <Save className="me-1" />
+              Simpan
             </button>
             <button type="button" className="btn btn-secondary" onClick={onCancel}>
               Batal

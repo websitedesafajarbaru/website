@@ -15,7 +15,7 @@ masyarakatRoutes.get("/", authMiddleware, async (c) => {
     }
 
     const masyarakat = await c.env.DB.prepare(
-      "SELECT p.id, p.nama_lengkap, p.username, p.roles, p.waktu_dibuat, p.waktu_diperbarui, m.alamat_rumah, m.nomor_telepon FROM pengguna p JOIN masyarakat m ON p.id = m.id ORDER BY p.waktu_dibuat DESC"
+      "SELECT p.id, p.nama_lengkap, p.username, p.roles, p.waktu_dibuat, p.waktu_diperbarui, m.alamat_rumah, m.nomor_telepon, m.email, m.status FROM pengguna p JOIN masyarakat m ON p.id = m.id ORDER BY p.waktu_dibuat DESC"
     ).all()
 
     return c.json(masyarakat.results)
@@ -56,7 +56,7 @@ masyarakatRoutes.post("/", authMiddleware, async (c) => {
         hashedPassword,
         "masyarakat"
       ),
-      c.env.DB.prepare("INSERT INTO masyarakat (id, alamat_rumah, nomor_telepon) VALUES (?, ?, ?)").bind(userId, alamat_rumah, nomor_telepon),
+      c.env.DB.prepare("INSERT INTO masyarakat (id, alamat_rumah, nomor_telepon, email) VALUES (?, ?, ?, ?)").bind(userId, alamat_rumah, nomor_telepon, email),
     ])
 
     return c.json(
@@ -81,13 +81,12 @@ masyarakatRoutes.put("/:id", authMiddleware, async (c) => {
     }
 
     const masyarakatId = c.req.param("id")
-    const { nama_lengkap, username, nomor_telepon, alamat_rumah, password } = await c.req.json()
+    const { nama_lengkap, username, nomor_telepon, alamat_rumah, password, email } = await c.req.json()
 
     if (!nama_lengkap || !username || !nomor_telepon || !alamat_rumah) {
       return c.json({ error: "Nama lengkap, username, nomor telepon, dan alamat rumah harus diisi" }, 400)
     }
 
-    // Check if username is taken by another user
     const existingUser = await c.env.DB.prepare("SELECT id FROM pengguna WHERE username = ? AND id != ?").bind(username, masyarakatId).first()
 
     if (existingUser) {
@@ -112,10 +111,12 @@ masyarakatRoutes.put("/:id", authMiddleware, async (c) => {
     updates.push('waktu_diperbarui = datetime("now")')
     values.push(masyarakatId)
 
-    await c.env.DB.prepare(`UPDATE pengguna SET ${updates.join(", ")} WHERE id = ?`).bind(...values).run()
+    await c.env.DB.prepare(`UPDATE pengguna SET ${updates.join(", ")} WHERE id = ?`)
+      .bind(...values)
+      .run()
 
-    await c.env.DB.prepare('UPDATE masyarakat SET alamat_rumah = ?, nomor_telepon = ?, waktu_diperbarui = datetime("now") WHERE id = ?')
-      .bind(alamat_rumah, nomor_telepon, masyarakatId)
+    await c.env.DB.prepare('UPDATE masyarakat SET alamat_rumah = ?, nomor_telepon = ?, email = ?, waktu_diperbarui = datetime("now") WHERE id = ?')
+      .bind(alamat_rumah, nomor_telepon, email, masyarakatId)
       .run()
 
     return c.json({ message: "Masyarakat berhasil diperbarui" })
@@ -125,28 +126,29 @@ masyarakatRoutes.put("/:id", authMiddleware, async (c) => {
   }
 })
 
-masyarakatRoutes.delete("/:id", authMiddleware, async (c) => {
+masyarakatRoutes.put("/:id/ban", authMiddleware, async (c) => {
   try {
     const user = c.get("user") as JWTPayload
 
     if (user.roles !== "admin") {
-      return c.json({ error: "Hanya admin yang dapat menghapus masyarakat" }, 403)
+      return c.json({ error: "Hanya admin yang dapat mengubah status masyarakat" }, 403)
     }
 
     const masyarakatId = c.req.param("id")
+    const currentMasyarakat = await c.env.DB.prepare("SELECT status FROM masyarakat WHERE id = ?").bind(masyarakatId).first()
 
-    // Check if masyarakat exists
-    const existingMasyarakat = await c.env.DB.prepare("SELECT id FROM masyarakat WHERE id = ?").bind(masyarakatId).first()
-
-    if (!existingMasyarakat) {
+    if (!currentMasyarakat) {
       return c.json({ error: "Masyarakat tidak ditemukan" }, 404)
     }
 
-    // Delete from masyarakat first (due to foreign key)
-    await c.env.DB.prepare("DELETE FROM masyarakat WHERE id = ?").bind(masyarakatId).run()
-    await c.env.DB.prepare("DELETE FROM pengguna WHERE id = ?").bind(masyarakatId).run()
+    const newStatus = currentMasyarakat.status === "active" ? "banned" : "active"
 
-    return c.json({ message: "Masyarakat berhasil dihapus" })
+    await c.env.DB.prepare('UPDATE masyarakat SET status = ?, waktu_diperbarui = datetime("now") WHERE id = ?').bind(newStatus, masyarakatId).run()
+
+    return c.json({
+      message: `Masyarakat berhasil di${newStatus === "banned" ? "banned" : "unbanned"}`,
+      status: newStatus,
+    })
   } catch (error) {
     console.error(error)
     return c.json({ error: "Terjadi kesalahan server" }, 500)

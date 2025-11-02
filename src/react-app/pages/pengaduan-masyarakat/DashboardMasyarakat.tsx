@@ -4,6 +4,7 @@ import { CreateAduanForm } from "../../components/pengaduan-masyarakat/Dashboard
 import { DashboardHeader } from "../../components/pengaduan-masyarakat/DashboardHeader"
 import { AduanDetail } from "../../components/pengaduan-masyarakat/AduanDetail"
 import { AduanTable } from "../../components/pengaduan-masyarakat/AduanTable"
+import { FilterSection } from "../../components/pengaduan-masyarakat/DashboardAdmin"
 
 declare global {
   interface Window {
@@ -26,6 +27,7 @@ export function DashboardMasyarakat() {
     kategori: "",
     isi_aduan: "",
   })
+  const [tanggapan, setTanggapan] = useState("")
 
   useEffect(() => {
     fetchAduan()
@@ -68,6 +70,7 @@ export function DashboardMasyarakat() {
       if (response.ok) {
         const data = await response.json()
         setSelectedAduan(data)
+        setTanggapan("")
         setActiveTab("detail")
       }
     } catch (error) {
@@ -126,6 +129,46 @@ export function DashboardMasyarakat() {
       item.isi?.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
+  const submitTanggapan = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!selectedAduan) return
+
+    try {
+      const token = localStorage.getItem("token")
+      const response = await fetch(`/api/aduan/${selectedAduan.id}/tanggapan`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ isi_tanggapan: tanggapan }),
+      })
+
+      if (response.ok) {
+        window.Swal.fire({
+          icon: "success",
+          title: "Berhasil!",
+          text: "Balasan berhasil dikirim",
+        })
+        setTanggapan("")
+        fetchDetail(selectedAduan.id)
+      } else {
+        window.Swal.fire({
+          icon: "error",
+          title: "Gagal!",
+          text: "Gagal mengirim balasan",
+        })
+      }
+    } catch (error) {
+      console.error("Error:", error)
+      window.Swal.fire({
+        icon: "error",
+        title: "Gagal!",
+        text: "Terjadi kesalahan saat mengirim balasan",
+      })
+    }
+  }
+
   return (
     <div className="container-fluid p-4">
       <DashboardHeader role="masyarakat" />
@@ -141,13 +184,12 @@ export function DashboardMasyarakat() {
             </div>
           </div>
 
+          <FilterSection statusFilter="" onStatusFilterChange={() => {}} onRefresh={fetchAduan} searchTerm={searchTerm} onSearchChange={setSearchTerm} showStatusFilter={false} />
+
           <AduanTable
             aduan={filteredAduan}
             loading={loading}
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
             onViewDetail={fetchDetail}
-            onRefresh={fetchAduan}
             role="masyarakat"
             currentPage={currentPage}
             itemsPerPage={itemsPerPage}
@@ -180,7 +222,7 @@ export function DashboardMasyarakat() {
             </button>
           </div>
           <div className="card-body">
-            <AduanDetail aduan={selectedAduan} />
+            <AduanDetail aduan={selectedAduan} tanggapan={tanggapan} setTanggapan={setTanggapan} onSubmitTanggapan={submitTanggapan} />
           </div>
         </div>
       )}

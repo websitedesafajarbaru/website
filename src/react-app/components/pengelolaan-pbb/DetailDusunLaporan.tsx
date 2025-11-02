@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"
 import { SuratPBB } from "../../types"
 import { formatStatusPembayaran, getStatusPembayaranColor } from "../../utils/formatters"
 import { formatToWIB } from "../../utils/time"
+import { Calendar, BarChart3, ChevronUp, ChevronDown, DollarSign, CheckCircle, FileText, Target, ArrowLeft, Eye, Square, Triangle, Box } from "lucide-react"
 
 interface DusunStatistik {
   dusun: {
@@ -110,7 +111,8 @@ export function DetailDusunLaporan({ dusunId, token, onBack }: DetailDusunLapora
         </div>
         <div className="text-end">
           <div className="badge bg-primary fs-6">
-            <i className="bi bi-calendar me-1"></i>Tahun {statistik.active_year || new Date().getFullYear()}
+            <Calendar className="me-1" />
+            Tahun {statistik.active_year || new Date().getFullYear()}
           </div>
           <div className="small text-muted mt-1">Data yang ditampilkan untuk tahun {statistik.active_year || new Date().getFullYear()}</div>
         </div>
@@ -119,9 +121,10 @@ export function DetailDusunLaporan({ dusunId, token, onBack }: DetailDusunLapora
         <div className="card-header" style={{ cursor: "pointer" }} onClick={() => setShowStatistics(!showStatistics)}>
           <div className="d-flex justify-content-between align-items-center">
             <h6 className="mb-0">
-              <i className="bi bi-bar-chart me-2"></i>Statistik PBB
+              <BarChart3 className="me-2" />
+              Statistik PBB
             </h6>
-            <i className={`bi bi-chevron-${showStatistics ? "up" : "down"}`}></i>
+            {showStatistics ? <ChevronUp /> : <ChevronDown />}
           </div>
         </div>
         {showStatistics && (
@@ -135,7 +138,7 @@ export function DetailDusunLaporan({ dusunId, token, onBack }: DetailDusunLapora
                         <div className="text-muted small mb-1">Total Pajak Terhutang</div>
                         <div className="h4 mb-0 text-primary">Rp {statistik.total_pajak_terhutang.toLocaleString("id-ID")}</div>
                       </div>
-                      <i className="bi bi-wallet2 text-primary" style={{ fontSize: "2.5rem", opacity: 0.3 }}></i>
+                      <DollarSign style={{ fontSize: "2.5rem", opacity: 0.3 }} />
                     </div>
                   </div>
                 </div>
@@ -149,7 +152,7 @@ export function DetailDusunLaporan({ dusunId, token, onBack }: DetailDusunLapora
                         <div className="text-muted small mb-1">Total Pajak Terbayar</div>
                         <div className="h4 mb-0 text-success">Rp {statistik.total_pajak_dibayar.toLocaleString("id-ID")}</div>
                       </div>
-                      <i className="bi bi-check-circle text-success" style={{ fontSize: "2.5rem", opacity: 0.3 }}></i>
+                      <CheckCircle style={{ fontSize: "2.5rem", opacity: 0.3 }} />
                     </div>
                   </div>
                 </div>
@@ -163,7 +166,7 @@ export function DetailDusunLaporan({ dusunId, token, onBack }: DetailDusunLapora
                         <div className="text-muted small mb-1">Persentase Pembayaran</div>
                         <div className="h4 mb-0 text-info">{statistik.persentase_pembayaran.toFixed(1)}%</div>
                       </div>
-                      <i className="bi bi-percent text-info" style={{ fontSize: "2.5rem", opacity: 0.3 }}></i>
+                      <Target style={{ fontSize: "2.5rem", opacity: 0.3 }} />
                     </div>
                   </div>
                 </div>
@@ -177,7 +180,7 @@ export function DetailDusunLaporan({ dusunId, token, onBack }: DetailDusunLapora
                         <div className="text-muted small mb-1">Total Surat</div>
                         <div className="h4 mb-0 text-secondary">{statistik.total_surat}</div>
                       </div>
-                      <i className="bi bi-file-text text-secondary" style={{ fontSize: "2.5rem", opacity: 0.3 }}></i>
+                      <FileText style={{ fontSize: "2.5rem", opacity: 0.3 }} />
                     </div>
                   </div>
                 </div>
@@ -191,7 +194,7 @@ export function DetailDusunLaporan({ dusunId, token, onBack }: DetailDusunLapora
                         <div className="text-muted small mb-1">Surat Sudah Dibayar</div>
                         <div className="h4 mb-0 text-success">{statistik.total_surat_dibayar}</div>
                       </div>
-                      <i className="bi bi-check2-square text-success" style={{ fontSize: "2.5rem", opacity: 0.3 }}></i>
+                      <Square style={{ fontSize: "2.5rem", opacity: 0.3 }} />
                     </div>
                   </div>
                 </div>
@@ -205,7 +208,7 @@ export function DetailDusunLaporan({ dusunId, token, onBack }: DetailDusunLapora
                         <div className="text-muted small mb-1">Surat Belum Dibayar</div>
                         <div className="h4 mb-0 text-warning">{statistik.total_surat_belum_bayar}</div>
                       </div>
-                      <i className="bi bi-exclamation-square text-warning" style={{ fontSize: "2.5rem", opacity: 0.3 }}></i>
+                      <Triangle style={{ fontSize: "2.5rem", opacity: 0.3 }} />
                     </div>
                   </div>
                 </div>
@@ -220,11 +223,13 @@ export function DetailDusunLaporan({ dusunId, token, onBack }: DetailDusunLapora
           <div className="card mb-3">
             <div className="card-header d-flex justify-content-between align-items-center">
               <h6 className="mb-0">
-                <i className="bi bi-file-text me-2"></i>Daftar Surat PBB
+                <FileText className="me-2" />
+                Daftar Surat PBB
               </h6>
               {onBack && (
                 <button className="btn btn-sm btn-secondary" onClick={onBack}>
-                  <i className="bi bi-arrow-left me-1"></i>Kembali ke Laporan
+                  <ArrowLeft className="me-1" />
+                  Kembali ke Laporan
                 </button>
               )}
             </div>
@@ -234,7 +239,7 @@ export function DetailDusunLaporan({ dusunId, token, onBack }: DetailDusunLapora
           </div>
           {filteredSuratPBB.length === 0 ? (
             <div className="p-4 text-center text-muted">
-              <i className="bi bi-inbox" style={{ fontSize: "3rem", opacity: 0.3 }}></i>
+              <Box size={64} className="text-muted mb-3" />
               <p className="mt-2 mb-0">{searchTerm ? "Tidak ada surat PBB yang cocok dengan pencarian" : "Belum ada surat PBB yang terdaftar"}</p>
             </div>
           ) : (
@@ -264,7 +269,8 @@ export function DetailDusunLaporan({ dusunId, token, onBack }: DetailDusunLapora
                       </td>
                       <td>
                         <button className="btn btn-sm btn-outline-primary" onClick={() => handleSuratClick(surat)}>
-                          <i className="bi bi-eye me-1"></i>Detail
+                          <Eye className="me-1" />
+                          Detail
                         </button>
                       </td>
                     </tr>
@@ -281,7 +287,8 @@ export function DetailDusunLaporan({ dusunId, token, onBack }: DetailDusunLapora
           <div className="card-header d-flex justify-content-between align-items-center">
             <h6 className="mb-0">Detail Surat PBB - {selectedSurat.nomor_objek_pajak}</h6>
             <button className="btn btn-sm btn-secondary" onClick={() => setSelectedSurat(null)}>
-              <i className="bi bi-arrow-left me-1"></i>Kembali ke Daftar
+              <ArrowLeft className="me-1" />
+              Kembali ke Daftar
             </button>
           </div>
           <div className="card-body">

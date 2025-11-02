@@ -1,3 +1,5 @@
+import { BarChart3, ChevronUp, ChevronDown, CheckCircle, Target, FileText, Square, Triangle } from "lucide-react"
+
 interface StatistikData {
   totalPajakTerhutang: number
   totalPajakDibayar: number
@@ -19,9 +21,10 @@ export function StatistikCards({ data, showStatistics, onToggle }: StatistikCard
       <div className="card-header" style={{ cursor: "pointer" }} onClick={onToggle}>
         <div className="d-flex justify-content-between align-items-center">
           <h6 className="mb-0">
-            <i className="bi bi-bar-chart me-2"></i>Statistik PBB
+            <BarChart3 className="me-2" />
+            Statistik PBB
           </h6>
-          <i className={`bi bi-chevron-${showStatistics ? "up" : "down"}`}></i>
+          {showStatistics ? <ChevronUp /> : <ChevronDown />}
         </div>
       </div>
       {showStatistics && (
@@ -35,7 +38,7 @@ export function StatistikCards({ data, showStatistics, onToggle }: StatistikCard
                       <div className="text-muted small mb-1">Total Pajak Terhutang</div>
                       <div className="h4 mb-0 text-primary">Rp {data.totalPajakTerhutang.toLocaleString("id-ID")}</div>
                     </div>
-                    <i className="bi bi-wallet2 text-primary" style={{ fontSize: "2.5rem", opacity: 0.3 }}></i>
+                    <BarChart3 style={{ fontSize: "2.5rem", opacity: 0.3 }} />
                   </div>
                 </div>
               </div>
@@ -49,7 +52,7 @@ export function StatistikCards({ data, showStatistics, onToggle }: StatistikCard
                       <div className="text-muted small mb-1">Total Pajak Terbayar</div>
                       <div className="h4 mb-0 text-success">Rp {data.totalPajakDibayar.toLocaleString("id-ID")}</div>
                     </div>
-                    <i className="bi bi-check-circle text-success" style={{ fontSize: "2.5rem", opacity: 0.3 }}></i>
+                    <CheckCircle style={{ fontSize: "2.5rem", opacity: 0.3 }} />
                   </div>
                 </div>
               </div>
@@ -63,7 +66,7 @@ export function StatistikCards({ data, showStatistics, onToggle }: StatistikCard
                       <div className="text-muted small mb-1">Persentase Pembayaran</div>
                       <div className="h4 mb-0 text-info">{data.persentasePembayaran.toFixed(1)}%</div>
                     </div>
-                    <i className="bi bi-percent text-info" style={{ fontSize: "2.5rem", opacity: 0.3 }}></i>
+                    <Target style={{ fontSize: "2.5rem", opacity: 0.3 }} />
                   </div>
                 </div>
               </div>
@@ -77,7 +80,7 @@ export function StatistikCards({ data, showStatistics, onToggle }: StatistikCard
                       <div className="text-muted small mb-1">Total Surat</div>
                       <div className="h4 mb-0 text-secondary">{data.totalSurat}</div>
                     </div>
-                    <i className="bi bi-file-text text-secondary" style={{ fontSize: "2.5rem", opacity: 0.3 }}></i>
+                    <FileText style={{ fontSize: "2.5rem", opacity: 0.3 }} />
                   </div>
                 </div>
               </div>
@@ -91,7 +94,7 @@ export function StatistikCards({ data, showStatistics, onToggle }: StatistikCard
                       <div className="text-muted small mb-1">Surat Sudah Dibayar</div>
                       <div className="h4 mb-0 text-success">{data.totalSuratDibayar}</div>
                     </div>
-                    <i className="bi bi-check2-square text-success" style={{ fontSize: "2.5rem", opacity: 0.3 }}></i>
+                    <Square style={{ fontSize: "2.5rem", opacity: 0.3 }} />
                   </div>
                 </div>
               </div>
@@ -105,7 +108,7 @@ export function StatistikCards({ data, showStatistics, onToggle }: StatistikCard
                       <div className="text-muted small mb-1">Surat Belum Dibayar</div>
                       <div className="h4 mb-0 text-warning">{data.totalSuratBelumBayar}</div>
                     </div>
-                    <i className="bi bi-exclamation-square text-warning" style={{ fontSize: "2.5rem", opacity: 0.3 }}></i>
+                    <Triangle style={{ fontSize: "2.5rem", opacity: 0.3 }} />
                   </div>
                 </div>
               </div>

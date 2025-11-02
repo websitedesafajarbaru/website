@@ -1,5 +1,6 @@
 import { Aduan } from "../../types"
 import { formatToWIB } from "../../utils/time"
+import { Box, Eye } from "lucide-react"
 
 interface AduanTableProps {
   aduan: Aduan[]
@@ -15,19 +16,7 @@ interface AduanTableProps {
   onPageChange: (page: number) => void
 }
 
-export function AduanTable({
-  aduan,
-  loading,
-  onViewDetail,
-  role,
-  searchTerm = "",
-  setSearchTerm,
-  onRefresh,
-  currentPage,
-  itemsPerPage,
-  totalItems,
-  onPageChange,
-}: AduanTableProps) {
+export function AduanTable({ aduan, loading, onViewDetail, role, currentPage, itemsPerPage, totalItems, onPageChange }: AduanTableProps) {
   const paginatedAduan = aduan.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
   const totalPages = Math.ceil(totalItems / itemsPerPage)
 
@@ -57,7 +46,7 @@ export function AduanTable({
       return (
         <div className="card">
           <div className="card-body text-center py-5">
-            <i className="bi bi-inbox" style={{ fontSize: "3rem", color: "#ccc" }}></i>
+            <Box size={64} className="text-muted mb-3" />
             <h4 className="mt-3">Tidak Ada Aduan</h4>
             <p className="text-muted">Belum ada aduan yang masuk</p>
           </div>
@@ -67,7 +56,7 @@ export function AduanTable({
       return (
         <div className="card">
           <div className="card-body text-center py-5">
-            <i className="bi bi-inbox" style={{ fontSize: "3rem", color: "#ccc" }}></i>
+            <Box size={64} className="text-muted mb-3" />
             <h4 className="mt-3">Belum Ada Aduan</h4>
             <p className="text-muted">Anda belum memiliki aduan. Buat aduan pertama Anda!</p>
           </div>
@@ -100,7 +89,8 @@ export function AduanTable({
               <td>
                 <div className={role === "admin" ? "action-buttons d-flex justify-content-center" : ""}>
                   <button className="btn btn-sm btn-primary" onClick={() => onViewDetail(item.id)}>
-                    <i className="bi bi-eye me-1"></i>Lihat Detail
+                    <Eye className="me-1" />
+                    Lihat Detail
                   </button>
                 </div>
               </td>
@@ -141,23 +131,6 @@ export function AduanTable({
   } else {
     return (
       <>
-        <div className="mb-3">
-          <div className="input-group">
-            <span className="input-group-text">
-              <i className="bi bi-search"></i>
-            </span>
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Cari aduan..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm?.(e.target.value)}
-            />
-            <button className="btn btn-outline-secondary" onClick={onRefresh}>
-              <i className="bi bi-arrow-clockwise me-1"></i>Refresh
-            </button>
-          </div>
-        </div>
         {totalItems === 0 ? renderEmptyState() : renderTable()}
         {renderPagination()}
       </>

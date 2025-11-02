@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { Masyarakat } from "../../types"
+import { Masyarakat } from "../../../types"
 
 interface MasyarakatFormProps {
   masyarakat?: Masyarakat | null
@@ -35,9 +35,9 @@ export function MasyarakatForm({ masyarakat, onSubmit, onCancel, loading }: Masy
         nama_lengkap: masyarakat.nama_lengkap,
         username: masyarakat.username,
         nomor_telepon: masyarakat.nomor_telepon,
-        email: "", // Email tidak disimpan di DB, tapi diperlukan untuk registrasi
+        email: masyarakat.email || "",
         alamat_rumah: masyarakat.alamat_rumah,
-        password: "", // Kosongkan password untuk edit
+        password: "",
       })
     }
   }, [masyarakat])
@@ -77,9 +77,9 @@ export function MasyarakatForm({ masyarakat, onSubmit, onCancel, loading }: Masy
   }
 
   const handleChange = (field: keyof MasyarakatFormData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
+    setFormData((prev) => ({ ...prev, [field]: value }))
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }))
+      setErrors((prev) => ({ ...prev, [field]: undefined }))
     }
   }
 
@@ -135,14 +135,7 @@ export function MasyarakatForm({ masyarakat, onSubmit, onCancel, loading }: Masy
           <label htmlFor="email" className="form-label">
             Email
           </label>
-          <input
-            type="email"
-            className="form-control"
-            id="email"
-            value={formData.email}
-            onChange={(e) => handleChange("email", e.target.value)}
-            placeholder="Masukkan email"
-          />
+          <input type="email" className="form-control" id="email" value={formData.email} onChange={(e) => handleChange("email", e.target.value)} placeholder="Masukkan email" />
         </div>
 
         <div className="col-12">
@@ -186,8 +179,10 @@ export function MasyarakatForm({ masyarakat, onSubmit, onCancel, loading }: Masy
               <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
               {masyarakat ? "Menyimpan..." : "Membuat..."}
             </>
+          ) : masyarakat ? (
+            "Simpan Perubahan"
           ) : (
-            masyarakat ? "Simpan Perubahan" : "Tambah Masyarakat"
+            "Tambah Masyarakat"
           )}
         </button>
       </div>

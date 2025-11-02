@@ -135,37 +135,39 @@ export function DashboardAdminPengaduan() {
     setActiveTab("masyarakat-form")
   }
 
-  const handleDeleteMasyarakat = async (id: string) => {
+  const handleToggleBan = async (id: string, currentStatus: string) => {
+    const action = currentStatus === "active" ? "ban" : "unban"
     const result = await Swal.fire({
-      title: "Apakah Anda yakin?",
-      text: "Data masyarakat akan dihapus permanen!",
+      title: `Apakah Anda yakin?`,
+      text: `Masyarakat akan di${action} dari sistem`,
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#d33",
+      confirmButtonColor: currentStatus === "active" ? "#d33" : "#28a745",
       cancelButtonColor: "#3085d6",
-      confirmButtonText: "Ya, Hapus!",
+      confirmButtonText: currentStatus === "active" ? "Ya, Ban!" : "Ya, Unban!",
       cancelButtonText: "Batal",
     })
 
     if (result.isConfirmed) {
       try {
-        await apiRequest(`/api/masyarakat/${id}`, {
-          method: "DELETE",
+        await apiRequest(`/api/masyarakat/${id}/ban`, {
+          method: "PUT",
         })
         Swal.fire({
           icon: "success",
           title: "Berhasil!",
-          text: "Masyarakat berhasil dihapus",
+          text: `Masyarakat berhasil di${action}`,
           timer: 2000,
           showConfirmButton: false,
         })
         fetchMasyarakat()
-      } catch (err) {
+      } catch (err: unknown) {
         console.error(err)
+        const errorMessage = err instanceof Error ? err.message : "Terjadi kesalahan"
         Swal.fire({
           icon: "error",
           title: "Gagal!",
-          text: "Terjadi kesalahan saat menghapus masyarakat",
+          text: errorMessage,
         })
       }
     }
@@ -174,7 +176,6 @@ export function DashboardAdminPengaduan() {
   const handleSubmitMasyarakat = async (data: MasyarakatFormData) => {
     try {
       if (selectedMasyarakat) {
-        // Update
         await apiRequest(`/api/masyarakat/${selectedMasyarakat.id}`, {
           method: "PUT",
           body: JSON.stringify(data),
@@ -187,7 +188,6 @@ export function DashboardAdminPengaduan() {
           showConfirmButton: false,
         })
       } else {
-        // Create
         await apiRequest("/api/masyarakat", {
           method: "POST",
           body: JSON.stringify(data),
@@ -312,11 +312,11 @@ export function DashboardAdminPengaduan() {
 
           <StatsCardsMasyarakat masyarakat={masyarakat} />
 
-          <FilterSection 
-            statusFilter="" 
-            onStatusFilterChange={() => {}} 
-            onRefresh={fetchMasyarakat} 
-            searchTerm={searchTermMasyarakat} 
+          <FilterSection
+            statusFilter=""
+            onStatusFilterChange={() => {}}
+            onRefresh={fetchMasyarakat}
+            searchTerm={searchTermMasyarakat}
             onSearchChange={setSearchTermMasyarakat}
             showStatusFilter={false}
           />
@@ -325,7 +325,7 @@ export function DashboardAdminPengaduan() {
             masyarakat={filteredMasyarakat}
             loading={loadingMasyarakat}
             onEdit={handleEditMasyarakat}
-            onDelete={handleDeleteMasyarakat}
+            onToggleBan={handleToggleBan}
             currentPage={currentPageMasyarakat}
             itemsPerPage={itemsPerPage}
             totalItems={filteredMasyarakat.length}
@@ -343,12 +343,7 @@ export function DashboardAdminPengaduan() {
             </button>
           </div>
           <div className="card-body">
-            <MasyarakatForm
-              masyarakat={selectedMasyarakat}
-              onSubmit={handleSubmitMasyarakat}
-              onCancel={() => setActiveTab("masyarakat")}
-              loading={false}
-            />
+            <MasyarakatForm masyarakat={selectedMasyarakat} onSubmit={handleSubmitMasyarakat} onCancel={() => setActiveTab("masyarakat")} loading={false} />
           </div>
         </div>
       )}

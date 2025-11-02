@@ -1,3 +1,5 @@
+import { Search, RefreshCw, Filter } from "lucide-react"
+
 interface FilterSectionProps {
   statusFilter: string
   onStatusFilterChange: (value: string) => void
@@ -16,7 +18,7 @@ export function FilterSection({ statusFilter, onStatusFilterChange, onRefresh, s
             <div className="col-md-10">
               <div className="input-group">
                 <span className="input-group-text" style={{ width: "40px" }}>
-                  <i className="bi bi-search"></i>
+                  <Search size={16} />
                 </span>
                 <input
                   type="text"
@@ -30,7 +32,7 @@ export function FilterSection({ statusFilter, onStatusFilterChange, onRefresh, s
             </div>
             <div className="col-md-2">
               <button className="btn btn-outline-secondary" style={{ width: "100%", height: "50px" }} onClick={onRefresh}>
-                <i className="bi bi-arrow-clockwise"></i>
+                <RefreshCw size={16} />
               </button>
             </div>
           </div>
@@ -46,7 +48,7 @@ export function FilterSection({ statusFilter, onStatusFilterChange, onRefresh, s
           <div className="col-md-3">
             <div className="input-group">
               <span className="input-group-text" style={{ width: "40px" }}>
-                <i className="bi bi-funnel-fill"></i>
+                <Filter size={16} />
               </span>
               <select className="form-select" style={{ height: "50px" }} value={statusFilter} onChange={(e) => onStatusFilterChange(e.target.value)}>
                 <option value="">Semua Status</option>
@@ -59,7 +61,7 @@ export function FilterSection({ statusFilter, onStatusFilterChange, onRefresh, s
           <div className="col-md-7">
             <div className="input-group">
               <span className="input-group-text" style={{ width: "40px" }}>
-                <i className="bi bi-search"></i>
+                <Search size={16} />
               </span>
               <input
                 type="text"
@@ -73,7 +75,7 @@ export function FilterSection({ statusFilter, onStatusFilterChange, onRefresh, s
           </div>
           <div className="col-md-2">
             <button className="btn btn-outline-secondary" style={{ width: "100%", height: "50px" }} onClick={onRefresh}>
-              <i className="bi bi-arrow-clockwise"></i>
+              <RefreshCw size={16} />
             </button>
           </div>
         </div>

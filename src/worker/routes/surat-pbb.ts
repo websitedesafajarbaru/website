@@ -210,9 +210,7 @@ suratPBBRoutes.put("/:id", async (c) => {
     const updateFields: string[] = []
     const params: (string | number)[] = []
 
-    // Validasi khusus untuk status_pembayaran
     if (updates.status_pembayaran !== undefined && updates.status_pembayaran !== originalSurat?.status_pembayaran && user.roles !== "admin") {
-      // Cek status data PBB dusun
       const dusunStatus = await c.env.DB.prepare("SELECT d.status_data_pbb FROM dusun d JOIN surat_pbb s ON d.id = s.id_dusun WHERE s.id = ?").bind(suratId).first()
 
       if (dusunStatus?.status_data_pbb !== "sudah_lengkap") {
