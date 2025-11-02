@@ -25,6 +25,17 @@ export interface Tanggapan {
   nama_lengkap: string
 }
 
+export interface Masyarakat {
+  id: string
+  nama_lengkap: string
+  username: string
+  roles: string
+  alamat_rumah: string
+  nomor_telepon: string
+  waktu_dibuat: string
+  waktu_diperbarui: string
+}
+
 export interface Dusun {
   id: number
   nama_dusun: string

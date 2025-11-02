@@ -8,7 +8,6 @@ interface AduanTableProps {
   role: "admin" | "masyarakat"
   searchTerm?: string
   setSearchTerm?: (term: string) => void
-  onCreateNew?: () => void
   onRefresh?: () => void
   currentPage: number
   itemsPerPage: number
@@ -23,7 +22,6 @@ export function AduanTable({
   role,
   searchTerm = "",
   setSearchTerm,
-  onCreateNew,
   onRefresh,
   currentPage,
   itemsPerPage,
@@ -67,15 +65,12 @@ export function AduanTable({
       )
     } else {
       return (
-        <div className="text-center py-5">
-          <i className="bi bi-inbox display-1 text-muted"></i>
-          <h4 className="mt-3">Belum Ada Aduan</h4>
-          <p className="text-muted">Anda belum memiliki aduan. Buat aduan pertama Anda!</p>
-          {onCreateNew && (
-            <button className="btn btn-primary" onClick={onCreateNew}>
-              <i className="bi bi-plus-circle me-2"></i>Buat Aduan Baru
-            </button>
-          )}
+        <div className="card">
+          <div className="card-body text-center py-5">
+            <i className="bi bi-inbox" style={{ fontSize: "3rem", color: "#ccc" }}></i>
+            <h4 className="mt-3">Belum Ada Aduan</h4>
+            <p className="text-muted">Anda belum memiliki aduan. Buat aduan pertama Anda!</p>
+          </div>
         </div>
       )
     }
@@ -145,36 +140,27 @@ export function AduanTable({
     )
   } else {
     return (
-      <div className="card shadow-sm">
-        <div className="card-header bg-light">
-          <div className="row g-2">
-            <div className="col-md-10">
-              <div className="input-group">
-                <span className="input-group-text" style={{ width: "40px" }}>
-                  <i className="bi bi-search"></i>
-                </span>
-                <input
-                  type="text"
-                  className="form-control"
-                  style={{ height: "50px" }}
-                  placeholder="Cari aduan..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm?.(e.target.value)}
-                />
-              </div>
-            </div>
-            <div className="col-md-2">
-              <button className="btn btn-outline-secondary" style={{ width: "100%", height: "50px" }} onClick={onRefresh}>
-                <i className="bi bi-arrow-clockwise"></i>
-              </button>
-            </div>
+      <>
+        <div className="mb-3">
+          <div className="input-group">
+            <span className="input-group-text">
+              <i className="bi bi-search"></i>
+            </span>
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Cari aduan..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm?.(e.target.value)}
+            />
+            <button className="btn btn-outline-secondary" onClick={onRefresh}>
+              <i className="bi bi-arrow-clockwise me-1"></i>Refresh
+            </button>
           </div>
         </div>
-        <div className="card-body p-0">
-          {totalItems === 0 ? renderEmptyState() : renderTable()}
-          {renderPagination()}
-        </div>
-      </div>
+        {totalItems === 0 ? renderEmptyState() : renderTable()}
+        {renderPagination()}
+      </>
     )
   }
 }

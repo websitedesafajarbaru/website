@@ -9,6 +9,7 @@ import perangkatDesaRoutes from "./routes/perangkat-desa"
 import suratPBBRoutes from "./routes/surat-pbb"
 import publicRoutes from "./routes/public"
 import statistikRoutes from "./routes/statistik"
+import masyarakatRoutes from "./routes/masyarakat"
 
 const app = new Hono<{ Bindings: Env }>()
 
@@ -21,6 +22,7 @@ app.route("/api/dusun", dusunRoutes)
 app.route("/api/pengelolaan-pbb", pengelolaanPBBRoutes)
 app.route("/api/perangkat-desa", perangkatDesaRoutes)
 app.route("/api/surat-pbb", suratPBBRoutes)
+app.route("/api/masyarakat", masyarakatRoutes)
 app.route("/api", publicRoutes)
 app.route("/api/statistik", statistikRoutes)
 

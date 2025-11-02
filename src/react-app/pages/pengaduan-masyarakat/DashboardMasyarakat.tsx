@@ -128,28 +128,62 @@ export function DashboardMasyarakat() {
 
   return (
     <div className="container-fluid p-4">
-      <DashboardHeader role="masyarakat" activeTab={activeTab} setActiveTab={setActiveTab} />
+      <DashboardHeader role="masyarakat" />
 
       {activeTab === "daftar" && (
-        <AduanTable
-          aduan={filteredAduan}
-          loading={loading}
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          onViewDetail={fetchDetail}
-          onCreateNew={() => setActiveTab("buat")}
-          onRefresh={fetchAduan}
-          role="masyarakat"
-          currentPage={currentPage}
-          itemsPerPage={itemsPerPage}
-          totalItems={filteredAduan.length}
-          onPageChange={setCurrentPage}
-        />
+        <>
+          <div className="card mb-3">
+            <div className="card-header d-flex justify-content-between align-items-center">
+              <h6 className="mb-0">Daftar Aduan Saya</h6>
+              <button className="btn btn-sm btn-primary" onClick={() => setActiveTab("buat")}>
+                <i className="bi bi-plus-circle me-1"></i>Buat Aduan Baru
+              </button>
+            </div>
+          </div>
+
+          <AduanTable
+            aduan={filteredAduan}
+            loading={loading}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            onViewDetail={fetchDetail}
+            onRefresh={fetchAduan}
+            role="masyarakat"
+            currentPage={currentPage}
+            itemsPerPage={itemsPerPage}
+            totalItems={filteredAduan.length}
+            onPageChange={setCurrentPage}
+          />
+        </>
       )}
 
-      {activeTab === "buat" && <CreateAduanForm formData={formData} setFormData={setFormData} onSubmit={handleSubmit} onCancel={() => setActiveTab("daftar")} />}
+      {activeTab === "buat" && (
+        <div className="card">
+          <div className="card-header d-flex justify-content-between align-items-center">
+            <h6 className="mb-0">Buat Aduan Baru</h6>
+            <button className="btn btn-sm btn-secondary" onClick={() => setActiveTab("daftar")}>
+              <i className="bi bi-arrow-left me-1"></i>Kembali ke Daftar
+            </button>
+          </div>
+          <div className="card-body">
+            <CreateAduanForm formData={formData} setFormData={setFormData} onSubmit={handleSubmit} onCancel={() => setActiveTab("daftar")} />
+          </div>
+        </div>
+      )}
 
-      {activeTab === "detail" && selectedAduan && <AduanDetail aduan={selectedAduan} />}
+      {activeTab === "detail" && selectedAduan && (
+        <div className="card">
+          <div className="card-header d-flex justify-content-between align-items-center">
+            <h6 className="mb-0">Detail Aduan - {selectedAduan.judul}</h6>
+            <button className="btn btn-sm btn-secondary" onClick={() => setActiveTab("daftar")}>
+              <i className="bi bi-arrow-left me-1"></i>Kembali ke Daftar
+            </button>
+          </div>
+          <div className="card-body">
+            <AduanDetail aduan={selectedAduan} />
+          </div>
+        </div>
+      )}
     </div>
   )
 }

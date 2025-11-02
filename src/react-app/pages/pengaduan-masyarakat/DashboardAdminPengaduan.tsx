@@ -1,21 +1,28 @@
 import { useState, useEffect, useCallback } from "react"
 import { useAuth } from "../../contexts/AuthContext"
-import { Aduan } from "../../types"
+import { Aduan, Masyarakat } from "../../types"
 import { StatsCards, FilterSection } from "../../components/pengaduan-masyarakat/DashboardAdmin"
-import { DashboardHeader } from "../../components/pengaduan-masyarakat/DashboardHeader"
+import { StatsCardsMasyarakat } from "../../components/pengaduan-masyarakat/DashboardAdmin/StatsCardsMasyarakat"
 import { AduanDetail } from "../../components/pengaduan-masyarakat/AduanDetail"
 import { AduanTable } from "../../components/pengaduan-masyarakat/AduanTable"
+import { MasyarakatTable } from "../../components/pengaduan-masyarakat/DashboardAdmin/MasyarakatTable"
+import { MasyarakatForm, MasyarakatFormData } from "../../components/pengaduan-masyarakat/DashboardAdmin/MasyarakatForm"
 
 export function DashboardAdminPengaduan() {
   const { apiRequest } = useAuth()
   const [aduan, setAduan] = useState<Aduan[]>([])
+  const [masyarakat, setMasyarakat] = useState<Masyarakat[]>([])
   const [selectedAduan, setSelectedAduan] = useState<Aduan | null>(null)
+  const [selectedMasyarakat, setSelectedMasyarakat] = useState<Masyarakat | null>(null)
   const [tanggapan, setTanggapan] = useState("")
   const [statusFilter, setStatusFilter] = useState("")
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<"daftar" | "detail">("daftar")
+  const [loadingMasyarakat, setLoadingMasyarakat] = useState(false)
+  const [activeTab, setActiveTab] = useState<"daftar" | "detail" | "masyarakat" | "masyarakat-form">("daftar")
   const [searchTerm, setSearchTerm] = useState("")
+  const [searchTermMasyarakat, setSearchTermMasyarakat] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
+  const [currentPageMasyarakat, setCurrentPageMasyarakat] = useState(1)
   const itemsPerPage = 100
 
   const fetchAduan = useCallback(async () => {
@@ -31,13 +38,35 @@ export function DashboardAdminPengaduan() {
     }
   }, [statusFilter, apiRequest])
 
+  const fetchMasyarakat = useCallback(async () => {
+    try {
+      setLoadingMasyarakat(true)
+      const result = await apiRequest<Masyarakat[]>("/api/masyarakat")
+      setMasyarakat(result)
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setLoadingMasyarakat(false)
+    }
+  }, [apiRequest])
+
   useEffect(() => {
     fetchAduan()
   }, [fetchAduan])
 
   useEffect(() => {
+    if (activeTab === "masyarakat" || activeTab === "masyarakat-form") {
+      fetchMasyarakat()
+    }
+  }, [activeTab, fetchMasyarakat])
+
+  useEffect(() => {
     setCurrentPage(1)
   }, [searchTerm, statusFilter])
+
+  useEffect(() => {
+    setCurrentPageMasyarakat(1)
+  }, [searchTermMasyarakat])
 
   const fetchDetail = async (id: string) => {
     try {
@@ -96,6 +125,94 @@ export function DashboardAdminPengaduan() {
     }
   }
 
+  const handleCreateMasyarakat = () => {
+    setSelectedMasyarakat(null)
+    setActiveTab("masyarakat-form")
+  }
+
+  const handleEditMasyarakat = (masyarakat: Masyarakat) => {
+    setSelectedMasyarakat(masyarakat)
+    setActiveTab("masyarakat-form")
+  }
+
+  const handleDeleteMasyarakat = async (id: string) => {
+    const result = await Swal.fire({
+      title: "Apakah Anda yakin?",
+      text: "Data masyarakat akan dihapus permanen!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Ya, Hapus!",
+      cancelButtonText: "Batal",
+    })
+
+    if (result.isConfirmed) {
+      try {
+        await apiRequest(`/api/masyarakat/${id}`, {
+          method: "DELETE",
+        })
+        Swal.fire({
+          icon: "success",
+          title: "Berhasil!",
+          text: "Masyarakat berhasil dihapus",
+          timer: 2000,
+          showConfirmButton: false,
+        })
+        fetchMasyarakat()
+      } catch (err) {
+        console.error(err)
+        Swal.fire({
+          icon: "error",
+          title: "Gagal!",
+          text: "Terjadi kesalahan saat menghapus masyarakat",
+        })
+      }
+    }
+  }
+
+  const handleSubmitMasyarakat = async (data: MasyarakatFormData) => {
+    try {
+      if (selectedMasyarakat) {
+        // Update
+        await apiRequest(`/api/masyarakat/${selectedMasyarakat.id}`, {
+          method: "PUT",
+          body: JSON.stringify(data),
+        })
+        Swal.fire({
+          icon: "success",
+          title: "Berhasil!",
+          text: "Masyarakat berhasil diperbarui",
+          timer: 2000,
+          showConfirmButton: false,
+        })
+      } else {
+        // Create
+        await apiRequest("/api/masyarakat", {
+          method: "POST",
+          body: JSON.stringify(data),
+        })
+        Swal.fire({
+          icon: "success",
+          title: "Berhasil!",
+          text: "Masyarakat berhasil ditambahkan",
+          timer: 2000,
+          showConfirmButton: false,
+        })
+      }
+      setActiveTab("masyarakat")
+      fetchMasyarakat()
+    } catch (err: unknown) {
+      console.error(err)
+      const errorMessage = err instanceof Error ? err.message : "Terjadi kesalahan"
+      Swal.fire({
+        icon: "error",
+        title: "Gagal!",
+        text: errorMessage,
+      })
+    }
+  }
+
   const filteredAduan = aduan.filter(
     (item) =>
       item.judul?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -104,12 +221,53 @@ export function DashboardAdminPengaduan() {
       item.isi?.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
+  const filteredMasyarakat = masyarakat.filter(
+    (item) =>
+      item.nama_lengkap.toLowerCase().includes(searchTermMasyarakat.toLowerCase()) ||
+      item.username.toLowerCase().includes(searchTermMasyarakat.toLowerCase()) ||
+      item.alamat_rumah.toLowerCase().includes(searchTermMasyarakat.toLowerCase()) ||
+      item.nomor_telepon.toLowerCase().includes(searchTermMasyarakat.toLowerCase())
+  )
+
   return (
     <div className="container-wide">
-      <DashboardHeader role="admin" activeTab={activeTab} onBackToList={() => setActiveTab("daftar")} />
+      <div className="dashboard-header" style={{ minHeight: "80px" }}>
+        <div>
+          <h2>Dashboard Admin Pengaduan</h2>
+          <p className="text-muted mb-0 small">Admin</p>
+        </div>
+      </div>
+
+      {/* Tab Navigation */}
+      <ul className="nav nav-tabs mb-3" style={{ backgroundColor: "#fff", padding: "0.5rem 1rem", borderRadius: "4px", border: "1px solid #dee2e6" }}>
+        <li className="nav-item">
+          <button
+            className={`nav-link ${activeTab === "daftar" || activeTab === "detail" ? "active" : ""}`}
+            onClick={() => setActiveTab("daftar")}
+            style={{ border: "none", fontSize: "0.9rem" }}
+          >
+            <i className="bi bi-list-ul me-2"></i>Aduan
+          </button>
+        </li>
+        <li className="nav-item">
+          <button
+            className={`nav-link ${activeTab === "masyarakat" || activeTab === "masyarakat-form" ? "active" : ""}`}
+            onClick={() => setActiveTab("masyarakat")}
+            style={{ border: "none", fontSize: "0.9rem" }}
+          >
+            <i className="bi bi-people me-2"></i>Masyarakat
+          </button>
+        </li>
+      </ul>
 
       {activeTab === "daftar" && (
         <>
+          <div className="card mb-3">
+            <div className="card-header d-flex justify-content-between align-items-center">
+              <h6 className="mb-0">Daftar Aduan</h6>
+            </div>
+          </div>
+
           <StatsCards aduan={aduan} />
 
           <FilterSection statusFilter={statusFilter} onStatusFilterChange={setStatusFilter} onRefresh={fetchAduan} searchTerm={searchTerm} onSearchChange={setSearchTerm} />
@@ -128,7 +286,71 @@ export function DashboardAdminPengaduan() {
       )}
 
       {activeTab === "detail" && selectedAduan && (
-        <AduanDetail aduan={selectedAduan} isAdmin={true} tanggapan={tanggapan} setTanggapan={setTanggapan} onStatusChange={updateStatus} onSubmitTanggapan={submitTanggapan} />
+        <div className="card">
+          <div className="card-header d-flex justify-content-between align-items-center">
+            <h6 className="mb-0">Detail Aduan - {selectedAduan.judul}</h6>
+            <button className="btn btn-sm btn-secondary" onClick={() => setActiveTab("daftar")}>
+              <i className="bi bi-arrow-left me-1"></i>Kembali ke Daftar
+            </button>
+          </div>
+          <div className="card-body">
+            <AduanDetail aduan={selectedAduan} isAdmin={true} tanggapan={tanggapan} setTanggapan={setTanggapan} onStatusChange={updateStatus} onSubmitTanggapan={submitTanggapan} />
+          </div>
+        </div>
+      )}
+
+      {activeTab === "masyarakat" && (
+        <>
+          <div className="card mb-3">
+            <div className="card-header d-flex justify-content-between align-items-center">
+              <h6 className="mb-0">Daftar Masyarakat</h6>
+              <button className="btn btn-sm btn-primary" onClick={handleCreateMasyarakat}>
+                <i className="bi bi-plus-circle me-1"></i>Tambah Masyarakat
+              </button>
+            </div>
+          </div>
+
+          <StatsCardsMasyarakat masyarakat={masyarakat} />
+
+          <FilterSection 
+            statusFilter="" 
+            onStatusFilterChange={() => {}} 
+            onRefresh={fetchMasyarakat} 
+            searchTerm={searchTermMasyarakat} 
+            onSearchChange={setSearchTermMasyarakat}
+            showStatusFilter={false}
+          />
+
+          <MasyarakatTable
+            masyarakat={filteredMasyarakat}
+            loading={loadingMasyarakat}
+            onEdit={handleEditMasyarakat}
+            onDelete={handleDeleteMasyarakat}
+            currentPage={currentPageMasyarakat}
+            itemsPerPage={itemsPerPage}
+            totalItems={filteredMasyarakat.length}
+            onPageChange={setCurrentPageMasyarakat}
+          />
+        </>
+      )}
+
+      {activeTab === "masyarakat-form" && (
+        <div className="card">
+          <div className="card-header d-flex justify-content-between align-items-center">
+            <h6 className="mb-0">{selectedMasyarakat ? "Edit Masyarakat" : "Tambah Masyarakat Baru"}</h6>
+            <button className="btn btn-sm btn-secondary" onClick={() => setActiveTab("masyarakat")}>
+              <i className="bi bi-arrow-left me-1"></i>Kembali ke Daftar
+            </button>
+          </div>
+          <div className="card-body">
+            <MasyarakatForm
+              masyarakat={selectedMasyarakat}
+              onSubmit={handleSubmitMasyarakat}
+              onCancel={() => setActiveTab("masyarakat")}
+              loading={false}
+            />
+          </div>
+        </div>
       )}
     </div>
   )
