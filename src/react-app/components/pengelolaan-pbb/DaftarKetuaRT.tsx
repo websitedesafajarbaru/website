@@ -1,5 +1,3 @@
-import { Box, Pencil, Trash2 } from "lucide-react"
-
 interface PerangkatDesa {
   id: string
   nama_lengkap: string
@@ -41,7 +39,7 @@ export function DaftarKetuaRT({ ketuaRT, searchTerm, onSearchChange, onEdit, onD
       {filteredKetuaRT.length === 0 ? (
         <div className="card">
           <div className="card-body text-center py-5">
-            <Box size={64} className="text-muted mb-3" />
+            <i className="bi bi-box text-muted mb-3" style={{ fontSize: "4rem" }}></i>
             <h4 className="mt-3">{searchTerm ? "Tidak Ada Ketua RT" : "Belum Ada Ketua RT"}</h4>
             <p className="text-muted">{searchTerm ? "Tidak ada ketua RT yang cocok dengan pencarian" : "Belum ada ketua RT yang terdaftar"}</p>
           </div>
@@ -67,10 +65,10 @@ export function DaftarKetuaRT({ ketuaRT, searchTerm, onSearchChange, onEdit, onD
                   </td>
                   <td>
                     <button className="btn btn-sm btn-outline-primary me-2" onClick={() => onEdit(k)} title="Edit">
-                      <Pencil size={16} />
+                      <i className="bi bi-pencil"></i>
                     </button>
                     <button className="btn btn-sm btn-outline-danger" onClick={() => onDelete(k)} title="Hapus">
-                      <Trash2 size={16} />
+                      <i className="bi bi-trash"></i>
                     </button>
                   </td>
                 </tr>

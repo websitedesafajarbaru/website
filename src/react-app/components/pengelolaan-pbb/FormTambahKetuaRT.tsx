@@ -1,5 +1,4 @@
 import React from "react"
-import { ArrowLeft, Save } from "lucide-react"
 
 interface FormTambahKetuaRTProps {
   form: {
@@ -18,7 +17,7 @@ export function FormTambahKetuaRT({ form, onFormChange, onSubmit, onCancel }: Fo
       <div className="card-header d-flex justify-content-between align-items-center">
         <h6 className="mb-0">Tambah Ketua RT Baru</h6>
         <button className="btn btn-sm btn-secondary" onClick={onCancel}>
-          <ArrowLeft className="me-1" />
+          <i className="bi bi-arrow-left me-1"></i>
           Kembali ke Daftar
         </button>
       </div>
@@ -46,7 +45,7 @@ export function FormTambahKetuaRT({ form, onFormChange, onSubmit, onCancel }: Fo
           </div>
           <div className="d-flex gap-2 mt-4">
             <button type="submit" className="btn btn-primary">
-              <Save className="me-1" />
+              <i className="bi bi-save me-1"></i>
               Simpan
             </button>
             <button type="button" className="btn btn-secondary" onClick={onCancel}>

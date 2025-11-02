@@ -1,5 +1,3 @@
-import { BarChart3, ChevronUp, ChevronDown, CheckCircle, Target, FileText, Square, Triangle } from "lucide-react"
-
 interface StatistikData {
   totalPajakTerhutang: number
   totalPajakDibayar: number
@@ -21,24 +19,24 @@ export function StatistikCards({ data, showStatistics, onToggle }: StatistikCard
       <div className="card-header" style={{ cursor: "pointer" }} onClick={onToggle}>
         <div className="d-flex justify-content-between align-items-center">
           <h6 className="mb-0">
-            <BarChart3 className="me-2" />
+            <i className="bi bi-bar-chart me-2"></i>
             Statistik PBB
           </h6>
-          {showStatistics ? <ChevronUp /> : <ChevronDown />}
+          {showStatistics ? <i className="bi bi-chevron-up"></i> : <i className="bi bi-chevron-down"></i>}
         </div>
       </div>
       {showStatistics && (
         <div className="card-body">
-          <div className="row g-3">
+          <div className="row g-1 g-md-2">
             <div className="col-md-4">
               <div className="card border-primary h-100">
-                <div className="card-body">
+                <div className="card-body p-1 p-md-3">
                   <div className="d-flex align-items-center">
                     <div className="flex-grow-1">
                       <div className="text-muted small mb-1">Total Pajak Terhutang</div>
                       <div className="h4 mb-0 text-primary">Rp {data.totalPajakTerhutang.toLocaleString("id-ID")}</div>
                     </div>
-                    <BarChart3 style={{ fontSize: "2.5rem", opacity: 0.3 }} />
+                    <i className="bi bi-cash-coin" style={{ fontSize: "2.5rem", opacity: 0.3 }}></i>
                   </div>
                 </div>
               </div>
@@ -46,13 +44,13 @@ export function StatistikCards({ data, showStatistics, onToggle }: StatistikCard
 
             <div className="col-md-4">
               <div className="card border-success h-100">
-                <div className="card-body">
+                <div className="card-body p-1 p-md-3">
                   <div className="d-flex align-items-center">
                     <div className="flex-grow-1">
                       <div className="text-muted small mb-1">Total Pajak Terbayar</div>
                       <div className="h4 mb-0 text-success">Rp {data.totalPajakDibayar.toLocaleString("id-ID")}</div>
                     </div>
-                    <CheckCircle style={{ fontSize: "2.5rem", opacity: 0.3 }} />
+                    <i className="bi bi-check-circle" style={{ fontSize: "2.5rem", opacity: 0.3 }}></i>
                   </div>
                 </div>
               </div>
@@ -60,13 +58,13 @@ export function StatistikCards({ data, showStatistics, onToggle }: StatistikCard
 
             <div className="col-md-4">
               <div className="card border-info h-100">
-                <div className="card-body">
+                <div className="card-body p-1 p-md-3">
                   <div className="d-flex align-items-center">
                     <div className="flex-grow-1">
                       <div className="text-muted small mb-1">Persentase Pembayaran</div>
                       <div className="h4 mb-0 text-info">{data.persentasePembayaran.toFixed(1)}%</div>
                     </div>
-                    <Target style={{ fontSize: "2.5rem", opacity: 0.3 }} />
+                    <i className="bi bi-target" style={{ fontSize: "2.5rem", opacity: 0.3 }}></i>
                   </div>
                 </div>
               </div>
@@ -74,13 +72,13 @@ export function StatistikCards({ data, showStatistics, onToggle }: StatistikCard
 
             <div className="col-md-4">
               <div className="card border-secondary h-100">
-                <div className="card-body">
+                <div className="card-body p-1 p-md-3">
                   <div className="d-flex align-items-center">
                     <div className="flex-grow-1">
                       <div className="text-muted small mb-1">Total Surat</div>
                       <div className="h4 mb-0 text-secondary">{data.totalSurat}</div>
                     </div>
-                    <FileText style={{ fontSize: "2.5rem", opacity: 0.3 }} />
+                    <i className="bi bi-file-text" style={{ fontSize: "2.5rem", opacity: 0.3 }}></i>
                   </div>
                 </div>
               </div>
@@ -88,13 +86,13 @@ export function StatistikCards({ data, showStatistics, onToggle }: StatistikCard
 
             <div className="col-md-4">
               <div className="card border-success h-100">
-                <div className="card-body">
+                <div className="card-body p-1 p-md-3">
                   <div className="d-flex align-items-center">
                     <div className="flex-grow-1">
                       <div className="text-muted small mb-1">Surat Sudah Dibayar</div>
                       <div className="h4 mb-0 text-success">{data.totalSuratDibayar}</div>
                     </div>
-                    <Square style={{ fontSize: "2.5rem", opacity: 0.3 }} />
+                    <i className="bi bi-check-square" style={{ fontSize: "2.5rem", opacity: 0.3 }}></i>
                   </div>
                 </div>
               </div>
@@ -102,13 +100,13 @@ export function StatistikCards({ data, showStatistics, onToggle }: StatistikCard
 
             <div className="col-md-4">
               <div className="card border-warning h-100">
-                <div className="card-body">
+                <div className="card-body p-0 p-md-2">
                   <div className="d-flex align-items-center">
                     <div className="flex-grow-1">
                       <div className="text-muted small mb-1">Surat Belum Dibayar</div>
                       <div className="h4 mb-0 text-warning">{data.totalSuratBelumBayar}</div>
                     </div>
-                    <Triangle style={{ fontSize: "2.5rem", opacity: 0.3 }} />
+                    <i className="bi bi-exclamation-triangle" style={{ fontSize: "2.5rem", opacity: 0.3 }}></i>
                   </div>
                 </div>
               </div>

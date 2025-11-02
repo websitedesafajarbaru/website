@@ -1,6 +1,5 @@
 import { Masyarakat } from "../../../types"
 import { formatToWIB } from "../../../utils/time"
-import { Box, Pencil, X, Check } from "lucide-react"
 
 interface MasyarakatTableProps {
   masyarakat: Masyarakat[]
@@ -31,7 +30,7 @@ export function MasyarakatTable({ masyarakat, loading, onEdit, onToggleBan, curr
   const renderEmptyState = () => (
     <div className="card">
       <div className="card-body text-center py-5">
-        <Box size={64} className="text-muted mb-3" />
+        <i className="bi bi-box text-muted mb-3" style={{ fontSize: "4rem" }}></i>
         <h4 className="mt-3">Tidak Ada Masyarakat</h4>
         <p className="text-muted">Belum ada data masyarakat yang terdaftar</p>
       </div>
@@ -66,10 +65,10 @@ export function MasyarakatTable({ masyarakat, loading, onEdit, onToggleBan, curr
               <td>
                 <div className="action-buttons d-flex justify-content-center gap-2">
                   <button className="btn btn-sm btn-outline-primary" onClick={() => onEdit(item)}>
-                    <Pencil size={16} />
+                    <i className="bi bi-pencil"></i>
                   </button>
                   <button className={`btn btn-sm ${item.status === "active" ? "btn-outline-warning" : "btn-outline-success"}`} onClick={() => onToggleBan(item.id, item.status)}>
-                    {item.status === "active" ? <X size={16} /> : <Check size={16} />}
+                    {item.status === "active" ? <i className="bi bi-x"></i> : <i className="bi bi-check"></i>}
                     {item.status === "active" ? "Ban" : "Unban"}
                   </button>
                 </div>

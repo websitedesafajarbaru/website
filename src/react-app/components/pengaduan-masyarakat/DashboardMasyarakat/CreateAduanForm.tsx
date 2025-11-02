@@ -1,5 +1,3 @@
-import { PlusCircle, Type, Minus, FileText, X, Send } from "lucide-react"
-
 interface CreateAduanFormProps {
   formData: {
     judul: string
@@ -16,7 +14,7 @@ export function CreateAduanForm({ formData, setFormData, onSubmit, onCancel }: C
     <div className="card">
       <div className="card-header bg-primary text-white">
         <h5 className="mb-0">
-          <PlusCircle className="me-2" />
+          <i className="bi bi-plus-circle me-2"></i>
           Buat Aduan Baru
         </h5>
       </div>
@@ -24,7 +22,7 @@ export function CreateAduanForm({ formData, setFormData, onSubmit, onCancel }: C
         <form onSubmit={onSubmit}>
           <div className="mb-3">
             <label className="form-label">
-              <Type className="me-2" />
+              <i className="bi bi-type me-2"></i>
               Judul Aduan *
             </label>
             <input
@@ -39,7 +37,7 @@ export function CreateAduanForm({ formData, setFormData, onSubmit, onCancel }: C
           </div>
           <div className="mb-3">
             <label className="form-label">
-              <Minus className="me-2" />
+              <i className="bi bi-dash me-2"></i>
               Kategori *
             </label>
             <select className="form-select" style={{ height: "60px" }} value={formData.kategori} onChange={(e) => setFormData({ ...formData, kategori: e.target.value })} required>
@@ -54,7 +52,7 @@ export function CreateAduanForm({ formData, setFormData, onSubmit, onCancel }: C
           </div>
           <div className="mb-3">
             <label className="form-label">
-              <FileText className="me-2" />
+              <i className="bi bi-file-text me-2"></i>
               Isi Aduan *
             </label>
             <textarea
@@ -69,11 +67,11 @@ export function CreateAduanForm({ formData, setFormData, onSubmit, onCancel }: C
           </div>
           <div className="d-flex gap-2">
             <button type="button" className="btn btn-outline-secondary" onClick={onCancel}>
-              <X className="me-2" />
+              <i className="bi bi-x me-2"></i>
               Batal
             </button>
             <button type="submit" className="btn btn-primary">
-              <Send className="me-2" />
+              <i className="bi bi-send me-2"></i>
               Kirim Aduan
             </button>
           </div>

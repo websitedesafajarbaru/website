@@ -135,6 +135,13 @@ export function DashboardAdminPengaduan() {
     setActiveTab("masyarakat-form")
   }
 
+  const handleEditMasyarakatById = (id: string) => {
+    const foundMasyarakat = masyarakat.find((m: Masyarakat) => m.id === id)
+    if (foundMasyarakat) {
+      handleEditMasyarakat(foundMasyarakat)
+    }
+  }
+
   const handleToggleBan = async (id: string, currentStatus: string) => {
     const action = currentStatus === "active" ? "ban" : "unban"
     const result = await Swal.fire({
@@ -294,7 +301,7 @@ export function DashboardAdminPengaduan() {
             </button>
           </div>
           <div className="card-body">
-            <AduanDetail aduan={selectedAduan} isAdmin={true} tanggapan={tanggapan} setTanggapan={setTanggapan} onStatusChange={updateStatus} onSubmitTanggapan={submitTanggapan} />
+            <AduanDetail aduan={selectedAduan} isAdmin={true} tanggapan={tanggapan} setTanggapan={setTanggapan} onStatusChange={updateStatus} onSubmitTanggapan={submitTanggapan} onEditMasyarakat={handleEditMasyarakatById} />
           </div>
         </div>
       )}
@@ -343,7 +350,7 @@ export function DashboardAdminPengaduan() {
             </button>
           </div>
           <div className="card-body">
-            <MasyarakatForm masyarakat={selectedMasyarakat} onSubmit={handleSubmitMasyarakat} onCancel={() => setActiveTab("masyarakat")} loading={false} />
+            <MasyarakatForm masyarakat={selectedMasyarakat} onSubmit={handleSubmitMasyarakat} onCancel={() => setActiveTab("masyarakat")} loading={false} onToggleBan={handleToggleBan} />
           </div>
         </div>
       )}

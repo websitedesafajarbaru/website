@@ -5,32 +5,6 @@ import { TabelSuratPBB } from "../../components/pengelolaan-pbb/TabelSuratPBB"
 import { DetailSuratPBB } from "../../components/pengelolaan-pbb/DetailSuratPBB"
 import { DetailDusunLaporan } from "../../components/pengelolaan-pbb/DetailDusunLaporan"
 import { FormTambahSuratPBB } from "../../components/pengelolaan-pbb/FormTambahSuratPBB"
-import {
-  Home,
-  FileText,
-  BarChart3,
-  PlusCircle,
-  Inbox,
-  Users,
-  Eye,
-  AlertTriangle,
-  Trash2,
-  ArrowLeft,
-  Save,
-  Info,
-  Key,
-  User,
-  Box,
-  RefreshCw,
-  Clipboard,
-  Wallet,
-  Percent,
-  CheckSquare,
-  Pencil,
-  ChevronUp,
-  ChevronDown,
-  CheckCircle,
-} from "lucide-react"
 
 interface PerangkatDesa {
   id: string
@@ -894,19 +868,19 @@ export function DashboardAdminPBB() {
       <ul className="nav nav-tabs mb-3" style={{ backgroundColor: "#fff", padding: "0.5rem 1rem", borderRadius: "4px", border: "1px solid #dee2e6" }}>
         <li className="nav-item">
           <button className={`nav-link ${activeTab === "dusun" ? "active" : ""}`} onClick={() => setActiveTab("dusun")} style={{ border: "none", fontSize: "0.9rem" }}>
-            <Home className="me-2" />
+            <i className="bi bi-house me-2"></i>
             Dusun
           </button>
         </li>
         <li className="nav-item">
           <button className={`nav-link ${activeTab === "surat" ? "active" : ""}`} onClick={() => setActiveTab("surat")} style={{ border: "none", fontSize: "0.9rem" }}>
-            <FileText className="me-2" />
+            <i className="bi bi-file-text me-2"></i>
             Surat PBB
           </button>
         </li>
         <li className="nav-item">
           <button className={`nav-link ${activeTab === "laporan" ? "active" : ""}`} onClick={() => setActiveTab("laporan")} style={{ border: "none", fontSize: "0.9rem" }}>
-            <BarChart3 className="me-2" />
+            <i className="bi bi-bar-chart me-2"></i>
             Laporan
           </button>
         </li>
@@ -918,7 +892,7 @@ export function DashboardAdminPBB() {
             <div className="card-header d-flex justify-content-between align-items-center">
               <h6 className="mb-0">Daftar Dusun</h6>
               <button className="btn btn-sm btn-primary" onClick={() => setActiveTab("tambah-dusun")}>
-                <PlusCircle className="me-1" />
+                <i className="bi bi-plus-circle me-1"></i>
                 Tambah Dusun
               </button>
             </div>
@@ -929,7 +903,7 @@ export function DashboardAdminPBB() {
           {filteredDusun.length === 0 ? (
             <div className="card">
               <div className="card-body text-center py-5">
-                <Box size={64} className="text-muted mb-3" />
+                <i className="bi bi-box text-muted" style={{ fontSize: "4rem" }}></i>
                 <h4 className="mt-3">{searchDusun ? "Tidak Ada Dusun" : "Belum Ada Dusun"}</h4>
                 <p className="text-muted">{searchDusun ? "Tidak ada dusun yang cocok dengan pencarian" : "Belum ada dusun yang terdaftar"}</p>
               </div>
@@ -952,13 +926,13 @@ export function DashboardAdminPBB() {
                       <td>{d.nama_kepala_dusun || "Belum ada"}</td>
                       <td>
                         <span className="badge bg-info">
-                          <User className="me-1" />
+                          <i className="bi bi-person me-1"></i>
                           {d.total_perangkat_desa || 0} Orang
                         </span>
                       </td>
                       <td>
                         <button className="btn btn-sm btn-primary" onClick={() => openDusunDetail(d.id)}>
-                          <Eye className="me-1" />
+                          <i className="bi bi-eye me-1"></i>
                           Lihat Detail
                         </button>
                       </td>
@@ -979,7 +953,7 @@ export function DashboardAdminPBB() {
                 <div className="card-header d-flex justify-content-between align-items-center">
                   <h6 className="mb-0">Daftar Surat PBB</h6>
                   <button className="btn btn-sm btn-primary" onClick={() => setActiveTab("tambah-surat")}>
-                    <PlusCircle className="me-1" />
+                    <i className="bi bi-plus-circle me-1"></i>
                     Tambah Surat
                   </button>
                 </div>
@@ -1019,18 +993,18 @@ export function DashboardAdminPBB() {
                 aria-controls="statisticsCollapse"
               >
                 <h6 className="mb-0">
-                  <BarChart3 className="me-2" />
+                  <i className="bi bi-bar-chart me-2"></i>
                   Statistik Keseluruhan
                 </h6>
-                {showStatistics ? <ChevronUp /> : <ChevronDown />}
+                {showStatistics ? <i className="bi bi-chevron-up"></i> : <i className="bi bi-chevron-down"></i>}
               </button>
             </div>
             <div className={`collapse ${showStatistics ? "show" : ""}`} id="statisticsCollapse">
               <div className="card-body">
-                <div className="row g-3">
+                <div className="row g-1 g-md-2">
                   <div className="col-md-4">
                     <div className="card border-primary h-100">
-                      <div className="card-body">
+                      <div className="card-body p-1 p-md-3">
                         <div className="d-flex align-items-center">
                           <div className="flex-grow-1">
                             <div className="text-muted small mb-1">Total Pajak Terhutang</div>
@@ -1039,7 +1013,7 @@ export function DashboardAdminPBB() {
                             </div>
                           </div>
                           <div className="ms-3">
-                            <Wallet size={32} className="text-primary opacity-75" />
+                            <i className="bi bi-wallet text-primary opacity-75" style={{ fontSize: "2rem" }}></i>
                           </div>
                         </div>
                       </div>
@@ -1048,7 +1022,7 @@ export function DashboardAdminPBB() {
 
                   <div className="col-md-4">
                     <div className="card border-success h-100">
-                      <div className="card-body">
+                      <div className="card-body p-1 p-md-3">
                         <div className="d-flex align-items-center">
                           <div className="flex-grow-1">
                             <div className="text-muted small mb-1">Total Pajak Terbayar</div>
@@ -1057,7 +1031,7 @@ export function DashboardAdminPBB() {
                             </div>
                           </div>
                           <div className="ms-3">
-                            <CheckCircle size={32} className="text-success opacity-75" />
+                            <i className="bi bi-check-circle text-success opacity-75" style={{ fontSize: "2rem" }}></i>
                           </div>
                         </div>
                       </div>
@@ -1066,7 +1040,7 @@ export function DashboardAdminPBB() {
 
                   <div className="col-md-4">
                     <div className="card border-info h-100">
-                      <div className="card-body">
+                      <div className="card-body p-1 p-md-3">
                         <div className="d-flex align-items-center">
                           <div className="flex-grow-1">
                             <div className="text-muted small mb-1">Persentase Pembayaran</div>
@@ -1080,7 +1054,7 @@ export function DashboardAdminPBB() {
                             </div>
                           </div>
                           <div className="ms-3">
-                            <Percent size={32} className="text-info opacity-75" />
+                            <i className="bi bi-percent text-info opacity-75" style={{ fontSize: "2rem" }}></i>
                           </div>
                         </div>
                       </div>
@@ -1089,14 +1063,14 @@ export function DashboardAdminPBB() {
 
                   <div className="col-md-4">
                     <div className="card border-secondary h-100">
-                      <div className="card-body">
+                      <div className="card-body p-1 p-md-3">
                         <div className="d-flex align-items-center">
                           <div className="flex-grow-1">
                             <div className="text-muted small mb-1">Total Surat</div>
                             <div className="h4 mb-0 text-secondary">{laporan.total_surat_keseluruhan}</div>
                           </div>
                           <div className="ms-3">
-                            <FileText size={32} className="text-secondary opacity-75" />
+                            <i className="bi bi-file-text text-secondary opacity-75" style={{ fontSize: "2rem" }}></i>
                           </div>
                         </div>
                       </div>
@@ -1105,14 +1079,14 @@ export function DashboardAdminPBB() {
 
                   <div className="col-md-4">
                     <div className="card border-success h-100">
-                      <div className="card-body">
+                      <div className="card-body p-1 p-md-3">
                         <div className="d-flex align-items-center">
                           <div className="flex-grow-1">
                             <div className="text-muted small mb-1">Surat Sudah Dibayar</div>
                             <div className="h4 mb-0 text-success">{laporan.statistik_per_dusun.reduce((sum, stat) => sum + (stat.total_surat_dibayar || 0), 0)}</div>
                           </div>
                           <div className="ms-3">
-                            <CheckSquare size={32} className="text-success opacity-75" />
+                            <i className="bi bi-check-square text-success opacity-75" style={{ fontSize: "2rem" }}></i>
                           </div>
                         </div>
                       </div>
@@ -1121,14 +1095,14 @@ export function DashboardAdminPBB() {
 
                   <div className="col-md-4">
                     <div className="card border-warning h-100">
-                      <div className="card-body">
+                      <div className="card-body p-1 p-md-3">
                         <div className="d-flex align-items-center">
                           <div className="flex-grow-1">
                             <div className="text-muted small mb-1">Surat Belum Dibayar</div>
                             <div className="h4 mb-0 text-warning">{laporan.statistik_per_dusun.reduce((sum, stat) => sum + (stat.total_surat_belum_bayar || 0), 0)}</div>
                           </div>
                           <div className="ms-3">
-                            <AlertTriangle size={32} className="text-warning opacity-75" />
+                            <i className="bi bi-exclamation-triangle text-warning opacity-75" style={{ fontSize: "2rem" }}></i>
                           </div>
                         </div>
                       </div>
@@ -1142,7 +1116,7 @@ export function DashboardAdminPBB() {
           <div className="card mb-3">
             <div className="card-header">
               <h6 className="mb-0">
-                <BarChart3 className="me-2" />
+                <i className="bi bi-bar-chart me-2"></i>
                 Statistik Per Dusun
               </h6>
             </div>
@@ -1153,7 +1127,7 @@ export function DashboardAdminPBB() {
           {filteredStatistik.length === 0 ? (
             <div className="card">
               <div className="card-body text-center py-5">
-                <Inbox size={64} className="text-muted mb-3" />
+                <i className="bi bi-inbox text-muted" style={{ fontSize: "4rem" }}></i>
                 <h4 className="mt-3">{searchStatistik ? "Tidak Ada Statistik" : "Belum Ada Data Statistik"}</h4>
                 <p className="text-muted">{searchStatistik ? "Tidak ada statistik dusun yang cocok dengan pencarian" : "Belum ada data statistik dusun"}</p>
               </div>
@@ -1176,7 +1150,7 @@ export function DashboardAdminPBB() {
                       <td>{stat.nama_dusun}</td>
                       <td>
                         <span className="badge bg-info">
-                          <FileText className="me-1" />
+                          <i className="bi bi-file-text me-1"></i>
                           {stat.total_surat || 0}
                         </span>
                       </td>
@@ -1210,7 +1184,7 @@ export function DashboardAdminPBB() {
                               setActiveTab("detail-laporan-dusun")
                             }}
                           >
-                            <Eye className="me-1" />
+                            <i className="bi bi-eye me-1"></i>
                             Detail
                           </button>
                           <select
@@ -1247,7 +1221,7 @@ export function DashboardAdminPBB() {
           <div className="card-header d-flex justify-content-between align-items-center">
             <h6 className="mb-0">Tambah Dusun Baru</h6>
             <button className="btn btn-sm btn-secondary" onClick={() => setActiveTab("dusun")}>
-              <ArrowLeft className="me-1" />
+              <i className="bi bi-arrow-left me-1"></i>
               Kembali ke Daftar
             </button>
           </div>
@@ -1260,12 +1234,12 @@ export function DashboardAdminPBB() {
                 <input type="text" className="form-control" value={dusunForm.nama_dusun} onChange={(e) => setDusunForm({ ...dusunForm, nama_dusun: e.target.value })} required />
               </div>
               <div className="alert alert-info">
-                <Info className="me-2" />
+                <i className="bi bi-info-circle me-2"></i>
                 Setelah dusun dibuat, token untuk registrasi perangkat desa akan ditampilkan. Simpan token tersebut untuk diberikan kepada perangkat desa.
               </div>
               <div className="d-flex gap-2">
                 <button type="submit" className="btn btn-primary">
-                  <Save className="me-1" />
+                  <i className="bi bi-save me-1"></i>
                   Simpan
                 </button>
                 <button type="button" className="btn btn-secondary" onClick={() => setActiveTab("dusun")}>
@@ -1293,7 +1267,7 @@ export function DashboardAdminPBB() {
           <div className="card-header d-flex justify-content-between align-items-center">
             <h6 className="mb-0">Tambah Perangkat Desa Baru</h6>
             <button className="btn btn-sm btn-secondary" onClick={() => setActiveTab("detail-dusun")}>
-              <ArrowLeft className="me-1" />
+              <i className="bi bi-arrow-left me-1"></i>
               Kembali ke Detail Dusun
             </button>
           </div>
@@ -1362,7 +1336,7 @@ export function DashboardAdminPBB() {
               </div>
               <div className="d-flex gap-2 mt-4">
                 <button type="submit" className="btn btn-primary">
-                  <Save className="me-1" />
+                  <i className="bi bi-save me-1"></i>
                   Simpan
                 </button>
                 <button type="button" className="btn btn-secondary" onClick={() => setActiveTab("detail-dusun")}>
@@ -1385,7 +1359,7 @@ export function DashboardAdminPBB() {
                 setDusunTokens(null)
               }}
             >
-              <ArrowLeft className="me-1" />
+              <i className="bi bi-arrow-left me-1"></i>
               Kembali ke Daftar
             </button>
           </div>
@@ -1395,7 +1369,7 @@ export function DashboardAdminPBB() {
                 <div className="card border-primary mb-3">
                   <div className="card-header bg-primary text-white">
                     <h6 className="mb-0">
-                      <Info className="me-2" />
+                      <i className="bi bi-info-circle me-2"></i>
                       Informasi Dusun
                     </h6>
                   </div>
@@ -1415,7 +1389,7 @@ export function DashboardAdminPBB() {
                         </div>
                         <div className="d-flex gap-2">
                           <button type="submit" className="btn btn-primary">
-                            <Save className="me-1" />
+                            <i className="bi bi-save me-1"></i>
                             Simpan
                           </button>
                           <button type="button" className="btn btn-secondary" onClick={cancelEditDusun}>
@@ -1436,11 +1410,11 @@ export function DashboardAdminPBB() {
                           </div>
                           <div className="d-flex flex-column gap-2">
                             <button className="btn btn-warning btn-sm" onClick={startEditDusun}>
-                              <Pencil className="me-1" />
+                              <i className="bi bi-pencil me-1"></i>
                               Edit Dusun
                             </button>
                             <button className="btn btn-danger btn-sm" onClick={deleteDusun}>
-                              <Trash2 className="me-1" />
+                              <i className="bi bi-trash me-1"></i>
                               Hapus Dusun
                             </button>
                           </div>
@@ -1449,7 +1423,7 @@ export function DashboardAdminPBB() {
                           <strong>Total Perangkat Desa:</strong>
                           <p className="mb-0">
                             <span className="badge bg-info">
-                              <Users className="me-1" />
+                              <i className="bi bi-people me-1"></i>
                               {selectedDusun.total_perangkat_desa || 0} Perangkat
                             </span>
                           </p>
@@ -1464,7 +1438,7 @@ export function DashboardAdminPBB() {
                 <div className="card border-warning mb-3">
                   <div className="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
                     <h6 className="mb-0">
-                      <Key className="me-2" />
+                      <i className="bi bi-key me-2"></i>
                       Token Registrasi Perangkat Desa
                     </h6>
                     <button
@@ -1523,19 +1497,19 @@ export function DashboardAdminPBB() {
                         }
                       }}
                     >
-                      <RefreshCw className="me-1" />
+                      <i className="bi bi-arrow-clockwise me-1"></i>
                       Regenerate Token
                     </button>
                   </div>
                   <div className="card-body">
                     <div className="alert alert-info">
-                      <Info className="me-2" />
+                      <i className="bi bi-info-circle me-2"></i>
                       Token ini digunakan oleh perangkat desa untuk mendaftar ke sistem. Berikan token yang sesuai dengan jabatan kepada calon perangkat desa.
                     </div>
                     <div className="row g-3">
                       <div className="col-md-6">
                         <label className="form-label fw-bold text-success">
-                          <User className="me-1" />
+                          <i className="bi bi-person me-1"></i>
                           Token Kepala Dusun
                         </label>
                         <div className="input-group">
@@ -1558,14 +1532,14 @@ export function DashboardAdminPBB() {
                             }}
                             disabled={!dusunTokens?.tokenKepalaDusun}
                           >
-                            <Clipboard className="me-1" />
+                            <i className="bi bi-clipboard me-1"></i>
                             Salin
                           </button>
                         </div>
                       </div>
                       <div className="col-md-6">
                         <label className="form-label fw-bold text-warning">
-                          <Users className="me-1" />
+                          <i className="bi bi-people me-1"></i>
                           Token Ketua RT
                         </label>
                         <div className="input-group">
@@ -1588,7 +1562,7 @@ export function DashboardAdminPBB() {
                             }}
                             disabled={!dusunTokens?.tokenKetuaRT}
                           >
-                            <Clipboard className="me-1" />
+                            <i className="bi bi-clipboard me-1"></i>
                             Salin
                           </button>
                         </div>
@@ -1602,7 +1576,7 @@ export function DashboardAdminPBB() {
                 <div className="card mb-3">
                   <div className="card-header d-flex justify-content-between align-items-center">
                     <h6 className="mb-0">
-                      <Users className="me-2" />
+                      <i className="bi bi-people me-2"></i>
                       Daftar Perangkat Desa
                     </h6>
                     <button
@@ -1618,7 +1592,7 @@ export function DashboardAdminPBB() {
                         setIsAddingPerangkat(true)
                       }}
                     >
-                      <User className="me-1" />
+                      <i className="bi bi-person me-1"></i>
                       Tambah Perangkat
                     </button>
                   </div>
@@ -1682,7 +1656,7 @@ export function DashboardAdminPBB() {
                         </div>
                         <div className="d-flex gap-2 mt-4">
                           <button type="submit" className="btn btn-primary">
-                            <Save className="me-1" />
+                            <i className="bi bi-save me-1"></i>
                             Simpan
                           </button>
                           <button type="button" className="btn btn-secondary" onClick={() => setIsAddingPerangkat(false)}>
@@ -1726,7 +1700,7 @@ export function DashboardAdminPBB() {
                               <td>
                                 <div className="d-flex gap-1">
                                   <button className="btn btn-sm btn-primary" onClick={() => openPerangkatDetail(perangkat)}>
-                                    <Pencil className="me-1" />
+                                    <i className="bi bi-pencil me-1"></i>
                                     Edit
                                   </button>
                                   <button
@@ -1748,7 +1722,7 @@ export function DashboardAdminPBB() {
                                       }
                                     }}
                                   >
-                                    <Trash2 className="me-1" />
+                                    <i className="bi bi-trash me-1"></i>
                                     Hapus
                                   </button>
                                 </div>
@@ -1771,7 +1745,7 @@ export function DashboardAdminPBB() {
           <div className="card-header d-flex justify-content-between align-items-center">
             <h6 className="mb-0">Edit Perangkat Desa: {selectedPerangkat.nama_lengkap}</h6>
             <button className="btn btn-sm btn-secondary" onClick={() => setActiveTab("detail-dusun")}>
-              <ArrowLeft className="me-1" />
+              <i className="bi bi-arrow-left me-1"></i>
               Kembali ke Detail Dusun
             </button>
           </div>
@@ -1837,7 +1811,7 @@ export function DashboardAdminPBB() {
               </div>
               <div className="d-flex gap-2 mt-4">
                 <button type="submit" className="btn btn-primary">
-                  <Save className="me-1" />
+                  <i className="bi bi-save me-1"></i>
                   Simpan Perubahan
                 </button>
               </div>

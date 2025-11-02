@@ -1,6 +1,5 @@
 import { Aduan } from "../../types"
 import { formatToWIB } from "../../utils/time"
-import { Box, Eye } from "lucide-react"
 
 interface AduanTableProps {
   aduan: Aduan[]
@@ -46,7 +45,7 @@ export function AduanTable({ aduan, loading, onViewDetail, role, currentPage, it
       return (
         <div className="card">
           <div className="card-body text-center py-5">
-            <Box size={64} className="text-muted mb-3" />
+            <i className="bi bi-box text-muted mb-3" style={{ fontSize: "4rem" }}></i>
             <h4 className="mt-3">Tidak Ada Aduan</h4>
             <p className="text-muted">Belum ada aduan yang masuk</p>
           </div>
@@ -56,7 +55,7 @@ export function AduanTable({ aduan, loading, onViewDetail, role, currentPage, it
       return (
         <div className="card">
           <div className="card-body text-center py-5">
-            <Box size={64} className="text-muted mb-3" />
+            <i className="bi bi-box text-muted mb-3" style={{ fontSize: "4rem" }}></i>
             <h4 className="mt-3">Belum Ada Aduan</h4>
             <p className="text-muted">Anda belum memiliki aduan. Buat aduan pertama Anda!</p>
           </div>
@@ -89,7 +88,7 @@ export function AduanTable({ aduan, loading, onViewDetail, role, currentPage, it
               <td>
                 <div className={role === "admin" ? "action-buttons d-flex justify-content-center" : ""}>
                   <button className="btn btn-sm btn-primary" onClick={() => onViewDetail(item.id)}>
-                    <Eye className="me-1" />
+                    <i className="bi bi-eye me-1"></i>
                     Lihat Detail
                   </button>
                 </div>

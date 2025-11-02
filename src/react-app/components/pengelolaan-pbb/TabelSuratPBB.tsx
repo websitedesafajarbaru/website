@@ -1,6 +1,5 @@
 import { SuratPBB } from "../../types"
 import { formatStatusPembayaran, getStatusPembayaranColor } from "../../utils/formatters"
-import { Package, Eye } from "lucide-react"
 
 interface TabelSuratPBBProps {
   suratPBB: SuratPBB[]
@@ -31,7 +30,7 @@ export function TabelSuratPBB({ suratPBB, searchTerm, onSearchChange, onSuratCli
       {filteredSuratPBB.length === 0 ? (
         <div className="card">
           <div className="card-body text-center py-5">
-            <Package style={{ fontSize: "3rem", color: "#ccc" }} />
+            <i className="bi bi-box-seam" style={{ fontSize: "3rem", color: "#ccc" }}></i>
             <h4 className="mt-3">{searchTerm ? "Tidak Ada Surat PBB" : "Belum Ada Surat PBB"}</h4>
             <p className="text-muted">{searchTerm ? "Tidak ada surat PBB yang cocok dengan pencarian" : "Belum ada surat PBB yang terdaftar"}</p>
           </div>
@@ -63,7 +62,7 @@ export function TabelSuratPBB({ suratPBB, searchTerm, onSearchChange, onSuratCli
                   </td>
                   <td>
                     <button className="btn btn-sm btn-outline-primary" onClick={() => onSuratClick(s)}>
-                      <Eye className="me-1" />
+                      <i className="bi bi-eye me-1"></i>
                       Detail
                     </button>
                   </td>

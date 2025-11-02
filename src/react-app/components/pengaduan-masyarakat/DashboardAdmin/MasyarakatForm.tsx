@@ -6,6 +6,7 @@ interface MasyarakatFormProps {
   onSubmit: (data: MasyarakatFormData) => void
   onCancel: () => void
   loading: boolean
+  onToggleBan?: (id: string, currentStatus: string) => void
 }
 
 export interface MasyarakatFormData {
@@ -17,7 +18,7 @@ export interface MasyarakatFormData {
   password?: string
 }
 
-export function MasyarakatForm({ masyarakat, onSubmit, onCancel, loading }: MasyarakatFormProps) {
+export function MasyarakatForm({ masyarakat, onSubmit, onCancel, loading, onToggleBan }: MasyarakatFormProps) {
   const [formData, setFormData] = useState<MasyarakatFormData>({
     nama_lengkap: "",
     username: "",
@@ -170,6 +171,24 @@ export function MasyarakatForm({ masyarakat, onSubmit, onCancel, loading }: Masy
       </div>
 
       <div className="d-flex justify-content-end gap-2 mt-4">
+        {masyarakat && onToggleBan && (
+          <button
+            type="button"
+            className={`btn ${masyarakat.status === "active" ? "btn-outline-warning" : "btn-outline-success"}`}
+            onClick={() => onToggleBan(masyarakat.id, masyarakat.status)}
+            disabled={loading}
+          >
+            {masyarakat.status === "active" ? (
+              <>
+                <i className="bi bi-x me-1"></i>Ban Masyarakat
+              </>
+            ) : (
+              <>
+                <i className="bi bi-check me-1"></i>Unban Masyarakat
+              </>
+            )}
+          </button>
+        )}
         <button type="button" className="btn btn-secondary" onClick={onCancel} disabled={loading}>
           Batal
         </button>

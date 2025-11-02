@@ -1,5 +1,4 @@
 import { SuratPBB } from "../../types"
-import { Pencil, Check, X, Trash2, ArrowLeft } from "lucide-react"
 
 interface DetailSuratPBBProps {
   surat: SuratPBB
@@ -37,29 +36,29 @@ export function DetailSuratPBB({
             <>
               {!isEditing ? (
                 <button className="btn btn-warning btn-sm" onClick={onStartEdit}>
-                  <Pencil className="me-1" />
+                  <i className="bi bi-pencil me-1"></i>
                   Edit
                 </button>
               ) : (
                 <>
                   <button className="btn btn-success btn-sm" onClick={onSaveEdit}>
-                    <Check className="me-1" />
+                    <i className="bi bi-check me-1"></i>
                     Simpan
                   </button>
                   <button className="btn btn-secondary btn-sm" onClick={onCancelEdit}>
-                    <X className="me-1" />
+                    <i className="bi bi-x me-1"></i>
                     Batal
                   </button>
                 </>
               )}
               <button className="btn btn-danger btn-sm" onClick={onDelete}>
-                <Trash2 className="me-1" />
+                <i className="bi bi-trash me-1"></i>
                 Hapus
               </button>
             </>
           )}
           <button className="btn btn-secondary btn-sm" onClick={onBack}>
-            <ArrowLeft className="me-1" />
+            <i className="bi bi-arrow-left me-1"></i>
             Kembali ke Daftar
           </button>
         </div>
