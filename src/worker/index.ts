@@ -10,6 +10,7 @@ import suratPBBRoutes from "./routes/surat-pbb"
 import publicRoutes from "./routes/public"
 import statistikRoutes from "./routes/statistik"
 import masyarakatRoutes from "./routes/masyarakat"
+import trackingRoutes from "./routes/tracking"
 
 const app = new Hono<{ Bindings: Env }>()
 
@@ -23,18 +24,44 @@ app.route("/api/pengelolaan-pbb", pengelolaanPBBRoutes)
 app.route("/api/perangkat-desa", perangkatDesaRoutes)
 app.route("/api/surat-pbb", suratPBBRoutes)
 app.route("/api/masyarakat", masyarakatRoutes)
+app.route("/api/tracking", trackingRoutes)
 app.route("/api", publicRoutes)
 app.route("/api/statistik", statistikRoutes)
 
+// Serve React app for all non-API routes
 app.get("*", async (c) => {
-  const url = new URL(c.req.url)
-  if (url.pathname.startsWith("/api/")) {
-    return c.text("Not Found", 404)
+  try {
+    // Try to fetch the asset from Cloudflare Workers Assets
+    const response = await c.env.ASSETS.fetch(c.req.raw)
+    
+    // If asset not found (404), serve index.html for client-side routing
+    if (response.status === 404) {
+      const indexRequest = new Request(new URL("/index.html", c.req.url), c.req.raw)
+      return c.env.ASSETS.fetch(indexRequest)
+    }
+    
+    return response
+  } catch {
+    // Fallback to index.html if there's any error
+    const indexRequest = new Request(new URL("/index.html", c.req.url), c.req.raw)
+    return c.env.ASSETS.fetch(indexRequest)
   }
-
-  const indexRequest = new Request(`${url.origin}/index.html`, c.req)
-  const page = await c.env.ASSETS.fetch(indexRequest)
-  return page
 })
+
+// Scheduled event handler for deleting old images (60 days)
+export const scheduled: ExportedHandlerScheduledHandler<Env> = async (_event, env) => {
+  try {
+    console.log("Running scheduled cleanup of old images...")
+    
+    // Delete images older than 60 days
+    const result = await env.DB.prepare(
+      "DELETE FROM gambar_aduan WHERE julianday('now') - julianday(waktu_dibuat) > 60"
+    ).run()
+    
+    console.log(`Deleted ${result.meta.changes} old images`)
+  } catch (error) {
+    console.error("Error in scheduled cleanup:", error)
+  }
+}
 
 export default app

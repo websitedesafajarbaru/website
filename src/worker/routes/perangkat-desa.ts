@@ -31,7 +31,7 @@ perangkatDesaRoutes.post("/", async (c) => {
       }
     }
 
-    const existingUser = await c.env.DB.prepare("SELECT id FROM pengguna WHERE username = ?").bind(username).first()
+    const existingUser = await c.env.DB.prepare("SELECT id FROM pengguna WHERE LOWER(username) = ?").bind(username.toLowerCase()).first()
     if (existingUser) {
       return c.json({ error: "Username sudah digunakan" }, 400)
     }
@@ -44,7 +44,6 @@ perangkatDesaRoutes.post("/", async (c) => {
     if (jabatan === "kepala_dusun") {
       const existingKepalaDusun = await c.env.DB.prepare("SELECT id FROM perangkat_desa WHERE id_dusun = ? AND jabatan = 'kepala_dusun'").bind(id_dusun).first()
       if (existingKepalaDusun) {
-        // Demote existing kepala_dusun to ketua_rt
         await c.env.DB.batch([
           c.env.DB.prepare("UPDATE pengguna SET roles = 'ketua_rt', waktu_diperbarui = datetime('now') WHERE id = ?").bind(existingKepalaDusun.id),
           c.env.DB.prepare("UPDATE perangkat_desa SET jabatan = 'ketua_rt', waktu_diperbarui = datetime('now') WHERE id = ?").bind(existingKepalaDusun.id),
@@ -60,7 +59,7 @@ perangkatDesaRoutes.post("/", async (c) => {
       `INSERT INTO pengguna (id, nama_lengkap, username, password, roles, waktu_dibuat, waktu_diperbarui)
        VALUES (?, ?, ?, ?, ?, datetime("now"), datetime("now"))`
     )
-      .bind(newId, nama_lengkap, username, hashedPassword, jabatan)
+      .bind(newId, nama_lengkap, username.toLowerCase(), hashedPassword, jabatan)
       .run()
 
     await c.env.DB.prepare(
@@ -170,7 +169,6 @@ perangkatDesaRoutes.put("/:id", async (c) => {
     if (jabatan === "kepala_dusun") {
       const existingKepalaDusun = await c.env.DB.prepare("SELECT id FROM perangkat_desa WHERE id_dusun = ? AND jabatan = 'kepala_dusun' AND id != ?").bind(id_dusun, id).first()
       if (existingKepalaDusun) {
-        // Demote existing kepala_dusun to ketua_rt
         await c.env.DB.batch([
           c.env.DB.prepare("UPDATE pengguna SET roles = 'ketua_rt', waktu_diperbarui = datetime('now') WHERE id = ?").bind(existingKepalaDusun.id),
           c.env.DB.prepare("UPDATE perangkat_desa SET jabatan = 'ketua_rt', waktu_diperbarui = datetime('now') WHERE id = ?").bind(existingKepalaDusun.id),
@@ -187,8 +185,13 @@ perangkatDesaRoutes.put("/:id", async (c) => {
     }
 
     if (username) {
+      const lowerUsername = username.toLowerCase()
+      const existingUser = await c.env.DB.prepare("SELECT id FROM pengguna WHERE LOWER(username) = ? AND id != ?").bind(lowerUsername, id).first()
+      if (existingUser) {
+        return c.json({ error: "Username sudah digunakan" }, 400)
+      }
       penggunaQuery += ", username = ?"
-      penggunaParams.push(username)
+      penggunaParams.push(lowerUsername)
     }
 
     if (password) {
@@ -246,7 +249,7 @@ perangkatDesaRoutes.delete("/:id", requireRole("admin"), async (c) => {
     }
 
     await c.env.DB.prepare("DELETE FROM tanggapan_aduan WHERE id_perangkat_desa = ?").bind(id).run()
-    await c.env.DB.prepare("DELETE FROM surat_pbb WHERE id_perangkat_desa = ?").bind(id).run()
+    await c.env.DB.prepare("DELETE FROM surat_pbb WHERE id_pengguna = ?").bind(id).run()
     await c.env.DB.prepare("DELETE FROM perangkat_desa WHERE id = ?").bind(id).run()
     await c.env.DB.prepare("DELETE FROM pengguna WHERE id = ?").bind(id).run()
 
