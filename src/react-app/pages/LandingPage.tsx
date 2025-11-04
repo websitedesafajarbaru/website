@@ -6,16 +6,16 @@ export function LandingPage() {
     <div>
       {/* Hero Section */}
       <section className="hero-section bg-primary text-white py-5">
-        <div className="container-wide text-center">
+        <div className="container-wide text-center px-3">
           <img src={logo} alt="Logo SIFABAR" className="mb-3" style={{ height: "80px" }} />
           <h1 className="display-4 fw-bold mb-3">SIFABAR</h1>
           <p className="lead mb-4">Sistem Informasi Desa Fajar Baru - Portal Informasi dan Layanan Digital Untuk Warga Desa</p>
-          <div className="d-flex justify-content-center gap-3">
+          <div className="d-flex justify-content-center gap-3 flex-column flex-md-row mx-3">
             <Link to="/cek-pembayaran" className="btn btn-light btn-lg" style={{ minWidth: "200px" }}>
-              Cek Pembayaran PBB
+              Cek Pembayaran
             </Link>
             <Link to="/login" className="btn btn-outline-light btn-lg" style={{ minWidth: "200px" }}>
-              Pengaduan Masyarakat
+              Login
             </Link>
           </div>
         </div>

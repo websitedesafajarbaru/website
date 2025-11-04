@@ -58,11 +58,11 @@ CREATE TABLE surat_pbb (
     tahun_pajak INT NOT NULL,
     status_pembayaran TEXT NOT NULL CHECK (status_pembayaran IN ('bayar_sendiri_di_bank', 'bayar_lewat_perangkat_desa', 'belum_bayar', 'pindah_rumah', 'tidak_diketahui')),
     id_dusun INT NOT NULL,
-    id_perangkat_desa TEXT,
+    id_pengguna TEXT NOT NULL,
     waktu_dibuat TEXT DEFAULT (datetime('now')),
     waktu_diperbarui TEXT DEFAULT (datetime('now')),
     FOREIGN KEY (id_dusun) REFERENCES dusun(id) ON DELETE CASCADE,
-    FOREIGN KEY (id_perangkat_desa) REFERENCES perangkat_desa(id) ON DELETE SET NULL
+    FOREIGN KEY (id_pengguna) REFERENCES pengguna(id) ON DELETE CASCADE
 );
 
 CREATE TABLE aduan (

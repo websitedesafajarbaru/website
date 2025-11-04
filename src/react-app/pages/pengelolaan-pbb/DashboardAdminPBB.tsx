@@ -5,6 +5,9 @@ import { TabelSuratPBB } from "../../components/pengelolaan-pbb/TabelSuratPBB"
 import { DetailSuratPBB } from "../../components/pengelolaan-pbb/DetailSuratPBB"
 import { DetailDusunLaporan } from "../../components/pengelolaan-pbb/DetailDusunLaporan"
 import { FormTambahSuratPBB } from "../../components/pengelolaan-pbb/FormTambahSuratPBB"
+import * as XLSX from 'xlsx'
+import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
 
 interface PerangkatDesa {
   id: string
@@ -93,6 +96,73 @@ export function DashboardAdminPBB() {
     return p.nama_lengkap.toLowerCase().includes(searchLower) || p.username.toLowerCase().includes(searchLower) || p.jabatan.toLowerCase().includes(searchLower)
   })
 
+  const exportToExcel = () => {
+    const worksheet = XLSX.utils.json_to_sheet(suratPBB.map(s => ({
+      'NOP': s.nomor_objek_pajak,
+      'Nama Wajib Pajak': s.nama_wajib_pajak,
+      'Alamat Wajib Pajak': s.alamat_wajib_pajak,
+      'Alamat Objek Pajak': s.alamat_objek_pajak,
+      'Luas Tanah': `${s.luas_tanah} m²`,
+      'Luas Bangunan': `${s.luas_bangunan} m²`,
+      'Nilai Jual Objek Pajak': `Rp ${Number(s.nilai_jual_objek_pajak).toLocaleString('id-ID')}`,
+      'Tahun Pajak': s.tahun_pajak,
+      'Jumlah Pajak Terhutang': `Rp ${Number(s.jumlah_pajak_terhutang).toLocaleString('id-ID')}`,
+      'Status Pembayaran': s.status_pembayaran.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+      'Waktu Dibuat': s.waktu_dibuat,
+      'Waktu Diperbarui': s.waktu_diperbarui,
+      'ID Dusun': s.id_dusun,
+      'Nama Dusun': s.nama_dusun
+    })))
+    const workbook = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Surat PBB')
+    XLSX.writeFile(workbook, 'surat_pbb.xlsx')
+  }
+
+  const exportToPDF = () => {
+    const doc = new jsPDF()
+    doc.text('Daftar Surat PBB', 14, 10)
+
+    const tableColumn = [
+      'NOP',
+      'Nama Wajib Pajak',
+      'Alamat Wajib Pajak',
+      'Alamat Objek Pajak',
+      'Luas Tanah',
+      'Luas Bangunan',
+      'Nilai Jual',
+      'Jumlah Pajak',
+      'Tahun Pajak',
+      'Status',
+      'Dusun',
+      'Pengguna'
+    ]
+
+    const tableRows = suratPBB.map(s => [
+      s.nomor_objek_pajak,
+      s.nama_wajib_pajak,
+      s.alamat_wajib_pajak,
+      s.alamat_objek_pajak,
+      `${s.luas_tanah} m²`,
+      `${s.luas_bangunan} m²`,
+      `Rp ${Number(s.nilai_jual_objek_pajak).toLocaleString('id-ID')}`,
+      `Rp ${Number(s.jumlah_pajak_terhutang).toLocaleString('id-ID')}`,
+      s.tahun_pajak,
+      s.status_pembayaran.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+      s.nama_dusun || '',
+      s.nama_perangkat || ''
+    ])
+
+    autoTable(doc, {
+      head: [tableColumn],
+      body: tableRows,
+      startY: 20,
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [41, 128, 185] },
+    })
+
+    doc.save('surat_pbb.pdf')
+  }
+
   const fetchActiveYear = useCallback(async () => {
     try {
       const response = await fetch("/api/statistik/active-year", {
@@ -128,7 +198,8 @@ export function DashboardAdminPBB() {
           title: "Error",
           text: error.message || "Gagal mengatur tahun aktif",
           icon: "error",
-          confirmButtonText: "OK",
+          timer: 3000,
+          showConfirmButton: false,
         })
       }
     } catch (error) {
@@ -137,7 +208,8 @@ export function DashboardAdminPBB() {
         title: "Error",
         text: "Terjadi kesalahan saat mengatur tahun aktif",
         icon: "error",
-        confirmButtonText: "OK",
+        timer: 3000,
+        showConfirmButton: false,
       })
     }
   }
@@ -267,7 +339,8 @@ export function DashboardAdminPBB() {
           title: "Berhasil!",
           text: "Dusun berhasil ditambahkan!",
           icon: "success",
-          confirmButtonText: "OK",
+          timer: 3000,
+          showConfirmButton: false,
         })
       } else {
         const error = await response.json()
@@ -275,7 +348,8 @@ export function DashboardAdminPBB() {
           title: "Error",
           text: error.message || "Gagal menambahkan dusun",
           icon: "error",
-          confirmButtonText: "OK",
+          timer: 3000,
+          showConfirmButton: false,
         })
       }
     } catch (err) {
@@ -332,7 +406,8 @@ export function DashboardAdminPBB() {
           title: "Berhasil!",
           text: "Surat PBB berhasil ditambahkan!",
           icon: "success",
-          confirmButtonText: "OK",
+          timer: 3000,
+          showConfirmButton: false,
         })
       } else {
         const error = await response.json()
@@ -340,7 +415,8 @@ export function DashboardAdminPBB() {
           title: "Error",
           text: error.message || "Gagal menambahkan surat PBB",
           icon: "error",
-          confirmButtonText: "OK",
+          timer: 3000,
+          showConfirmButton: false,
         })
       }
     } catch (err) {
@@ -349,7 +425,8 @@ export function DashboardAdminPBB() {
         title: "Error",
         text: "Terjadi kesalahan",
         icon: "error",
-        confirmButtonText: "OK",
+        timer: 3000,
+        showConfirmButton: false,
       })
     }
   }
@@ -388,7 +465,8 @@ export function DashboardAdminPBB() {
           title: "Berhasil!",
           text: "Perangkat desa berhasil ditambahkan!",
           icon: "success",
-          confirmButtonText: "OK",
+          timer: 3000,
+          showConfirmButton: false,
         })
       } else {
         const error = await response.json()
@@ -396,7 +474,8 @@ export function DashboardAdminPBB() {
           title: "Error",
           text: error.message || "Gagal menambahkan perangkat desa",
           icon: "error",
-          confirmButtonText: "OK",
+          timer: 3000,
+          showConfirmButton: false,
         })
       }
     } catch (err) {
@@ -405,7 +484,8 @@ export function DashboardAdminPBB() {
         title: "Error",
         text: "Terjadi kesalahan",
         icon: "error",
-        confirmButtonText: "OK",
+        timer: 3000,
+        showConfirmButton: false,
       })
     }
   }
@@ -446,7 +526,8 @@ export function DashboardAdminPBB() {
           title: "Berhasil!",
           text: "Data perangkat desa berhasil diperbarui!",
           icon: "success",
-          confirmButtonText: "OK",
+          timer: 3000,
+          showConfirmButton: false,
         })
         setActiveTab("detail-dusun")
         if (selectedDusun) {
@@ -458,7 +539,8 @@ export function DashboardAdminPBB() {
           title: "Error",
           text: error.message || "Gagal memperbarui data perangkat desa",
           icon: "error",
-          confirmButtonText: "OK",
+          timer: 3000,
+          showConfirmButton: false,
         })
       }
     } catch (err) {
@@ -467,7 +549,8 @@ export function DashboardAdminPBB() {
         title: "Error",
         text: "Terjadi kesalahan",
         icon: "error",
-        confirmButtonText: "OK",
+        timer: 3000,
+        showConfirmButton: false,
       })
     }
   }
@@ -481,6 +564,7 @@ export function DashboardAdminPBB() {
       text: `Apakah Anda yakin ingin menghapus perangkat desa "${targetPerangkat.nama_lengkap}"? Tindakan ini tidak dapat dibatalkan.`,
       icon: "warning",
       showCancelButton: true,
+      showCloseButton: true,
       confirmButtonColor: "#d33",
       cancelButtonColor: "#3085d6",
       confirmButtonText: "Ya, Hapus",
@@ -502,7 +586,8 @@ export function DashboardAdminPBB() {
           title: "Berhasil!",
           text: "Perangkat desa berhasil dihapus!",
           icon: "success",
-          confirmButtonText: "OK",
+          timer: 3000,
+          showConfirmButton: false,
         })
         setActiveTab("detail-dusun")
         if (selectedDusun) {
@@ -514,7 +599,8 @@ export function DashboardAdminPBB() {
           title: "Error",
           text: error.message || "Gagal menghapus perangkat desa",
           icon: "error",
-          confirmButtonText: "OK",
+          timer: 3000,
+          showConfirmButton: false,
         })
       }
     } catch (err) {
@@ -523,7 +609,8 @@ export function DashboardAdminPBB() {
         title: "Error",
         text: "Terjadi kesalahan",
         icon: "error",
-        confirmButtonText: "OK",
+        timer: 3000,
+        showConfirmButton: false,
       })
     }
   }
@@ -536,6 +623,7 @@ export function DashboardAdminPBB() {
       text: `Apakah Anda yakin ingin menghapus dusun "${selectedDusun.nama_dusun}"? Semua data terkait (surat PBB, perangkat desa, dll.) akan dihapus permanen. Tindakan ini tidak dapat dibatalkan.`,
       icon: "warning",
       showCancelButton: true,
+      showCloseButton: true,
       confirmButtonColor: "#d33",
       cancelButtonColor: "#3085d6",
       confirmButtonText: "Ya, Hapus",
@@ -557,7 +645,8 @@ export function DashboardAdminPBB() {
           title: "Berhasil!",
           text: "Dusun berhasil dihapus!",
           icon: "success",
-          confirmButtonText: "OK",
+          timer: 3000,
+          showConfirmButton: false,
         })
         setActiveTab("dusun")
         fetchDusun()
@@ -567,7 +656,8 @@ export function DashboardAdminPBB() {
           title: "Error",
           text: error.message || "Gagal menghapus dusun",
           icon: "error",
-          confirmButtonText: "OK",
+          timer: 3000,
+          showConfirmButton: false,
         })
       }
     } catch (err) {
@@ -576,7 +666,8 @@ export function DashboardAdminPBB() {
         title: "Error",
         text: "Terjadi kesalahan",
         icon: "error",
-        confirmButtonText: "OK",
+        timer: 3000,
+        showConfirmButton: false,
       })
     }
   }
@@ -593,7 +684,8 @@ export function DashboardAdminPBB() {
         title: "Error",
         text: "Nama dusun tidak boleh kosong",
         icon: "error",
-        confirmButtonText: "OK",
+        timer: 3000,
+        showConfirmButton: false,
       })
       return
     }
@@ -613,7 +705,8 @@ export function DashboardAdminPBB() {
           title: "Berhasil!",
           text: "Nama dusun berhasil diperbarui!",
           icon: "success",
-          confirmButtonText: "OK",
+          timer: 3000,
+          showConfirmButton: false,
         })
         setIsEditingDusun(false)
         setEditDusunName("")
@@ -624,7 +717,8 @@ export function DashboardAdminPBB() {
           title: "Error",
           text: error.message || "Gagal memperbarui nama dusun",
           icon: "error",
-          confirmButtonText: "OK",
+          timer: 3000,
+          showConfirmButton: false,
         })
       }
     } catch (err) {
@@ -633,7 +727,8 @@ export function DashboardAdminPBB() {
         title: "Error",
         text: "Terjadi kesalahan",
         icon: "error",
-        confirmButtonText: "OK",
+        timer: 3000,
+        showConfirmButton: false,
       })
     }
   }
@@ -681,7 +776,8 @@ export function DashboardAdminPBB() {
           title: "Berhasil!",
           text: "Status data PBB berhasil diperbarui!",
           icon: "success",
-          confirmButtonText: "OK",
+          timer: 3000,
+          showConfirmButton: false,
         })
         fetchLaporan()
       } else {
@@ -690,7 +786,8 @@ export function DashboardAdminPBB() {
           title: "Error",
           text: error.message || "Gagal memperbarui status data PBB",
           icon: "error",
-          confirmButtonText: "OK",
+          timer: 3000,
+          showConfirmButton: false,
         })
       }
     } catch (err) {
@@ -699,7 +796,8 @@ export function DashboardAdminPBB() {
         title: "Error",
         text: "Terjadi kesalahan",
         icon: "error",
-        confirmButtonText: "OK",
+        timer: 3000,
+        showConfirmButton: false,
       })
     }
   }
@@ -725,7 +823,8 @@ export function DashboardAdminPBB() {
           title: "Error",
           text: "Gagal memperbarui status pembayaran",
           icon: "error",
-          confirmButtonText: "OK",
+          timer: 3000,
+          showConfirmButton: false,
         })
       }
     } catch (err) {
@@ -734,7 +833,8 @@ export function DashboardAdminPBB() {
         title: "Error",
         text: "Terjadi kesalahan",
         icon: "error",
-        confirmButtonText: "OK",
+        timer: 3000,
+        showConfirmButton: false,
       })
     }
   }
@@ -763,7 +863,8 @@ export function DashboardAdminPBB() {
           title: "Berhasil!",
           text: "Surat PBB berhasil diperbarui",
           icon: "success",
-          confirmButtonText: "OK",
+          timer: 3000,
+          showConfirmButton: false,
         })
       } else {
         const error = await response.json()
@@ -771,7 +872,8 @@ export function DashboardAdminPBB() {
           title: "Error",
           text: error.message || "Gagal memperbarui surat PBB",
           icon: "error",
-          confirmButtonText: "OK",
+          timer: 3000,
+          showConfirmButton: false,
         })
       }
     } catch (err) {
@@ -780,7 +882,8 @@ export function DashboardAdminPBB() {
         title: "Error",
         text: "Terjadi kesalahan",
         icon: "error",
-        confirmButtonText: "OK",
+        timer: 3000,
+        showConfirmButton: false,
       })
     }
   }
@@ -798,6 +901,7 @@ export function DashboardAdminPBB() {
       text: "Apakah Anda yakin ingin menghapus surat PBB ini? Tindakan ini tidak dapat dibatalkan.",
       icon: "warning",
       showCancelButton: true,
+      showCloseButton: true,
       confirmButtonColor: "#d33",
       cancelButtonColor: "#3085d6",
       confirmButtonText: "Ya, Hapus",
@@ -817,7 +921,8 @@ export function DashboardAdminPBB() {
           title: "Berhasil!",
           text: "Surat PBB berhasil dihapus",
           icon: "success",
-          confirmButtonText: "OK",
+          timer: 3000,
+          showConfirmButton: false,
         })
         setSelectedSurat(null)
         fetchSuratPBB()
@@ -827,7 +932,8 @@ export function DashboardAdminPBB() {
           title: "Error",
           text: error.message || "Gagal menghapus surat PBB",
           icon: "error",
-          confirmButtonText: "OK",
+          timer: 3000,
+          showConfirmButton: false,
         })
       }
     } catch (err) {
@@ -836,7 +942,8 @@ export function DashboardAdminPBB() {
         title: "Error",
         text: "Terjadi kesalahan",
         icon: "error",
-        confirmButtonText: "OK",
+        timer: 3000,
+        showConfirmButton: false,
       })
     }
   }
@@ -952,10 +1059,35 @@ export function DashboardAdminPBB() {
               <div className="card mb-3">
                 <div className="card-header d-flex justify-content-between align-items-center">
                   <h6 className="mb-0">Daftar Surat PBB</h6>
-                  <button className="btn btn-sm btn-primary" onClick={() => setActiveTab("tambah-surat")}>
-                    <i className="bi bi-plus-circle me-1"></i>
-                    Tambah Surat
-                  </button>
+                  <div className="d-flex gap-2">
+                    <button className="btn btn-sm btn-success" onClick={async () => {
+                      const result = await Swal.fire({
+                        title: 'Pilih Format Export',
+                        text: 'Pilih format file untuk export data Surat PBB',
+                        icon: 'question',
+                        showCancelButton: true,
+                        showCloseButton: true,
+                        confirmButtonText: 'Excel',
+                        cancelButtonText: 'PDF',
+                        confirmButtonColor: '#28a745',
+                        cancelButtonColor: '#dc3545',
+                        reverseButtons: true
+                      });
+
+                      if (result.isConfirmed) {
+                        exportToExcel();
+                      } else if (result.dismiss === 'cancel') {
+                        exportToPDF();
+                      }
+                    }}>
+                      <i className="bi bi-download me-1"></i>
+                      Export
+                    </button>
+                    <button className="btn btn-sm btn-primary" onClick={() => setActiveTab("tambah-surat")}>
+                      <i className="bi bi-plus-circle me-1"></i>
+                      Tambah Surat
+                    </button>
+                  </div>
                 </div>
               </div>
               <TabelSuratPBB suratPBB={suratPBB} searchTerm={searchSuratPBB} onSearchChange={setSearchSuratPBB} onSuratClick={setSelectedSurat} showDusunColumn={true} />
@@ -1449,6 +1581,7 @@ export function DashboardAdminPBB() {
                           text: "Apakah Anda yakin ingin meregenerate token? Token lama akan tidak valid lagi.",
                           icon: "warning",
                           showCancelButton: true,
+                          showCloseButton: true,
                           confirmButtonColor: "#d33",
                           cancelButtonColor: "#3085d6",
                           confirmButtonText: "Ya, Regenerate",
@@ -1474,7 +1607,8 @@ export function DashboardAdminPBB() {
                                 title: "Berhasil!",
                                 text: "Token berhasil diregenerate!",
                                 icon: "success",
-                                confirmButtonText: "OK",
+                                timer: 3000,
+                                showConfirmButton: false,
                               })
                             } else {
                               const error = await response.json()
@@ -1482,7 +1616,8 @@ export function DashboardAdminPBB() {
                                 title: "Error",
                                 text: error.message || "Gagal meregenerate token",
                                 icon: "error",
-                                confirmButtonText: "OK",
+                                timer: 3000,
+                                showConfirmButton: false,
                               })
                             }
                           } catch (err) {
@@ -1711,6 +1846,7 @@ export function DashboardAdminPBB() {
                                         text: `Apakah Anda yakin ingin menghapus perangkat desa "${perangkat.nama_lengkap}"? Tindakan ini tidak dapat dibatalkan.`,
                                         icon: "warning",
                                         showCancelButton: true,
+                                        showCloseButton: true,
                                         confirmButtonColor: "#d33",
                                         cancelButtonColor: "#3085d6",
                                         confirmButtonText: "Ya, Hapus",

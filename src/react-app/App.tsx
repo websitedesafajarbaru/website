@@ -14,6 +14,7 @@ import { DashboardAdminPBB } from "./pages/pengelolaan-pbb/DashboardAdminPBB"
 import { DashboardKepalaDusun } from "./pages/pengelolaan-pbb/DashboardKepalaDusun"
 import { DashboardKetuaRT } from "./pages/pengelolaan-pbb/DashboardKetuaRT"
 import { Settings } from "./pages/Settings"
+import { Credits } from "./pages/Credits"
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/lupa-password" element={<ForgotPassword />} />
             <Route path="/cek-pembayaran" element={<CekPembayaran />} />
+            <Route path="/credits" element={<Credits />} />
 
             <Route path="/pengaduan-masyarakat/registrasi" element={<RegistrasiMasyarakat />} />
             <Route

@@ -92,7 +92,12 @@ export function DetailSuratPBB({
           <div className="col-md-6">
             <label className="form-label text-muted small mb-1">Status Pembayaran</label>
             {isEditing ? (
-              <select className="form-select" value={editForm.status_pembayaran || ""} onChange={(e) => onEditFormChange("status_pembayaran", e.target.value)}>
+              <select
+                className="form-select"
+                value={editForm.status_pembayaran || ""}
+                onChange={(e) => onEditFormChange("status_pembayaran", e.target.value)}
+                disabled={surat.status_data_pbb === "belum_lengkap"}
+              >
                 <option value="belum_bayar">Belum Bayar</option>
                 <option value="bayar_sendiri_di_bank">Bayar Sendiri di Bank</option>
                 <option value="bayar_lewat_perangkat_desa">Bayar Lewat Perangkat Desa</option>
@@ -100,13 +105,23 @@ export function DetailSuratPBB({
                 <option value="tidak_diketahui">Tidak Diketahui</option>
               </select>
             ) : (
-              <select className="form-select" value={surat.status_pembayaran} onChange={(e) => onStatusChange(e.target.value)}>
-                <option value="belum_bayar">Belum Bayar</option>
-                <option value="bayar_sendiri_di_bank">Bayar Sendiri di Bank</option>
-                <option value="bayar_lewat_perangkat_desa">Bayar Lewat Perangkat Desa</option>
-                <option value="pindah_rumah">Pindah Rumah</option>
-                <option value="tidak_diketahui">Tidak Diketahui</option>
-              </select>
+              <>
+                <select
+                  className="form-select"
+                  value={surat.status_pembayaran}
+                  onChange={(e) => onStatusChange(e.target.value)}
+                  disabled={surat.status_data_pbb === "belum_lengkap"}
+                >
+                  <option value="belum_bayar">Belum Bayar</option>
+                  <option value="bayar_sendiri_di_bank">Bayar Sendiri di Bank</option>
+                  <option value="bayar_lewat_perangkat_desa">Bayar Lewat Perangkat Desa</option>
+                  <option value="pindah_rumah">Pindah Rumah</option>
+                  <option value="tidak_diketahui">Tidak Diketahui</option>
+                </select>
+                {surat.status_data_pbb === "belum_lengkap" && (
+                  <div className="small text-muted mt-1">Status tidak dapat diubah karena data PBB dusun belum lengkap.</div>
+                )}
+              </>
             )}
           </div>
           <div className="col-12">

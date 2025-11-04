@@ -67,7 +67,7 @@ export interface SuratPBB {
   tahun_pajak: number
   status_pembayaran: "belum_bayar" | "bayar_sendiri_di_bank" | "bayar_lewat_perangkat_desa" | "pindah_rumah" | "tidak_diketahui"
   id_dusun: number
-  id_perangkat_desa: string
+  id_pengguna: string
   waktu_dibuat: string
   waktu_diperbarui: string
   nama_dusun?: string

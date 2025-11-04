@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react"
 import { SuratPBB } from "../../types"
 import { formatStatusPembayaran, getStatusPembayaranColor } from "../../utils/formatters"
-import { formatToWIB } from "../../utils/time"
 
 interface DusunStatistik {
   dusun: {
@@ -61,6 +60,8 @@ export function DetailDusunLaporan({ dusunId, token, onBack }: DetailDusunLapora
             icon: "error",
             title: "Gagal!",
             text: "Gagal mengambil data dusun",
+            timer: 3000,
+            showConfirmButton: false,
           })
         }
       } catch (err) {
@@ -69,6 +70,8 @@ export function DetailDusunLaporan({ dusunId, token, onBack }: DetailDusunLapora
           icon: "error",
           title: "Terjadi Kesalahan!",
           text: "Terjadi kesalahan saat mengambil data dusun",
+          timer: 3000,
+          showConfirmButton: false,
         })
       } finally {
         setLoading(false)
@@ -83,7 +86,7 @@ export function DetailDusunLaporan({ dusunId, token, onBack }: DetailDusunLapora
 
   if (loading) {
     return (
-      <div className="container-wide">
+      <div>
         <div className="text-center py-5">
           <div className="spinner-border text-primary" role="status">
             <span className="visually-hidden">Loading...</span>
@@ -95,14 +98,14 @@ export function DetailDusunLaporan({ dusunId, token, onBack }: DetailDusunLapora
 
   if (!statistik) {
     return (
-      <div className="container-wide">
+      <div>
         <div className="alert alert-danger">Data tidak ditemukan</div>
       </div>
     )
   }
 
   return (
-    <div className="container-wide">
+    <div>
       <div className="dashboard-header">
         <div>
           <h2>Laporan {statistik.dusun.nama_dusun}</h2>
@@ -342,14 +345,7 @@ export function DetailDusunLaporan({ dusunId, token, onBack }: DetailDusunLapora
                 <label className="form-label text-muted small mb-1">Perangkat Desa</label>
                 <div className="fw-semibold">{selectedSurat.nama_perangkat || "-"}</div>
               </div>
-              <div className="col-md-6">
-                <label className="form-label text-muted small mb-1">Waktu Dibuat</label>
-                <div className="small">{formatToWIB(selectedSurat.waktu_dibuat)}</div>
-              </div>
-              <div className="col-md-6">
-                <label className="form-label text-muted small mb-1">Waktu Diperbarui</label>
-                <div className="small">{formatToWIB(selectedSurat.waktu_diperbarui)}</div>
-              </div>
+              ...existing code...
             </div>
           </div>
         </div>

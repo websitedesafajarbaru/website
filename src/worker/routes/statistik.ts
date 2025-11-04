@@ -99,7 +99,7 @@ statistikRoutes.get("/dusun/:id", async (c) => {
     const persentasePembayaran = totalPajak > 0 ? (totalDibayar / totalPajak) * 100 : 0
 
     const suratPBBList = await c.env.DB.prepare(
-      "SELECT sp.*, d.nama_dusun, p.nama_lengkap as nama_perangkat FROM surat_pbb sp LEFT JOIN dusun d ON sp.id_dusun = d.id LEFT JOIN pengguna p ON sp.id_perangkat_desa = p.id WHERE sp.id_dusun = ? AND sp.tahun_pajak = ? ORDER BY sp.waktu_dibuat DESC"
+      "SELECT sp.*, d.nama_dusun, p.nama_lengkap as nama_perangkat FROM surat_pbb sp LEFT JOIN dusun d ON sp.id_dusun = d.id LEFT JOIN pengguna p ON sp.id_pengguna = p.id WHERE sp.id_dusun = ? AND sp.tahun_pajak = ? ORDER BY sp.waktu_dibuat DESC"
     )
       .bind(dusunId, currentYear)
       .all()

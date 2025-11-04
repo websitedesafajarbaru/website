@@ -244,7 +244,7 @@ perangkatDesaRoutes.delete("/:id", requireRole("admin"), async (c) => {
     }
 
     await c.env.DB.prepare("DELETE FROM tanggapan_aduan WHERE id_perangkat_desa = ?").bind(id).run()
-    await c.env.DB.prepare("DELETE FROM surat_pbb WHERE id_perangkat_desa = ?").bind(id).run()
+    await c.env.DB.prepare("DELETE FROM surat_pbb WHERE id_pengguna = ?").bind(id).run()
     await c.env.DB.prepare("DELETE FROM perangkat_desa WHERE id = ?").bind(id).run()
     await c.env.DB.prepare("DELETE FROM pengguna WHERE id = ?").bind(id).run()
 

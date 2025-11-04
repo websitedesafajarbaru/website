@@ -13,6 +13,9 @@ export class ApiError extends Error {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+declare const Swal: any;
+
 export async function apiRequest<T = unknown>(url: string, options: RequestInit = {}, logout?: () => void): Promise<T> {
   const token = localStorage.getItem("token")
 
@@ -32,6 +35,14 @@ export async function apiRequest<T = unknown>(url: string, options: RequestInit 
     })
 
     if (response.status === 401) {
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Sesi Berakhir',
+        text: 'Sesi Anda telah berakhir. Silakan login kembali.',
+        timer: 3000,
+        showConfirmButton: false,
+        allowOutsideClick: false,
+      });
       if (logout) {
         logout()
       }

@@ -61,20 +61,18 @@ suratPBBRoutes.post("/", async (c) => {
       }
     }
 
-    let idPerangkatDesa: string | null = user.userId
+    let idPengguna: string = user.userId
     if (user.roles === "admin") {
       const kepalaDusun = await c.env.DB.prepare("SELECT id FROM perangkat_desa WHERE jabatan = 'kepala_dusun' AND id_dusun = ?").bind(id_dusun).first()
       if (kepalaDusun) {
-        idPerangkatDesa = kepalaDusun.id as string
-      } else {
-        idPerangkatDesa = null
+        idPengguna = kepalaDusun.id as string
       }
     }
 
     const suratId = generateId()
 
     await c.env.DB.prepare(
-      "INSERT INTO surat_pbb (id, nomor_objek_pajak, nama_wajib_pajak, alamat_wajib_pajak, alamat_objek_pajak, luas_tanah, luas_bangunan, nilai_jual_objek_pajak, jumlah_pajak_terhutang, tahun_pajak, status_pembayaran, id_dusun, id_perangkat_desa) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+      "INSERT INTO surat_pbb (id, nomor_objek_pajak, nama_wajib_pajak, alamat_wajib_pajak, alamat_objek_pajak, luas_tanah, luas_bangunan, nilai_jual_objek_pajak, jumlah_pajak_terhutang, tahun_pajak, status_pembayaran, id_dusun, id_pengguna) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
     )
       .bind(
         suratId,
@@ -89,7 +87,7 @@ suratPBBRoutes.post("/", async (c) => {
         tahun_pajak,
         status_pembayaran,
         id_dusun,
-        idPerangkatDesa
+        idPengguna
       )
       .run()
 
@@ -116,7 +114,7 @@ suratPBBRoutes.get("/", async (c) => {
     const currentYear = activeYear ? parseInt(activeYear) : new Date().getFullYear()
 
     let query =
-      "SELECT s.*, d.nama_dusun, d.status_data_pbb, p.nama_lengkap as nama_perangkat FROM surat_pbb s JOIN dusun d ON s.id_dusun = d.id JOIN pengguna p ON s.id_perangkat_desa = p.id WHERE s.tahun_pajak = ?"
+      "SELECT s.*, d.nama_dusun, d.status_data_pbb, p.nama_lengkap as nama_perangkat FROM surat_pbb s JOIN dusun d ON s.id_dusun = d.id JOIN pengguna p ON s.id_pengguna = p.id WHERE s.tahun_pajak = ?"
     const params: (string | number)[] = [currentYear]
 
     if (user.roles !== "admin") {
@@ -170,7 +168,7 @@ suratPBBRoutes.get("/:id", async (c) => {
     const suratId = c.req.param("id")
 
     const surat = await c.env.DB.prepare(
-      "SELECT s.*, d.nama_dusun, d.status_data_pbb, p.nama_lengkap as nama_perangkat FROM surat_pbb s JOIN dusun d ON s.id_dusun = d.id JOIN pengguna p ON s.id_perangkat_desa = p.id WHERE s.id = ?"
+      "SELECT s.*, d.nama_dusun, d.status_data_pbb, p.nama_lengkap as nama_perangkat FROM surat_pbb s JOIN dusun d ON s.id_dusun = d.id JOIN pengguna p ON s.id_pengguna = p.id WHERE s.id = ?"
     )
       .bind(suratId)
       .first()
@@ -210,7 +208,7 @@ suratPBBRoutes.put("/:id", async (c) => {
     const updateFields: string[] = []
     const params: (string | number)[] = []
 
-    if (updates.status_pembayaran !== undefined && updates.status_pembayaran !== originalSurat?.status_pembayaran && user.roles !== "admin") {
+    if (updates.status_pembayaran !== undefined && updates.status_pembayaran !== originalSurat?.status_pembayaran) {
       const dusunStatus = await c.env.DB.prepare("SELECT d.status_data_pbb FROM dusun d JOIN surat_pbb s ON d.id = s.id_dusun WHERE s.id = ?").bind(suratId).first()
 
       if (dusunStatus?.status_data_pbb !== "sudah_lengkap") {
@@ -235,7 +233,7 @@ suratPBBRoutes.put("/:id", async (c) => {
     }
 
     updateFields.push('waktu_diperbarui = datetime("now")')
-    updateFields.push("id_perangkat_desa = ?")
+    updateFields.push("id_pengguna = ?")
     params.push(user.userId)
     params.push(suratId)
 
