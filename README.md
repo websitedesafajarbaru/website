@@ -6,102 +6,102 @@ Sebuah website yang bertujuan untuk memudahkan perangkat desa dalam meningkatkan
 
 ```
 public/
-src/
-	react-app/
-		App.css
-		App.tsx
-		index.css
-		main.tsx
-		types.ts
-		vite-env.d.ts
-		assets/
-		components/
-			Layout.tsx
-			Navbar.tsx
-			ProtectedRoute.tsx
-			pengaduan-masyarakat/
-				AduanDetail.tsx
-				AduanTable.tsx
-				DashboardHeader.tsx
-				DashboardAdmin/
-					FilterSection.tsx
-					index.tsx
-					MasyarakatForm.tsx
-					MasyarakatTable.tsx
-					StatsCards.tsx
-					StatsCardsMasyarakat.tsx
-				DashboardMasyarakat/
-					CreateAduanForm.tsx
-					index.tsx
-			pengelolaan-pbb/
-				DaftarKetuaRT.tsx
-				DetailDusunLaporan.tsx
-				DetailSuratPBB.tsx
-				FormTambahKetuaRT.tsx
-				FormTambahSuratPBB.tsx
-				StatistikCards.tsx
-				TabelSuratPBB.tsx
-		contexts/
-			AuthContext.tsx
-		pages/
-			CekPembayaran.tsx
-			ForgotPassword.tsx
-			LandingPage.tsx
-			Login.tsx
-			Settings.tsx
-			TrackingData.tsx
-			pengaduan-masyarakat/
-				DashboardAdminPengaduan.tsx
-				DashboardMasyarakat.tsx
-				LoginPengaduan.tsx
-				RegistrasiMasyarakat.tsx
-			pengelolaan-pbb/
-				DashboardAdminPBB.tsx
-				DashboardKepalaDusun.tsx
-				DashboardKetuaRT.tsx
-				LoginPBB.tsx
-				RegistrasiPerangkatDesa.tsx
-		utils/
-			api.ts
-			formatters.ts
-			time.ts
-	worker/
-		index.ts
-		types.ts
-		middleware/
-			auth.ts
-		routes/
-			aduan.ts
-			auth.ts
-			dusun.ts
-			masyarakat.ts
-			pengaduan-masyarakat.ts
-			pengelolaan-pbb.ts
-			perangkat-desa.ts
-			public.ts
-			statistik.ts
-			surat-pbb.ts
-			tracking.ts
-		utils/
-			db.ts
-			hash.ts
-			jwt.ts
-drop_all.sql
-eslint.config.js
-index.html
-package.json
-README.md
-rebuild_db_local.sh
-rebuild_db_remote.sh
-schema.sql
-seed.sql
-tsconfig.app.json
-tsconfig.json
-tsconfig.node.json
-tsconfig.worker.json
-vite.config.ts
-worker-configuration.d.ts
-wrangler.json
+├── src/
+│   ├── react-app/
+│   │   ├── App.css
+│   │   ├── App.tsx
+│   │   ├── index.css
+│   │   ├── main.tsx
+│   │   ├── types.ts
+│   │   ├── vite-env.d.ts
+│   │   ├── assets/
+│   │   ├── components/
+│   │   │   ├── Layout.tsx
+│   │   │   ├── Navbar.tsx
+│   │   │   ├── ProtectedRoute.tsx
+│   │   │   ├── pengaduan-masyarakat/
+│   │   │   │   ├── AduanDetail.tsx
+│   │   │   │   ├── AduanTable.tsx
+│   │   │   │   ├── DashboardHeader.tsx
+│   │   │   │   ├── DashboardAdmin/
+│   │   │   │   │   ├── FilterSection.tsx
+│   │   │   │   │   ├── index.tsx
+│   │   │   │   │   ├── MasyarakatForm.tsx
+│   │   │   │   │   ├── MasyarakatTable.tsx
+│   │   │   │   │   ├── StatsCards.tsx
+│   │   │   │   │   └── StatsCardsMasyarakat.tsx
+│   │   │   │   └── DashboardMasyarakat/
+│   │   │   │       ├── CreateAduanForm.tsx
+│   │   │   │       └── index.tsx
+│   │   │   └── pengelolaan-pbb/
+│   │   │       ├── DaftarKetuaRT.tsx
+│   │   │       ├── DetailDusunLaporan.tsx
+│   │   │       ├── DetailSuratPBB.tsx
+│   │   │       ├── FormTambahKetuaRT.tsx
+│   │   │       ├── FormTambahSuratPBB.tsx
+│   │   │       ├── StatistikCards.tsx
+│   │   │       └── TabelSuratPBB.tsx
+│   │   ├── contexts/
+│   │   │   └── AuthContext.tsx
+│   │   ├── pages/
+│   │   │   ├── CekPembayaran.tsx
+│   │   │   ├── ForgotPassword.tsx
+│   │   │   ├── LandingPage.tsx
+│   │   │   ├── Login.tsx
+│   │   │   ├── Settings.tsx
+│   │   │   ├── TrackingData.tsx
+│   │   │   ├── pengaduan-masyarakat/
+│   │   │   │   ├── DashboardAdminPengaduan.tsx
+│   │   │   │   ├── DashboardMasyarakat.tsx
+│   │   │   │   ├── LoginPengaduan.tsx
+│   │   │   │   └── RegistrasiMasyarakat.tsx
+│   │   │   └── pengelolaan-pbb/
+│   │   │       ├── DashboardAdminPBB.tsx
+│   │   │       ├── DashboardKepalaDusun.tsx
+│   │   │       ├── DashboardKetuaRT.tsx
+│   │   │       ├── LoginPBB.tsx
+│   │   │       └── RegistrasiPerangkatDesa.tsx
+│   │   └── utils/
+│   │       ├── api.ts
+│   │       ├── formatters.ts
+│   │       └── time.ts
+│   └── worker/
+│       ├── index.ts
+│       ├── types.ts
+│       ├── middleware/
+│       │   └── auth.ts
+│       ├── routes/
+│       │   ├── aduan.ts
+│       │   ├── auth.ts
+│       │   ├── dusun.ts
+│       │   ├── masyarakat.ts
+│       │   ├── pengaduan-masyarakat.ts
+│       │   ├── pengelolaan-pbb.ts
+│       │   ├── perangkat-desa.ts
+│       │   ├── public.ts
+│       │   ├── statistik.ts
+│       │   ├── surat-pbb.ts
+│       │   └── tracking.ts
+│       └── utils/
+│           ├── db.ts
+│           ├── hash.ts
+│           └── jwt.ts
+├── drop_all.sql
+├── eslint.config.js
+├── index.html
+├── package.json
+├── README.md
+├── rebuild_db_local.sh
+├── rebuild_db_remote.sh
+├── schema.sql
+├── seed.sql
+├── tsconfig.app.json
+├── tsconfig.json
+├── tsconfig.node.json
+├── tsconfig.worker.json
+├── vite.config.ts
+├── worker-configuration.d.ts
+└── wrangler.json
 ```
 
 ## Fitur Berdasarkan Role
