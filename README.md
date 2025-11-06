@@ -7,7 +7,7 @@ Sebuah website yang bertujuan untuk memudahkan perangkat desa dalam meningkatkan
 | Nama | NIM | Fitur yang dikerjakan |
 |------|-----|--------|
 | Andika Dinata | 123140096 | Backend stuff seperti Autentikasi, API, Database. |
-| Ardiansyah Fernando | 123140102 | Penambahan Fitur Upload Gambar |
+| Isi ya | Isi ya | Isi ya |
 | Isi ya | Isi ya | Isi ya |
 | Isi ya | Isi ya | Isi ya |
 | Isi ya | Isi ya | Isi ya |
