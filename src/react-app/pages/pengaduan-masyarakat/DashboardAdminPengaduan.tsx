@@ -75,7 +75,7 @@ export function DashboardAdminPengaduan() {
       setSelectedAduan(result)
       setTanggapan("")
       setActiveTab("detail")
-      setReadAduan(prev => new Set(prev).add(id))
+      setReadAduan((prev) => new Set(prev).add(id))
     } catch (err) {
       console.error(err)
     }
@@ -304,7 +304,15 @@ export function DashboardAdminPengaduan() {
             </button>
           </div>
           <div className="card-body">
-            <AduanDetail aduan={selectedAduan} isAdmin={true} tanggapan={tanggapan} setTanggapan={setTanggapan} onStatusChange={updateStatus} onSubmitTanggapan={submitTanggapan} onEditMasyarakat={handleEditMasyarakatById} />
+            <AduanDetail
+              aduan={selectedAduan}
+              isAdmin={true}
+              tanggapan={tanggapan}
+              setTanggapan={setTanggapan}
+              onStatusChange={updateStatus}
+              onSubmitTanggapan={submitTanggapan}
+              onEditMasyarakat={handleEditMasyarakatById}
+            />
           </div>
         </div>
       )}
@@ -353,7 +361,13 @@ export function DashboardAdminPengaduan() {
             </button>
           </div>
           <div className="card-body">
-            <MasyarakatForm masyarakat={selectedMasyarakat} onSubmit={handleSubmitMasyarakat} onCancel={() => setActiveTab("masyarakat")} loading={false} onToggleBan={handleToggleBan} />
+            <MasyarakatForm
+              masyarakat={selectedMasyarakat}
+              onSubmit={handleSubmitMasyarakat}
+              onCancel={() => setActiveTab("masyarakat")}
+              loading={false}
+              onToggleBan={handleToggleBan}
+            />
           </div>
         </div>
       )}

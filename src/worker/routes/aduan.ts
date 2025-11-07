@@ -37,7 +37,11 @@ aduanRoutes.get("/saya", authMiddleware, async (c) => {
   try {
     const user = c.get("user") as JWTPayload
 
-    const aduan = await c.env.DB.prepare("SELECT a.*, COUNT(t.id) as jumlah_tanggapan FROM aduan a LEFT JOIN tanggapan_aduan t ON a.id = t.id_aduan WHERE a.id_masyarakat = ? GROUP BY a.id ORDER BY a.waktu_dibuat DESC").bind(user.userId).all()
+    const aduan = await c.env.DB.prepare(
+      "SELECT a.*, COUNT(t.id) as jumlah_tanggapan FROM aduan a LEFT JOIN tanggapan_aduan t ON a.id = t.id_aduan WHERE a.id_masyarakat = ? GROUP BY a.id ORDER BY a.waktu_dibuat DESC"
+    )
+      .bind(user.userId)
+      .all()
 
     return c.json(aduan.results)
   } catch (error) {
@@ -90,7 +94,8 @@ aduanRoutes.get("/", authMiddleware, async (c) => {
     }
 
     const status = c.req.query("status")
-    let query = "SELECT a.*, m.alamat_rumah, m.nomor_telepon, p.nama_lengkap, COUNT(t.id) as jumlah_tanggapan FROM aduan a JOIN masyarakat m ON a.id_masyarakat = m.id JOIN pengguna p ON m.id = p.id LEFT JOIN tanggapan_aduan t ON a.id = t.id_aduan"
+    let query =
+      "SELECT a.*, m.alamat_rumah, m.nomor_telepon, p.nama_lengkap, COUNT(t.id) as jumlah_tanggapan FROM aduan a JOIN masyarakat m ON a.id_masyarakat = m.id JOIN pengguna p ON m.id = p.id LEFT JOIN tanggapan_aduan t ON a.id = t.id_aduan"
 
     if (status) {
       query += " WHERE a.status = ?"
@@ -194,13 +199,11 @@ aduanRoutes.post("/upload-image", authMiddleware, async (c) => {
 
     const imageId = generateId()
     const arrayBuffer = await file.arrayBuffer()
-    
+
     // Store in D1 as base64 to avoid binary issues
     const base64Data = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)))
-    
-    await c.env.DB.prepare("INSERT INTO gambar_aduan (id, nama_file, tipe_file, data) VALUES (?, ?, ?, ?)")
-      .bind(imageId, file.name, file.type, base64Data)
-      .run()
+
+    await c.env.DB.prepare("INSERT INTO gambar_aduan (id, nama_file, tipe_file, data) VALUES (?, ?, ?, ?)").bind(imageId, file.name, file.type, base64Data).run()
 
     // Return the URL
     const origin = new URL(c.req.url).origin
@@ -218,8 +221,8 @@ aduanRoutes.options("/images/:id", async () => {
     headers: {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "GET, OPTIONS",
-      "Access-Control-Allow-Headers": "*"
-    }
+      "Access-Control-Allow-Headers": "*",
+    },
   })
 })
 
@@ -254,13 +257,13 @@ aduanRoutes.get("/images/:id", async (c) => {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "GET, OPTIONS",
         "Access-Control-Allow-Headers": "*",
-        "Content-Length": bytes.length.toString()
-      }
+        "Content-Length": bytes.length.toString(),
+      },
     })
 
     return response
   } catch (error) {
-    console.error('Error in GET /images:', error)
+    console.error("Error in GET /images:", error)
     return c.json({ error: "Terjadi kesalahan server" }, 500)
   }
 })

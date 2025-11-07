@@ -1,6 +1,6 @@
 import { Aduan } from "../../types"
 import { formatToWIB } from "../../utils/time"
-import { Editor } from '@tinymce/tinymce-react'
+import { Editor } from "@tinymce/tinymce-react"
 
 interface AduanDetailProps {
   aduan: Aduan
@@ -49,11 +49,7 @@ export function AduanDetail({ aduan, isAdmin = false, tanggapan, setTanggapan, o
                   <div>
                     <small className="text-muted d-block">Pelapor</small>
                     {onEditMasyarakat ? (
-                      <button
-                        className="btn btn-link p-0 text-decoration-none fw-bold"
-                        onClick={() => onEditMasyarakat(aduan.id_masyarakat)}
-                        style={{ fontSize: 'inherit' }}
-                      >
+                      <button className="btn btn-link p-0 text-decoration-none fw-bold" onClick={() => onEditMasyarakat(aduan.id_masyarakat)} style={{ fontSize: "inherit" }}>
                         {aduan.nama_lengkap}
                       </button>
                     ) : (
@@ -181,7 +177,7 @@ export function AduanDetail({ aduan, isAdmin = false, tanggapan, setTanggapan, o
             <form onSubmit={onSubmitTanggapan}>
               <div className="mb-3">
                 <Editor
-                  apiKey='5p7jggzxeaaa6qzzvu2f7rfvt3yzdrzu3oxiv5wyoyyv9v3v'
+                  apiKey="5p7jggzxeaaa6qzzvu2f7rfvt3yzdrzu3oxiv5wyoyyv9v3v"
                   value={tanggapan}
                   onEditorChange={(content) => setTanggapan(content)}
                   init={{
@@ -190,50 +186,65 @@ export function AduanDetail({ aduan, isAdmin = false, tanggapan, setTanggapan, o
                     branding: false,
                     promotion: false,
                     plugins: [
-                      'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-                      'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                      'insertdatetime', 'table', 'code', 'help', 'wordcount'
+                      "advlist",
+                      "autolink",
+                      "lists",
+                      "link",
+                      "image",
+                      "charmap",
+                      "preview",
+                      "anchor",
+                      "searchreplace",
+                      "visualblocks",
+                      "code",
+                      "fullscreen",
+                      "insertdatetime",
+                      "table",
+                      "code",
+                      "help",
+                      "wordcount",
                     ],
-                    toolbar: 'undo redo | blocks | ' +
-                      'bold italic forecolor | alignleft aligncenter ' +
-                      'alignright alignjustify | bullist numlist outdent indent | ' +
-                      'removeformat | image | help',
-                    content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px } .tox .tox-statusbar__branding { display: none !important; }',
+                    toolbar:
+                      "undo redo | blocks | " +
+                      "bold italic forecolor | alignleft aligncenter " +
+                      "alignright alignjustify | bullist numlist outdent indent | " +
+                      "removeformat | image | help",
+                    content_style: "body { font-family:Helvetica,Arial,sans-serif; font-size:14px } .tox .tox-statusbar__branding { display: none !important; }",
                     image_advtab: false,
                     image_title: true,
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     setup: (editor: any) => {
                       // Hide any setup dialogs or promotions
-                      editor.on('init', () => {
-                        const branding = editor.getContainer().querySelector('.tox-statusbar__branding');
-                        if (branding) branding.style.display = 'none';
-                      });
+                      editor.on("init", () => {
+                        const branding = editor.getContainer().querySelector(".tox-statusbar__branding")
+                        if (branding) branding.style.display = "none"
+                      })
                     },
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     images_upload_handler: async (blobInfo: any) => {
                       // Check file size (max 1MB)
                       if (blobInfo.blob().size > 1 * 1024 * 1024) {
-                        throw new Error('Ukuran gambar maksimal 1MB');
+                        throw new Error("Ukuran gambar maksimal 1MB")
                       }
 
                       const formDataUpload = new FormData()
-                      formDataUpload.append('file', blobInfo.blob(), blobInfo.filename())
+                      formDataUpload.append("file", blobInfo.blob(), blobInfo.filename())
 
-                      const response = await fetch('/api/aduan/upload-image', {
-                        method: 'POST',
+                      const response = await fetch("/api/aduan/upload-image", {
+                        method: "POST",
                         body: formDataUpload,
                         headers: {
-                          'Authorization': `Bearer ${localStorage.getItem('token')}`
-                        }
+                          Authorization: `Bearer ${localStorage.getItem("token")}`,
+                        },
                       })
 
                       if (!response.ok) {
-                        throw new Error('Upload failed')
+                        throw new Error("Upload failed")
                       }
 
                       const data = await response.json()
                       return data.location
-                    }
+                    },
                   }}
                 />
                 <small className="text-muted mt-1 d-block">

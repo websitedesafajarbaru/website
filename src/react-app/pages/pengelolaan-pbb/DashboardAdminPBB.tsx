@@ -5,9 +5,9 @@ import { TabelSuratPBB } from "../../components/pengelolaan-pbb/TabelSuratPBB"
 import { DetailSuratPBB } from "../../components/pengelolaan-pbb/DetailSuratPBB"
 import { DetailDusunLaporan } from "../../components/pengelolaan-pbb/DetailDusunLaporan"
 import { FormTambahSuratPBB } from "../../components/pengelolaan-pbb/FormTambahSuratPBB"
-import * as XLSX from 'xlsx'
-import jsPDF from 'jspdf'
-import autoTable from 'jspdf-autotable'
+import * as XLSX from "xlsx"
+import jsPDF from "jspdf"
+import autoTable from "jspdf-autotable"
 
 interface PerangkatDesa {
   id: string
@@ -97,59 +97,61 @@ export function DashboardAdminPBB() {
   })
 
   const exportToExcel = () => {
-    const worksheet = XLSX.utils.json_to_sheet(suratPBB.map(s => ({
-      'NOP': s.nomor_objek_pajak,
-      'Nama Wajib Pajak': s.nama_wajib_pajak,
-      'Alamat Wajib Pajak': s.alamat_wajib_pajak,
-      'Alamat Objek Pajak': s.alamat_objek_pajak,
-      'Luas Tanah': `${s.luas_tanah} m²`,
-      'Luas Bangunan': `${s.luas_bangunan} m²`,
-      'Nilai Jual Objek Pajak': `Rp ${Number(s.nilai_jual_objek_pajak).toLocaleString('id-ID')}`,
-      'Tahun Pajak': s.tahun_pajak,
-      'Jumlah Pajak Terhutang': `Rp ${Number(s.jumlah_pajak_terhutang).toLocaleString('id-ID')}`,
-      'Status Pembayaran': s.status_pembayaran.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-      'Waktu Dibuat': s.waktu_dibuat,
-      'Waktu Diperbarui': s.waktu_diperbarui,
-      'ID Dusun': s.id_dusun,
-      'Nama Dusun': s.nama_dusun
-    })))
+    const worksheet = XLSX.utils.json_to_sheet(
+      suratPBB.map((s) => ({
+        NOP: s.nomor_objek_pajak,
+        "Nama Wajib Pajak": s.nama_wajib_pajak,
+        "Alamat Wajib Pajak": s.alamat_wajib_pajak,
+        "Alamat Objek Pajak": s.alamat_objek_pajak,
+        "Luas Tanah": `${s.luas_tanah} m²`,
+        "Luas Bangunan": `${s.luas_bangunan} m²`,
+        "Nilai Jual Objek Pajak": `Rp ${Number(s.nilai_jual_objek_pajak).toLocaleString("id-ID")}`,
+        "Tahun Pajak": s.tahun_pajak,
+        "Jumlah Pajak Terhutang": `Rp ${Number(s.jumlah_pajak_terhutang).toLocaleString("id-ID")}`,
+        "Status Pembayaran": s.status_pembayaran.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()),
+        "Waktu Dibuat": s.waktu_dibuat,
+        "Waktu Diperbarui": s.waktu_diperbarui,
+        "ID Dusun": s.id_dusun,
+        "Nama Dusun": s.nama_dusun,
+      }))
+    )
     const workbook = XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Surat PBB')
-    XLSX.writeFile(workbook, 'surat_pbb.xlsx')
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Surat PBB")
+    XLSX.writeFile(workbook, "surat_pbb.xlsx")
   }
 
   const exportToPDF = () => {
     const doc = new jsPDF()
-    doc.text('Daftar Surat PBB', 14, 10)
+    doc.text("Daftar Surat PBB", 14, 10)
 
     const tableColumn = [
-      'NOP',
-      'Nama Wajib Pajak',
-      'Alamat Wajib Pajak',
-      'Alamat Objek Pajak',
-      'Luas Tanah',
-      'Luas Bangunan',
-      'Nilai Jual',
-      'Jumlah Pajak',
-      'Tahun Pajak',
-      'Status',
-      'Dusun',
-      'Pengguna'
+      "NOP",
+      "Nama Wajib Pajak",
+      "Alamat Wajib Pajak",
+      "Alamat Objek Pajak",
+      "Luas Tanah",
+      "Luas Bangunan",
+      "Nilai Jual",
+      "Jumlah Pajak",
+      "Tahun Pajak",
+      "Status",
+      "Dusun",
+      "Pengguna",
     ]
 
-    const tableRows = suratPBB.map(s => [
+    const tableRows = suratPBB.map((s) => [
       s.nomor_objek_pajak,
       s.nama_wajib_pajak,
       s.alamat_wajib_pajak,
       s.alamat_objek_pajak,
       `${s.luas_tanah} m²`,
       `${s.luas_bangunan} m²`,
-      `Rp ${Number(s.nilai_jual_objek_pajak).toLocaleString('id-ID')}`,
-      `Rp ${Number(s.jumlah_pajak_terhutang).toLocaleString('id-ID')}`,
+      `Rp ${Number(s.nilai_jual_objek_pajak).toLocaleString("id-ID")}`,
+      `Rp ${Number(s.jumlah_pajak_terhutang).toLocaleString("id-ID")}`,
       s.tahun_pajak,
-      s.status_pembayaran.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-      s.nama_dusun || '',
-      s.nama_perangkat || ''
+      s.status_pembayaran.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()),
+      s.nama_dusun || "",
+      s.nama_perangkat || "",
     ])
 
     autoTable(doc, {
@@ -160,7 +162,7 @@ export function DashboardAdminPBB() {
       headStyles: { fillColor: [41, 128, 185] },
     })
 
-    doc.save('surat_pbb.pdf')
+    doc.save("surat_pbb.pdf")
   }
 
   const fetchActiveYear = useCallback(async () => {
@@ -1060,35 +1062,38 @@ export function DashboardAdminPBB() {
                 <div className="card-header d-flex justify-content-between align-items-center">
                   <h6 className="mb-0">Daftar Surat PBB</h6>
                   <div className="d-flex gap-2">
-                    <button className="btn btn-sm btn-success" onClick={async () => {
-                      if (suratPBB.length === 0) {
-                        await Swal.fire({
-                          title: 'Tidak Dapat Export',
-                          text: 'Tidak ada data surat PBB yang dapat diexport.',
-                          icon: 'error',
-                          confirmButtonText: 'OK'
-                        });
-                        return;
-                      }
-                      const result = await Swal.fire({
-                        title: 'Pilih Format Export',
-                        text: 'Pilih format file untuk export data Surat PBB',
-                        icon: 'question',
-                        showCancelButton: true,
-                        showCloseButton: true,
-                        confirmButtonText: 'Excel',
-                        cancelButtonText: 'PDF',
-                        confirmButtonColor: '#28a745',
-                        cancelButtonColor: '#dc3545',
-                        reverseButtons: true
-                      });
+                    <button
+                      className="btn btn-sm btn-success"
+                      onClick={async () => {
+                        if (suratPBB.length === 0) {
+                          await Swal.fire({
+                            title: "Tidak Dapat Export",
+                            text: "Tidak ada data surat PBB yang dapat diexport.",
+                            icon: "error",
+                            confirmButtonText: "OK",
+                          })
+                          return
+                        }
+                        const result = await Swal.fire({
+                          title: "Pilih Format Export",
+                          text: "Pilih format file untuk export data Surat PBB",
+                          icon: "question",
+                          showCancelButton: true,
+                          showCloseButton: true,
+                          confirmButtonText: "Excel",
+                          cancelButtonText: "PDF",
+                          confirmButtonColor: "#28a745",
+                          cancelButtonColor: "#dc3545",
+                          reverseButtons: true,
+                        })
 
-                      if (result.isConfirmed) {
-                        exportToExcel();
-                      } else if (result.dismiss === 'cancel') {
-                        exportToPDF();
-                      }
-                    }}>
+                        if (result.isConfirmed) {
+                          exportToExcel()
+                        } else if (result.dismiss === "cancel") {
+                          exportToPDF()
+                        }
+                      }}
+                    >
                       <i className="bi bi-download me-1"></i>
                       Export
                     </button>

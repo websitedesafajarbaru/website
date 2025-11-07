@@ -118,9 +118,7 @@ export function DetailSuratPBB({
                   <option value="pindah_rumah">Pindah Rumah</option>
                   <option value="tidak_diketahui">Tidak Diketahui</option>
                 </select>
-                {surat.status_data_pbb === "belum_lengkap" && (
-                  <div className="small text-muted mt-1">Status tidak dapat diubah karena data PBB dusun belum lengkap.</div>
-                )}
+                {surat.status_data_pbb === "belum_lengkap" && <div className="small text-muted mt-1">Status tidak dapat diubah karena data PBB dusun belum lengkap.</div>}
               </>
             )}
           </div>

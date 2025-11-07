@@ -1,4 +1,4 @@
-import { Editor } from '@tinymce/tinymce-react'
+import { Editor } from "@tinymce/tinymce-react"
 
 interface CreateAduanFormProps {
   formData: {
@@ -58,7 +58,7 @@ export function CreateAduanForm({ formData, setFormData, onSubmit, onCancel }: C
               Isi Aduan *
             </label>
             <Editor
-              apiKey='5p7jggzxeaaa6qzzvu2f7rfvt3yzdrzu3oxiv5wyoyyv9v3v'
+              apiKey="5p7jggzxeaaa6qzzvu2f7rfvt3yzdrzu3oxiv5wyoyyv9v3v"
               value={formData.isi_aduan}
               onEditorChange={(content) => setFormData({ ...formData, isi_aduan: content })}
               init={{
@@ -67,50 +67,65 @@ export function CreateAduanForm({ formData, setFormData, onSubmit, onCancel }: C
                 branding: false,
                 promotion: false,
                 plugins: [
-                  'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-                  'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                  'insertdatetime', 'table', 'code', 'help', 'wordcount'
+                  "advlist",
+                  "autolink",
+                  "lists",
+                  "link",
+                  "image",
+                  "charmap",
+                  "preview",
+                  "anchor",
+                  "searchreplace",
+                  "visualblocks",
+                  "code",
+                  "fullscreen",
+                  "insertdatetime",
+                  "table",
+                  "code",
+                  "help",
+                  "wordcount",
                 ],
-                toolbar: 'undo redo | blocks | ' +
-                  'bold italic forecolor | alignleft aligncenter ' +
-                  'alignright alignjustify | bullist numlist outdent indent | ' +
-                  'removeformat | image | help',
-                content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px } .tox .tox-statusbar__branding { display: none !important; }',
+                toolbar:
+                  "undo redo | blocks | " +
+                  "bold italic forecolor | alignleft aligncenter " +
+                  "alignright alignjustify | bullist numlist outdent indent | " +
+                  "removeformat | image | help",
+                content_style: "body { font-family:Helvetica,Arial,sans-serif; font-size:14px } .tox .tox-statusbar__branding { display: none !important; }",
                 image_advtab: false,
                 image_title: true,
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 setup: (editor: any) => {
                   // Hide any setup dialogs or promotions
-                  editor.on('init', () => {
-                    const branding = editor.getContainer().querySelector('.tox-statusbar__branding');
-                    if (branding) branding.style.display = 'none';
-                  });
+                  editor.on("init", () => {
+                    const branding = editor.getContainer().querySelector(".tox-statusbar__branding")
+                    if (branding) branding.style.display = "none"
+                  })
                 },
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 images_upload_handler: async (blobInfo: any) => {
                   // Check file size (max 1MB)
                   if (blobInfo.blob().size > 1 * 1024 * 1024) {
-                    throw new Error('Ukuran gambar maksimal 1MB');
+                    throw new Error("Ukuran gambar maksimal 1MB")
                   }
 
                   const formDataUpload = new FormData()
-                  formDataUpload.append('file', blobInfo.blob(), blobInfo.filename())
+                  formDataUpload.append("file", blobInfo.blob(), blobInfo.filename())
 
-                  const response = await fetch('/api/aduan/upload-image', {
-                    method: 'POST',
+                  const response = await fetch("/api/aduan/upload-image", {
+                    method: "POST",
                     body: formDataUpload,
                     headers: {
-                      'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    }
+                      Authorization: `Bearer ${localStorage.getItem("token")}`,
+                    },
                   })
 
                   if (!response.ok) {
-                    throw new Error('Upload failed')
+                    throw new Error("Upload failed")
                   }
 
                   const data = await response.json()
                   return data.location
-                }
+                },
               }}
             />
           </div>

@@ -82,7 +82,9 @@ export function AduanTable({ aduan, loading, onViewDetail, role, currentPage, it
           {paginatedAduan.map((item) => (
             <tr key={item.id} className={role === "admin" ? "" : "align-middle"}>
               <td>
-                {item.jumlah_tanggapan && item.jumlah_tanggapan > 0 && (!readAduan || !readAduan.has(item.id)) ? <span className="badge bg-danger">{item.jumlah_tanggapan}</span> : null}
+                {item.jumlah_tanggapan && item.jumlah_tanggapan > 0 && (!readAduan || !readAduan.has(item.id)) ? (
+                  <span className="badge bg-danger">{item.jumlah_tanggapan}</span>
+                ) : null}
               </td>
               <td>{role === "admin" ? formatToWIB(item.waktu_dibuat) : <small>{formatToWIB(item.created_at || item.waktu_dibuat)}</small>}</td>
               <td>{item.judul}</td>
