@@ -89,3 +89,12 @@ export const api = {
 
   delete: <T = unknown>(url: string, logout?: () => void) => apiRequest<T>(url, { method: "DELETE" }, logout),
 }
+
+const API_BASE_URL = "/api"
+
+export const apiClient = {
+  get: <T = unknown>(path: string) => api.get<T>(`${API_BASE_URL}${path}`),
+  post: <T = unknown>(path: string, data?: unknown) => api.post<T>(`${API_BASE_URL}${path}`, data),
+  put: <T = unknown>(path: string, data?: unknown) => api.put<T>(`${API_BASE_URL}${path}`, data),
+  delete: <T = unknown>(path: string) => api.delete<T>(`${API_BASE_URL}${path}`),
+}
