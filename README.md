@@ -145,13 +145,13 @@ public/
 
 ## Anggota Kelompok
 
-| Nama                | NIM       | Fitur yang dikerjakan                             |
-| ------------------- | --------- | ------------------------------------------------- |
-| Andika Dinata       | 123140096 | Backend stuff seperti Autentikasi, API, Database. |
-| Ardiansyah Fernando | 123140102 | Penambahan Fitur Upload Gambar                    |
-| Isi ya              | Isi ya    | Isi ya                                            |
-| Isi ya              | Isi ya    | Isi ya                                            |
-| Isi ya              | Isi ya    | Isi ya                                            |
-| Isi ya              | Isi ya    | Isi ya                                            |
-| Isi ya              | Isi ya    | Isi ya                                            |
-| Isi ya              | Isi ya    | Isi ya                                            |
+| Nama                          | NIM             | Fitur yang dikerjakan                             |
+| ----------------------------- | --------------- | ------------------------------------------------- |
+| Andika Dinata                 | 123140096       | Backend Development (API, Database, Authentication) |
+| Ribka Hana Josephine Situmorang | -             | User Authentication UI and Context               |
+| Ardiansyah Fernando           | -               | Pengaduan Masyarakat UI Components               |
+| Ibrahim Budi Satria           | -               | Pengelolaan PBB UI Components                    |
+| Ahmad Aufamahdi Salam         | -               | Admin Dashboard for PBB                          |
+| Ariq Ramadhinov Ronny         | -               | Admin Dashboard for Pengaduan                    |
+| Aditya Ronal Maruli           | aditya.123140093@student.itera.ac.id | Tracking and Payment Checking Features           |
+| Nabila Yuliana                | -               | Landing Page and General UI Enhancements         |
