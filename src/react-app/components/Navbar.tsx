@@ -13,16 +13,14 @@ export function Navbar() {
 
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-white">
-      <div className="container-wide">
-        <div className="d-flex align-items-center">
-          <Link className="navbar-brand" to="/">
-            <img src={logo} alt="Logo" className="me-2" style={{ height: "24px" }} />
-            SIFABAR
-          </Link>
-          <button className="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span className="navbar-toggler-icon"></span>
-          </button>
-        </div>
+      <div className="container-wide navbar-custom-container">
+        <Link className="navbar-brand" to="/">
+          <img src={logo} alt="Logo" className="me-2" style={{ height: "24px" }} />
+          SIFABAR
+        </Link>
+        <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+          <span className="navbar-toggler-icon"></span>
+        </button>
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav ms-auto align-items-lg-center">
             <li className="nav-item">
