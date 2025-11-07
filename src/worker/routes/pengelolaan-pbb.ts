@@ -12,7 +12,8 @@ pengelolaanPBBRoutes.post("/registrasi", async (c) => {
       return c.json({ error: "Semua field harus diisi" }, 400)
     }
 
-    const existingUser = await c.env.DB.prepare("SELECT id FROM pengguna WHERE username = ?").bind(username).first()
+    const lowerUsername = username.toLowerCase()
+    const existingUser = await c.env.DB.prepare("SELECT id FROM pengguna WHERE LOWER(username) = ?").bind(lowerUsername).first()
 
     if (existingUser) {
       return c.json({ error: "Username sudah digunakan" }, 400)
@@ -67,7 +68,7 @@ pengelolaanPBBRoutes.post("/registrasi", async (c) => {
     const hashedPassword = await hashPassword(password)
 
     await c.env.DB.batch([
-      c.env.DB.prepare("INSERT INTO pengguna (id, nama_lengkap, username, password, roles) VALUES (?, ?, ?, ?, ?)").bind(userId, nama_lengkap, username, hashedPassword, jabatan),
+      c.env.DB.prepare("INSERT INTO pengguna (id, nama_lengkap, username, password, roles) VALUES (?, ?, ?, ?, ?)").bind(userId, nama_lengkap, lowerUsername, hashedPassword, jabatan),
       c.env.DB.prepare("INSERT INTO perangkat_desa (id, jabatan, id_dusun) VALUES (?, ?, ?)").bind(userId, jabatan, dusunId),
     ])
 

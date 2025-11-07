@@ -13,9 +13,10 @@ interface AduanTableProps {
   itemsPerPage: number
   totalItems: number
   onPageChange: (page: number) => void
+  readAduan?: Set<string>
 }
 
-export function AduanTable({ aduan, loading, onViewDetail, role, currentPage, itemsPerPage, totalItems, onPageChange }: AduanTableProps) {
+export function AduanTable({ aduan, loading, onViewDetail, role, currentPage, itemsPerPage, totalItems, onPageChange, readAduan }: AduanTableProps) {
   const paginatedAduan = aduan.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
   const totalPages = Math.ceil(totalItems / itemsPerPage)
 
@@ -69,9 +70,10 @@ export function AduanTable({ aduan, loading, onViewDetail, role, currentPage, it
       <table className={role === "admin" ? "table" : "table table-hover mb-0"}>
         <thead className={role === "admin" ? "" : "table-light"}>
           <tr>
-            <th style={{ width: "15%" }}>Tanggal</th>
-            <th style={{ width: "35%" }}>Judul</th>
-            <th style={{ width: "20%" }}>Kategori</th>
+            <th style={{ width: "8%" }}>Pesan</th>
+            <th style={{ width: "12%" }}>Tanggal</th>
+            <th style={{ width: "30%" }}>Judul</th>
+            <th style={{ width: "15%" }}>Kategori</th>
             <th style={{ width: "15%" }}>Status</th>
             <th style={{ width: "15%" }}>Aksi</th>
           </tr>
@@ -79,6 +81,9 @@ export function AduanTable({ aduan, loading, onViewDetail, role, currentPage, it
         <tbody>
           {paginatedAduan.map((item) => (
             <tr key={item.id} className={role === "admin" ? "" : "align-middle"}>
+              <td>
+                {item.jumlah_tanggapan && item.jumlah_tanggapan > 0 && (!readAduan || !readAduan.has(item.id)) ? <span className="badge bg-danger">{item.jumlah_tanggapan}</span> : null}
+              </td>
               <td>{role === "admin" ? formatToWIB(item.waktu_dibuat) : <small>{formatToWIB(item.created_at || item.waktu_dibuat)}</small>}</td>
               <td>{item.judul}</td>
               <td>{item.kategori}</td>

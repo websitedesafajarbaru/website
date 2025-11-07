@@ -1,5 +1,6 @@
 import { Aduan } from "../../types"
 import { formatToWIB } from "../../utils/time"
+import { Editor } from '@tinymce/tinymce-react'
 
 interface AduanDetailProps {
   aduan: Aduan
@@ -123,9 +124,7 @@ export function AduanDetail({ aduan, isAdmin = false, tanggapan, setTanggapan, o
           </h6>
           <div className="card bg-light">
             <div className="card-body">
-              <p className="mb-0" style={{ whiteSpace: "pre-wrap", lineHeight: "1.8" }}>
-                {aduan.isi_aduan || aduan.isi}
-              </p>
+              <div className="mb-0" dangerouslySetInnerHTML={{ __html: aduan.isi_aduan || aduan.isi }} />
             </div>
           </div>
         </div>
@@ -164,9 +163,7 @@ export function AduanDetail({ aduan, isAdmin = false, tanggapan, setTanggapan, o
                         </div>
                         <span className={`badge bg-${t.roles === "masyarakat" ? "info" : "success"}`}>Tanggapan #{index + 1}</span>
                       </div>
-                      <p className="mb-0 mt-2" style={{ whiteSpace: "pre-wrap", lineHeight: "1.8" }}>
-                        {t.isi_tanggapan}
-                      </p>
+                      <div className="mb-0 mt-2" style={{ lineHeight: "1.8" }} dangerouslySetInnerHTML={{ __html: t.isi_tanggapan }} />
                     </div>
                   </div>
                 </div>
@@ -183,14 +180,61 @@ export function AduanDetail({ aduan, isAdmin = false, tanggapan, setTanggapan, o
             </h6>
             <form onSubmit={onSubmitTanggapan}>
               <div className="mb-3">
-                <textarea
-                  className="form-control"
+                <Editor
+                  apiKey='5p7jggzxeaaa6qzzvu2f7rfvt3yzdrzu3oxiv5wyoyyv9v3v'
                   value={tanggapan}
-                  onChange={(e) => setTanggapan(e.target.value)}
-                  required
-                  rows={4}
-                  placeholder={isAdmin ? "Tulis tanggapan Anda di sini..." : "Tulis balasan Anda di sini..."}
-                  style={{ resize: "vertical" }}
+                  onEditorChange={(content) => setTanggapan(content)}
+                  init={{
+                    height: 300,
+                    menubar: false,
+                    branding: false,
+                    promotion: false,
+                    plugins: [
+                      'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                      'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                      'insertdatetime', 'table', 'code', 'help', 'wordcount'
+                    ],
+                    toolbar: 'undo redo | blocks | ' +
+                      'bold italic forecolor | alignleft aligncenter ' +
+                      'alignright alignjustify | bullist numlist outdent indent | ' +
+                      'removeformat | image | help',
+                    content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px } .tox .tox-statusbar__branding { display: none !important; }',
+                    image_advtab: false,
+                    image_title: true,
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    setup: (editor: any) => {
+                      // Hide any setup dialogs or promotions
+                      editor.on('init', () => {
+                        const branding = editor.getContainer().querySelector('.tox-statusbar__branding');
+                        if (branding) branding.style.display = 'none';
+                      });
+                    },
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    images_upload_handler: async (blobInfo: any) => {
+                      // Check file size (max 1MB)
+                      if (blobInfo.blob().size > 1 * 1024 * 1024) {
+                        throw new Error('Ukuran gambar maksimal 1MB');
+                      }
+
+                      const formDataUpload = new FormData()
+                      formDataUpload.append('file', blobInfo.blob(), blobInfo.filename())
+
+                      const response = await fetch('/api/aduan/upload-image', {
+                        method: 'POST',
+                        body: formDataUpload,
+                        headers: {
+                          'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        }
+                      })
+
+                      if (!response.ok) {
+                        throw new Error('Upload failed')
+                      }
+
+                      const data = await response.json()
+                      return data.location
+                    }
+                  }}
                 />
                 <small className="text-muted mt-1 d-block">
                   <i className="bi bi-info-circle me-1"></i>

@@ -1061,6 +1061,15 @@ export function DashboardAdminPBB() {
                   <h6 className="mb-0">Daftar Surat PBB</h6>
                   <div className="d-flex gap-2">
                     <button className="btn btn-sm btn-success" onClick={async () => {
+                      if (suratPBB.length === 0) {
+                        await Swal.fire({
+                          title: 'Tidak Dapat Export',
+                          text: 'Tidak ada data surat PBB yang dapat diexport.',
+                          icon: 'error',
+                          confirmButtonText: 'OK'
+                        });
+                        return;
+                      }
                       const result = await Swal.fire({
                         title: 'Pilih Format Export',
                         text: 'Pilih format file untuk export data Surat PBB',

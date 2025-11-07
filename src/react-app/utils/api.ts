@@ -41,6 +41,7 @@ export async function apiRequest<T = unknown>(url: string, options: RequestInit 
         text: 'Sesi Anda telah berakhir. Silakan login kembali.',
         timer: 3000,
         showConfirmButton: false,
+        showCloseButton: true,
         allowOutsideClick: false,
       });
       if (logout) {

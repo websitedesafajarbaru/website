@@ -2,6 +2,7 @@
 PRAGMA foreign_keys = OFF;
 
 DROP TABLE IF EXISTS tanggapan_aduan;
+DROP TABLE IF EXISTS gambar_aduan;
 DROP TABLE IF EXISTS aduan;
 DROP TABLE IF EXISTS surat_pbb;
 DROP TABLE IF EXISTS perangkat_desa;

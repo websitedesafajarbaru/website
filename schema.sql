@@ -77,6 +77,16 @@ CREATE TABLE aduan (
     FOREIGN KEY (id_masyarakat) REFERENCES masyarakat(id) ON DELETE CASCADE
 );
 
+CREATE TABLE gambar_aduan (
+    id TEXT PRIMARY KEY,
+    nama_file TEXT NOT NULL,
+    tipe_file TEXT NOT NULL,
+    data TEXT NOT NULL,
+    id_aduan TEXT,
+    waktu_dibuat TEXT DEFAULT (datetime('now')),
+    FOREIGN KEY (id_aduan) REFERENCES aduan(id) ON DELETE CASCADE
+);
+
 CREATE TABLE tanggapan_aduan (
     id TEXT PRIMARY KEY,
     isi_tanggapan TEXT NOT NULL,
