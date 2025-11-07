@@ -29,51 +29,58 @@ export function DetailSuratPBB({
 }: DetailSuratPBBProps) {
   return (
     <div className="card">
-      <div className="card-header d-flex justify-content-between align-items-center">
-        <h6 className="mb-0">Detail Surat PBB - {surat.nomor_objek_pajak}</h6>
-        <div className="d-flex gap-2">
-          {showAdminActions && (
-            <>
-              {!isEditing ? (
-                <button className="btn btn-warning btn-sm" onClick={onStartEdit}>
-                  <i className="bi bi-pencil me-1"></i>
-                  Edit
+      <div className="card-header">
+        <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+          <h6 className="mb-0">
+            <span className="d-none d-md-inline">Detail Surat PBB - {surat.nomor_objek_pajak}</span>
+            <span className="d-md-none">Detail Surat PBB - {surat.nomor_objek_pajak.substring(0, 15)}...</span>
+          </h6>
+          <div className="d-flex flex-wrap gap-2 w-100 w-md-auto">
+            {showAdminActions && (
+              <>
+                {!isEditing ? (
+                  <button className="btn btn-warning btn-sm flex-grow-1 flex-md-grow-0" onClick={onStartEdit}>
+                    <i className="bi bi-pencil me-1"></i>
+                    <span className="d-none d-sm-inline">Edit</span>
+                    <i className="bi bi-pencil d-sm-none"></i>
+                  </button>
+                ) : (
+                  <>
+                    <button className="btn btn-success btn-sm flex-grow-1 flex-md-grow-0" onClick={onSaveEdit}>
+                      <i className="bi bi-check me-1"></i>
+                      <span className="d-none d-sm-inline">Simpan</span>
+                    </button>
+                    <button className="btn btn-secondary btn-sm flex-grow-1 flex-md-grow-0" onClick={onCancelEdit}>
+                      <i className="bi bi-x me-1"></i>
+                      <span className="d-none d-sm-inline">Batal</span>
+                    </button>
+                  </>
+                )}
+                <button className="btn btn-danger btn-sm flex-grow-1 flex-md-grow-0" onClick={onDelete}>
+                  <i className="bi bi-trash me-1"></i>
+                  <span className="d-none d-sm-inline">Hapus</span>
                 </button>
-              ) : (
-                <>
-                  <button className="btn btn-success btn-sm" onClick={onSaveEdit}>
-                    <i className="bi bi-check me-1"></i>
-                    Simpan
-                  </button>
-                  <button className="btn btn-secondary btn-sm" onClick={onCancelEdit}>
-                    <i className="bi bi-x me-1"></i>
-                    Batal
-                  </button>
-                </>
-              )}
-              <button className="btn btn-danger btn-sm" onClick={onDelete}>
-                <i className="bi bi-trash me-1"></i>
-                Hapus
-              </button>
-            </>
-          )}
-          <button className="btn btn-secondary btn-sm" onClick={onBack}>
-            <i className="bi bi-arrow-left me-1"></i>
-            Kembali ke Daftar
-          </button>
+              </>
+            )}
+            <button className="btn btn-secondary btn-sm flex-grow-1 flex-md-grow-0" onClick={onBack}>
+              <i className="bi bi-arrow-left me-1"></i>
+              <span className="d-none d-sm-inline">Kembali ke Daftar</span>
+              <span className="d-sm-none">Kembali</span>
+            </button>
+          </div>
         </div>
       </div>
-      <div className="card-body">
+      <div className="card-body p-3 p-md-4">
         <div className="row g-3">
-          <div className="col-md-6">
+          <div className="col-12 col-md-6">
             <label className="form-label text-muted small mb-1">Nomor Objek Pajak (NOP)</label>
             {isEditing ? (
               <input type="text" className="form-control" value={editForm.nomor_objek_pajak || ""} onChange={(e) => onEditFormChange("nomor_objek_pajak", e.target.value)} />
             ) : (
-              <div className="font-monospace">{surat.nomor_objek_pajak}</div>
+              <div className="font-monospace text-break">{surat.nomor_objek_pajak}</div>
             )}
           </div>
-          <div className="col-md-6">
+          <div className="col-12 col-md-6">
             <label className="form-label text-muted small mb-1">Tahun Pajak</label>
             {isEditing ? (
               <input type="number" className="form-control" value={editForm.tahun_pajak || ""} onChange={(e) => onEditFormChange("tahun_pajak", Number(e.target.value))} />
@@ -81,15 +88,15 @@ export function DetailSuratPBB({
               <div>{surat.tahun_pajak}</div>
             )}
           </div>
-          <div className="col-md-6">
+          <div className="col-12 col-md-6">
             <label className="form-label text-muted small mb-1">Nama Wajib Pajak</label>
             {isEditing ? (
               <input type="text" className="form-control" value={editForm.nama_wajib_pajak || ""} onChange={(e) => onEditFormChange("nama_wajib_pajak", e.target.value)} />
             ) : (
-              <div>{surat.nama_wajib_pajak}</div>
+              <div className="text-break">{surat.nama_wajib_pajak}</div>
             )}
           </div>
-          <div className="col-md-6">
+          <div className="col-12 col-md-6">
             <label className="form-label text-muted small mb-1">Status Pembayaran</label>
             {isEditing ? (
               <select
@@ -127,7 +134,7 @@ export function DetailSuratPBB({
             {isEditing ? (
               <input type="text" className="form-control" value={editForm.alamat_wajib_pajak || ""} onChange={(e) => onEditFormChange("alamat_wajib_pajak", e.target.value)} />
             ) : (
-              <div>{surat.alamat_wajib_pajak || "-"}</div>
+              <div className="text-break">{surat.alamat_wajib_pajak || "-"}</div>
             )}
           </div>
           <div className="col-12">
@@ -135,10 +142,10 @@ export function DetailSuratPBB({
             {isEditing ? (
               <input type="text" className="form-control" value={editForm.alamat_objek_pajak || ""} onChange={(e) => onEditFormChange("alamat_objek_pajak", e.target.value)} />
             ) : (
-              <div>{surat.alamat_objek_pajak}</div>
+              <div className="text-break">{surat.alamat_objek_pajak}</div>
             )}
           </div>
-          <div className="col-md-6">
+          <div className="col-12 col-sm-6 col-md-6">
             <label className="form-label text-muted small mb-1">Luas Tanah</label>
             {isEditing ? (
               <input type="number" className="form-control" value={editForm.luas_tanah || ""} onChange={(e) => onEditFormChange("luas_tanah", Number(e.target.value))} />
@@ -146,7 +153,7 @@ export function DetailSuratPBB({
               <div>{surat.luas_tanah ? `${surat.luas_tanah} m²` : "-"}</div>
             )}
           </div>
-          <div className="col-md-6">
+          <div className="col-12 col-sm-6 col-md-6">
             <label className="form-label text-muted small mb-1">Luas Bangunan</label>
             {isEditing ? (
               <input type="number" className="form-control" value={editForm.luas_bangunan || ""} onChange={(e) => onEditFormChange("luas_bangunan", Number(e.target.value))} />
@@ -154,7 +161,7 @@ export function DetailSuratPBB({
               <div>{surat.luas_bangunan ? `${surat.luas_bangunan} m²` : "-"}</div>
             )}
           </div>
-          <div className="col-md-6">
+          <div className="col-12 col-sm-6 col-md-6">
             <label className="form-label text-muted small mb-1">Nilai Jual Objek Pajak (NJOP)</label>
             {isEditing ? (
               <input
@@ -164,10 +171,10 @@ export function DetailSuratPBB({
                 onChange={(e) => onEditFormChange("nilai_jual_objek_pajak", Number(e.target.value))}
               />
             ) : (
-              <div>{surat.nilai_jual_objek_pajak ? `Rp ${Number(surat.nilai_jual_objek_pajak).toLocaleString("id-ID")}` : "-"}</div>
+              <div className="text-break">{surat.nilai_jual_objek_pajak ? `Rp ${Number(surat.nilai_jual_objek_pajak).toLocaleString("id-ID")}` : "-"}</div>
             )}
           </div>
-          <div className="col-md-6">
+          <div className="col-12 col-sm-6 col-md-6">
             <label className="form-label text-muted small mb-1">Jumlah Pajak Terhutang</label>
             {isEditing ? (
               <input
@@ -177,19 +184,19 @@ export function DetailSuratPBB({
                 onChange={(e) => onEditFormChange("jumlah_pajak_terhutang", Number(e.target.value))}
               />
             ) : (
-              <div className="text-primary">Rp {Number(surat.jumlah_pajak_terhutang).toLocaleString("id-ID")}</div>
+              <div className="text-primary text-break">Rp {Number(surat.jumlah_pajak_terhutang).toLocaleString("id-ID")}</div>
             )}
           </div>
           {surat.nama_dusun && (
-            <div className="col-md-6">
+            <div className="col-12 col-sm-6 col-md-6">
               <label className="form-label text-muted small mb-1">Dusun</label>
-              <div>{surat.nama_dusun}</div>
+              <div className="text-break">{surat.nama_dusun}</div>
             </div>
           )}
           {surat.nama_perangkat && (
-            <div className="col-md-6">
+            <div className="col-12 col-sm-6 col-md-6">
               <label className="form-label text-muted small mb-1">Perangkat Desa</label>
-              <div>{surat.nama_perangkat}</div>
+              <div className="text-break">{surat.nama_perangkat}</div>
             </div>
           )}
         </div>

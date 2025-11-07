@@ -28,6 +28,26 @@ app.route("/api/tracking", trackingRoutes)
 app.route("/api", publicRoutes)
 app.route("/api/statistik", statistikRoutes)
 
+// Serve React app for all non-API routes
+app.get("*", async (c) => {
+  try {
+    // Try to fetch the asset from Cloudflare Workers Assets
+    const response = await c.env.ASSETS.fetch(c.req.raw)
+    
+    // If asset not found (404), serve index.html for client-side routing
+    if (response.status === 404) {
+      const indexRequest = new Request(new URL("/index.html", c.req.url), c.req.raw)
+      return c.env.ASSETS.fetch(indexRequest)
+    }
+    
+    return response
+  } catch {
+    // Fallback to index.html if there's any error
+    const indexRequest = new Request(new URL("/index.html", c.req.url), c.req.raw)
+    return c.env.ASSETS.fetch(indexRequest)
+  }
+})
+
 // Scheduled event handler for deleting old images (60 days)
 export const scheduled: ExportedHandlerScheduledHandler<Env> = async (_event, env) => {
   try {
