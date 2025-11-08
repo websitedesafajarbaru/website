@@ -153,5 +153,5 @@ public/
 | Ibrahim Budi Satria           | -               | Pengelolaan PBB UI Components                    |
 | Ahmad Aufamahdi Salam         | -               | Admin Dashboard for PBB                          |
 | Ariq Ramadhinov Ronny         | -               | Admin Dashboard for Pengaduan                    |
-| Aditya Ronal Maruli           | aditya.123140093@student.itera.ac.id | Tracking and Payment Checking Features           |
+| Aditya Ronal Maruli           | -               | Tracking and Payment Checking Features           |
 | Nabila Yuliana                | -               | Landing Page and General UI Enhancements         |
