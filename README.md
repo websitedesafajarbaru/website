@@ -151,7 +151,7 @@ public/
 | Ribka Hana Josephine Situmorang | -             | UI Otentikasi Pengguna dan Konteks               |
 | Ardiansyah Fernando           | -               | Komponen UI Pengaduan Masyarakat               |
 | Ibrahim Budi Satria           | -               | Komponen UI Pengelolaan PBB                    |
-| Ahmad Aufamahdi Salam         | -               | Admin Dashboard for PBB                          |
+| Ahmad Aufamahdi Salam         | -               | Dashboard Admin untuk PBB                          |
 | Ariq Ramadhinov Ronny         | -               | Admin Dashboard for Pengaduan                    |
 | Aditya Ronal Maruli           | -               | Tracking and Payment Checking Features           |
 | Nabila Yuliana                | -               | Landing Page and General UI Enhancements         |
