@@ -6,7 +6,7 @@ Sebuah website yang bertujuan untuk memudahkan perangkat desa dalam meningkatkan
 
 | Nama | NIM | Fitur yang dikerjakan |
 |------|-----|--------|
-| Andika Dinata | 1234567890 | Backend stuff seperti Autentikasi, API, Database. |
+| Andika Dinata | 123140096 | Backend stuff seperti Autentikasi, API, Database. |
 | Isi ya | Isi ya | Isi ya |
 | Isi ya | Isi ya | Isi ya |
 | Isi ya | Isi ya | Isi ya |
