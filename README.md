@@ -152,6 +152,6 @@ public/
 | Ardiansyah Fernando           | -               | Komponen UI Pengaduan Masyarakat               |
 | Ibrahim Budi Satria           | -               | Komponen UI Pengelolaan PBB                    |
 | Ahmad Aufamahdi Salam         | -               | Dashboard Admin untuk PBB                          |
-| Ariq Ramadhinov Ronny         | -               | Admin Dashboard for Pengaduan                    |
+| Ariq Ramadhinov Ronny         | -               | Dashboard Admin untuk Pengaduan                    |
 | Aditya Ronal Maruli           | -               | Tracking and Payment Checking Features           |
 | Nabila Yuliana                | -               | Landing Page and General UI Enhancements         |
