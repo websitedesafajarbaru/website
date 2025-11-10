@@ -153,5 +153,5 @@ public/
 | Ibrahim Budi Satria           | -               | Komponen UI Pengelolaan PBB                    |
 | Ahmad Aufamahdi Salam         | -               | Dashboard Admin untuk PBB                          |
 | Ariq Ramadhinov Ronny         | -               | Dashboard Admin untuk Pengaduan                    |
-| Aditya Ronal Maruli           | -               | Tracking and Payment Checking Features           |
+| Aditya Ronal Maruli           | -               | Fitur Pelacakan dan Pemeriksaan Pembayaran           |
 | Nabila Yuliana                | -               | Landing Page and General UI Enhancements         |
