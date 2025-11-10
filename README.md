@@ -154,4 +154,4 @@ public/
 | Ahmad Aufamahdi Salam         | -               | Dashboard Admin untuk PBB                          |
 | Ariq Ramadhinov Ronny         | -               | Dashboard Admin untuk Pengaduan                    |
 | Aditya Ronal Maruli           | 123140093       | Fitur Pelacakan dan Pemeriksaan Pembayaran           |
-| Nabila Yuliana                | -               | Halaman Landing dan Peningkatan UI Umum         |
+| Nabila Yuliana                | 123140099       | Halaman Landing dan Peningkatan UI Umum         |
