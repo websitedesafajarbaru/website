@@ -150,7 +150,7 @@ public/
 | Andika Dinata                 | 123140096       | Pengembangan Backend (API, Database, Otentikasi) |
 | Ribka Hana Josephine Situmorang | -             | UI Otentikasi Pengguna dan Konteks               |
 | Ardiansyah Fernando           | -               | Komponen UI Pengaduan Masyarakat               |
-| Ibrahim Budi Satria           | -               | Komponen UI Pengelolaan PBB                    |
+| Ibrahim Budi Satria           | 123140097       | Komponen UI Pengelolaan PBB                    |
 | Ahmad Aufamahdi Salam         | -               | Dashboard Admin untuk PBB                          |
 | Ariq Ramadhinov Ronny         | -               | Dashboard Admin untuk Pengaduan                    |
 | Aditya Ronal Maruli           | 123140093       | Fitur Pelacakan dan Pemeriksaan Pembayaran           |
