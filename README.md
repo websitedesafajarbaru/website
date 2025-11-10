@@ -148,7 +148,7 @@ public/
 | Nama                          | NIM             | Fitur yang dikerjakan                             |
 | ----------------------------- | --------------- | ------------------------------------------------- |
 | Andika Dinata                 | 123140096       | Pengembangan Backend (API, Database, Otentikasi) |
-| Ribka Hana Josephine Situmorang | -             | UI Otentikasi Pengguna dan Konteks               |
+| Ribka Hana Josephine Situmorang | 123140103       | UI Otentikasi Pengguna dan Konteks               |
 | Ardiansyah Fernando           | 123140102       | Komponen UI Pengaduan Masyarakat               |
 | Ibrahim Budi Satria           | 123140097       | Komponen UI Pengelolaan PBB                    |
 | Ahmad Aufamahdi Salam         | -               | Dashboard Admin untuk PBB                          |
