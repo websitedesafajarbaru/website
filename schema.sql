@@ -52,7 +52,6 @@ CREATE TABLE surat_pbb (
     alamat_objek_pajak TEXT NOT NULL,
     luas_tanah REAL NOT NULL,
     luas_bangunan REAL NOT NULL,
-    nilai_jual_objek_pajak REAL NOT NULL,
     jumlah_pajak_terhutang REAL NOT NULL,
     tahun_pajak INT NOT NULL,
     status_pembayaran TEXT NOT NULL CHECK (status_pembayaran IN ('bayar_sendiri_di_bank', 'sudah_bayar', 'pindah_rumah', 'tidak_diketahui')),

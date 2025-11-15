@@ -62,7 +62,6 @@ export interface SuratPBB {
   alamat_objek_pajak: string
   luas_tanah: number
   luas_bangunan: number
-  nilai_jual_objek_pajak: number
   jumlah_pajak_terhutang: number
   tahun_pajak: number
   status_pembayaran: "bayar_sendiri_di_bank" | "sudah_bayar" | "pindah_rumah" | "tidak_diketahui"

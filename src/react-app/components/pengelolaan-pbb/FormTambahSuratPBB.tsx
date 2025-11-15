@@ -8,7 +8,6 @@ interface FormTambahSuratPBBProps {
     alamat_objek_pajak: string
     luas_tanah: string
     luas_bangunan: string
-    nilai_jual_objek_pajak: string
     jumlah_pajak_terhutang: string
     tahun_pajak: string
     status_pembayaran: string
@@ -74,7 +73,7 @@ export function FormTambahSuratPBB({ suratForm, onFormChange, onSubmit, onCancel
               <label className="form-label">
                 Tahun Pajak <span className="text-danger">*</span>
               </label>
-              <input type="number" className="form-control" value={suratForm.tahun_pajak} onChange={(e) => onFormChange("tahun_pajak", e.target.value)} required />
+              <input type="number" className="form-control" value="2025" readOnly />
             </div>
             <div className="col-md-6">
               <label className="form-label">
@@ -117,18 +116,6 @@ export function FormTambahSuratPBB({ suratForm, onFormChange, onSubmit, onCancel
                 Luas Bangunan (m²) <span className="text-danger">*</span>
               </label>
               <input type="number" className="form-control" value={suratForm.luas_bangunan} onChange={(e) => onFormChange("luas_bangunan", e.target.value)} required />
-            </div>
-            <div className="col-md-6">
-              <label className="form-label">
-                Nilai Jual Objek Pajak <span className="text-danger">*</span>
-              </label>
-              <input
-                type="number"
-                className="form-control"
-                value={suratForm.nilai_jual_objek_pajak}
-                onChange={(e) => onFormChange("nilai_jual_objek_pajak", e.target.value)}
-                required
-              />
             </div>
             <div className="col-md-6">
               <label className="form-label">

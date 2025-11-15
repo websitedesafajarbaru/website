@@ -14,7 +14,6 @@ import { DashboardAdminPBB } from "./pages/pengelolaan-pbb/DashboardAdminPBB"
 import { DashboardKepalaDusun } from "./pages/pengelolaan-pbb/DashboardKepalaDusun"
 import { DashboardKetuaRT } from "./pages/pengelolaan-pbb/DashboardKetuaRT"
 import { Settings } from "./pages/Settings"
-import TrackingData from "./pages/TrackingData"
 
 function App() {
   return (
@@ -75,14 +74,6 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={["admin", "kepala_dusun", "ketua_rt", "masyarakat"]}>
                   <Settings />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/tracking"
-              element={
-                <ProtectedRoute allowedRoles={["admin"]}>
-                  <TrackingData />
                 </ProtectedRoute>
               }
             />

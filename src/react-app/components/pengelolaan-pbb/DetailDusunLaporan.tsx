@@ -330,10 +330,6 @@ export function DetailDusunLaporan({ dusunId, token, onBack }: DetailDusunLapora
                 <div className="fw-semibold">{selectedSurat.luas_bangunan ? `${selectedSurat.luas_bangunan} m²` : "-"}</div>
               </div>
               <div className="col-md-6">
-                <label className="form-label text-muted small mb-1">Nilai Jual Objek Pajak (NJOP)</label>
-                <div className="fw-semibold">{selectedSurat.nilai_jual_objek_pajak ? `Rp ${Number(selectedSurat.nilai_jual_objek_pajak).toLocaleString("id-ID")}` : "-"}</div>
-              </div>
-              <div className="col-md-6">
                 <label className="form-label text-muted small mb-1">Jumlah Pajak Terhutang</label>
                 <div className="fw-semibold text-primary">Rp {Number(selectedSurat.jumlah_pajak_terhutang).toLocaleString("id-ID")}</div>
               </div>

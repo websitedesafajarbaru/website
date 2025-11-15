@@ -17,7 +17,6 @@ suratPBBRoutes.post("/", async (c) => {
       alamat_objek_pajak,
       luas_tanah,
       luas_bangunan,
-      nilai_jual_objek_pajak,
       jumlah_pajak_terhutang,
       tahun_pajak,
       status_pembayaran,
@@ -31,7 +30,6 @@ suratPBBRoutes.post("/", async (c) => {
       !alamat_objek_pajak ||
       !luas_tanah ||
       !luas_bangunan ||
-      !nilai_jual_objek_pajak ||
       !jumlah_pajak_terhutang ||
       !tahun_pajak ||
       !status_pembayaran ||
@@ -86,7 +84,7 @@ suratPBBRoutes.post("/", async (c) => {
     const suratId = generateId()
 
     await c.env.DB.prepare(
-      "INSERT INTO surat_pbb (id, nomor_objek_pajak, nama_wajib_pajak, alamat_wajib_pajak, alamat_objek_pajak, luas_tanah, luas_bangunan, nilai_jual_objek_pajak, jumlah_pajak_terhutang, tahun_pajak, status_pembayaran, id_dusun, id_pengguna) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+      "INSERT INTO surat_pbb (id, nomor_objek_pajak, nama_wajib_pajak, alamat_wajib_pajak, alamat_objek_pajak, luas_tanah, luas_bangunan, jumlah_pajak_terhutang, tahun_pajak, status_pembayaran, id_dusun, id_pengguna) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
     )
       .bind(
         suratId,
@@ -96,7 +94,6 @@ suratPBBRoutes.post("/", async (c) => {
         alamat_objek_pajak,
         luas_tanah,
         luas_bangunan,
-        nilai_jual_objek_pajak,
         jumlah_pajak_terhutang,
         tahun_pajak,
         status_pembayaran,
@@ -213,7 +210,6 @@ suratPBBRoutes.put("/:id", async (c) => {
       "alamat_objek_pajak",
       "luas_tanah",
       "luas_bangunan",
-      "nilai_jual_objek_pajak",
       "jumlah_pajak_terhutang",
       "tahun_pajak",
       "status_pembayaran",

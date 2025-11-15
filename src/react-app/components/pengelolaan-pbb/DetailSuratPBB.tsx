@@ -174,19 +174,6 @@ export function DetailSuratPBB({
             )}
           </div>
           <div className="col-12 col-sm-6 col-md-6">
-            <label className="form-label text-muted small mb-1">Nilai Jual Objek Pajak (NJOP)</label>
-            {isEditing ? (
-              <input
-                type="number"
-                className="form-control"
-                value={editForm.nilai_jual_objek_pajak || ""}
-                onChange={(e) => onEditFormChange("nilai_jual_objek_pajak", Number(e.target.value))}
-              />
-            ) : (
-              <div className="text-break">{surat.nilai_jual_objek_pajak ? `Rp ${Number(surat.nilai_jual_objek_pajak).toLocaleString("id-ID")}` : "-"}</div>
-            )}
-          </div>
-          <div className="col-12 col-sm-6 col-md-6">
             <label className="form-label text-muted small mb-1">Jumlah Pajak Terhutang</label>
             {isEditing ? (
               <input
