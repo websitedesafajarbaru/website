@@ -22,7 +22,7 @@ dusunRoutes.post("/", async (c) => {
 
     const newId = generateIntId(lastDusun?.id as number)
 
-    await c.env.DB.prepare("INSERT INTO dusun (id, nama_dusun, status_data_pbb) VALUES (?, ?, ?)").bind(newId, nama_dusun, "belum_lengkap").run()
+    await c.env.DB.prepare("INSERT INTO dusun (id, nama_dusun) VALUES (?, ?)").bind(newId, nama_dusun).run()
 
     await c.env.KV.put(`token:kepala_dusun:${newId}`, tokenKepalaDusun)
     await c.env.KV.put(`token:ketua_rt:${newId}`, tokenKetuaRT)
@@ -113,7 +113,7 @@ dusunRoutes.get("/:id", async (c) => {
 dusunRoutes.put("/:id", async (c) => {
   try {
     const dusunId = c.req.param("id")
-    const { nama_dusun, status_data_pbb } = await c.req.json()
+    const { nama_dusun } = await c.req.json()
 
     let query = 'UPDATE dusun SET waktu_diperbarui = datetime("now")'
     const params: (string | number)[] = []
@@ -121,14 +121,6 @@ dusunRoutes.put("/:id", async (c) => {
     if (nama_dusun) {
       query += ", nama_dusun = ?"
       params.push(nama_dusun)
-    }
-
-    if (status_data_pbb) {
-      if (!["belum_lengkap", "sudah_lengkap"].includes(status_data_pbb)) {
-        return c.json({ error: "Status data PBB tidak valid" }, 400)
-      }
-      query += ", status_data_pbb = ?"
-      params.push(status_data_pbb)
     }
 
     query += " WHERE id = ?"

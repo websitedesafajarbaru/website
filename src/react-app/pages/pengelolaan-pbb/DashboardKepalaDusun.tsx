@@ -11,7 +11,6 @@ interface DusunStatistik {
   dusun: {
     id: number
     nama_dusun: string
-    status_data_pbb: string
   }
   active_year: number
   total_pajak_terhutang: number
@@ -34,7 +33,6 @@ interface PerangkatDesa {
 interface DusunInfo {
   id: number
   nama_dusun: string
-  status_data_pbb: string
 }
 
 export function DashboardKepalaDusun() {
@@ -68,7 +66,7 @@ export function DashboardKepalaDusun() {
     nilai_jual_objek_pajak: "",
     jumlah_pajak_terhutang: "",
     tahun_pajak: activeYear.toString(),
-    status_pembayaran: "belum_bayar",
+    status_pembayaran: "tidak_diketahui",
     dusun_id: dusunId?.toString() || "",
   })
 
@@ -288,7 +286,7 @@ export function DashboardKepalaDusun() {
           nilai_jual_objek_pajak: "",
           jumlah_pajak_terhutang: "",
           tahun_pajak: activeYear.toString(),
-          status_pembayaran: "belum_bayar",
+          status_pembayaran: "tidak_diketahui",
           dusun_id: dusunId?.toString() || "",
         })
 
@@ -565,6 +563,7 @@ export function DashboardKepalaDusun() {
                 setEditForm(selectedSurat)
               }}
               showAdminActions={user?.roles === "admin" || user?.roles === "kepala_dusun"}
+              isPerangkatDesa={user?.roles === "kepala_dusun" || user?.roles === "ketua_rt"}
             />
           )}
         </div>
@@ -576,6 +575,7 @@ export function DashboardKepalaDusun() {
           onFormChange={(field, value) => setSuratForm({ ...suratForm, [field]: value })}
           onSubmit={handleCreateSurat}
           onCancel={() => setActiveTab("laporan")}
+          isPerangkatDesa={true}
         />
       )}
 

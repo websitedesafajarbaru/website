@@ -40,6 +40,20 @@ suratPBBRoutes.post("/", async (c) => {
       return c.json({ error: "Semua field harus diisi" }, 400)
     }
 
+    // Validate status_pembayaran for perangkat desa
+    if (user.roles !== "admin") {
+      const perangkat = await c.env.DB.prepare("SELECT jabatan FROM perangkat_desa WHERE id = ?").bind(user.userId).first()
+      
+      if (perangkat?.jabatan === "kepala_dusun" || perangkat?.jabatan === "ketua_rt") {
+        const allowedStatuses = ["bayar_sendiri_di_bank", "pindah_rumah", "tidak_diketahui"]
+        if (!allowedStatuses.includes(status_pembayaran)) {
+          return c.json({ 
+            error: "Sebagai perangkat desa, Anda hanya dapat membuat surat PBB dengan status: Bayar Sendiri di Bank, Pindah Rumah, atau Tidak Diketahui" 
+          }, 400)
+        }
+      }
+    }
+
     if (user.roles !== "admin") {
       console.log("User roles:", user.roles, "userId:", user.userId)
       const role = user.roles.trim().toLowerCase()
@@ -114,7 +128,7 @@ suratPBBRoutes.get("/", async (c) => {
     const currentYear = activeYear ? parseInt(activeYear) : new Date().getFullYear()
 
     let query =
-      "SELECT s.*, d.nama_dusun, d.status_data_pbb, p.nama_lengkap as nama_perangkat FROM surat_pbb s JOIN dusun d ON s.id_dusun = d.id JOIN pengguna p ON s.id_pengguna = p.id WHERE s.tahun_pajak = ?"
+      "SELECT s.*, d.nama_dusun, p.nama_lengkap as nama_perangkat FROM surat_pbb s JOIN dusun d ON s.id_dusun = d.id JOIN pengguna p ON s.id_pengguna = p.id WHERE s.tahun_pajak = ?"
     const params: (string | number)[] = [currentYear]
 
     if (user.roles !== "admin") {
@@ -168,7 +182,7 @@ suratPBBRoutes.get("/:id", async (c) => {
     const suratId = c.req.param("id")
 
     const surat = await c.env.DB.prepare(
-      "SELECT s.*, d.nama_dusun, d.status_data_pbb, p.nama_lengkap as nama_perangkat FROM surat_pbb s JOIN dusun d ON s.id_dusun = d.id JOIN pengguna p ON s.id_pengguna = p.id WHERE s.id = ?"
+      "SELECT s.*, d.nama_dusun, p.nama_lengkap as nama_perangkat FROM surat_pbb s JOIN dusun d ON s.id_dusun = d.id JOIN pengguna p ON s.id_pengguna = p.id WHERE s.id = ?"
     )
       .bind(suratId)
       .first()
@@ -209,15 +223,18 @@ suratPBBRoutes.put("/:id", async (c) => {
     const params: (string | number)[] = []
 
     if (updates.status_pembayaran !== undefined && updates.status_pembayaran !== originalSurat?.status_pembayaran) {
-      const dusunStatus = await c.env.DB.prepare("SELECT d.status_data_pbb FROM dusun d JOIN surat_pbb s ON d.id = s.id_dusun WHERE s.id = ?").bind(suratId).first()
-
-      if (dusunStatus?.status_data_pbb !== "sudah_lengkap") {
-        return c.json(
-          {
-            error: "Status pembayaran tidak dapat diubah karena data dusun belum diset sebagai lengkap oleh admin",
-          },
-          403
-        )
+      // Check user role and restrict status options for perangkat desa
+      if (user.roles !== "admin") {
+        const perangkat = await c.env.DB.prepare("SELECT jabatan FROM perangkat_desa WHERE id = ?").bind(user.userId).first()
+        
+        if (perangkat?.jabatan === "kepala_dusun" || perangkat?.jabatan === "ketua_rt") {
+          const allowedStatuses = ["bayar_sendiri_di_bank", "pindah_rumah", "tidak_diketahui"]
+          if (!allowedStatuses.includes(updates.status_pembayaran)) {
+            return c.json({ 
+              error: "Sebagai perangkat desa, Anda hanya dapat mengubah status pembayaran ke: Bayar Sendiri di Bank, Pindah Rumah, atau Tidak Diketahui" 
+            }, 403)
+          }
+        }
       }
     }
 

@@ -19,9 +19,10 @@ trackingRoutes.get("/", authMiddleware, async (c) => {
       `SELECT 
         tahun_pajak as tahun,
         COUNT(*) as total_surat_pbb,
-        SUM(CASE WHEN status_pembayaran = 'belum_bayar' THEN 1 ELSE 0 END) as belum_bayar,
         SUM(CASE WHEN status_pembayaran = 'bayar_sendiri_di_bank' THEN 1 ELSE 0 END) as bayar_sendiri,
-        SUM(CASE WHEN status_pembayaran = 'bayar_lewat_perangkat_desa' THEN 1 ELSE 0 END) as bayar_lewat_perangkat
+        SUM(CASE WHEN status_pembayaran = 'sudah_bayar' THEN 1 ELSE 0 END) as sudah_bayar,
+        SUM(CASE WHEN status_pembayaran = 'pindah_rumah' THEN 1 ELSE 0 END) as pindah_rumah,
+        SUM(CASE WHEN status_pembayaran = 'tidak_diketahui' THEN 1 ELSE 0 END) as tidak_diketahui
       FROM surat_pbb 
       GROUP BY tahun_pajak 
       ORDER BY tahun_pajak DESC`
@@ -48,9 +49,10 @@ trackingRoutes.get("/", authMiddleware, async (c) => {
       yearMap.set(row.tahun, {
         tahun: row.tahun,
         total_surat_pbb: row.total_surat_pbb,
-        surat_pbb_belum_bayar: row.belum_bayar,
         surat_pbb_bayar_sendiri: row.bayar_sendiri,
-        surat_pbb_bayar_lewat_perangkat: row.bayar_lewat_perangkat,
+        surat_pbb_sudah_bayar: row.sudah_bayar,
+        surat_pbb_pindah_rumah: row.pindah_rumah,
+        surat_pbb_tidak_diketahui: row.tidak_diketahui,
         total_aduan: 0,
         aduan_menunggu: 0,
         aduan_diproses: 0,
@@ -71,9 +73,10 @@ trackingRoutes.get("/", authMiddleware, async (c) => {
         yearMap.set(tahunNum, {
           tahun: tahunNum,
           total_surat_pbb: 0,
-          surat_pbb_belum_bayar: 0,
           surat_pbb_bayar_sendiri: 0,
-          surat_pbb_bayar_lewat_perangkat: 0,
+          surat_pbb_sudah_bayar: 0,
+          surat_pbb_pindah_rumah: 0,
+          surat_pbb_tidak_diketahui: 0,
           total_aduan: row.total_aduan,
           aduan_menunggu: row.menunggu,
           aduan_diproses: row.diproses,

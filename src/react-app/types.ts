@@ -45,7 +45,6 @@ export interface Dusun {
   id: number
   nama_dusun: string
   id_kepala_dusun: string | null
-  status_data_pbb: "belum_lengkap" | "sudah_lengkap"
   waktu_dibuat: string
   waktu_diperbarui: string
   nama_kepala_dusun?: string
@@ -66,14 +65,13 @@ export interface SuratPBB {
   nilai_jual_objek_pajak: number
   jumlah_pajak_terhutang: number
   tahun_pajak: number
-  status_pembayaran: "belum_bayar" | "bayar_sendiri_di_bank" | "bayar_lewat_perangkat_desa" | "pindah_rumah" | "tidak_diketahui"
+  status_pembayaran: "bayar_sendiri_di_bank" | "sudah_bayar" | "pindah_rumah" | "tidak_diketahui"
   id_dusun: number
   id_pengguna: string
   waktu_dibuat: string
   waktu_diperbarui: string
   nama_dusun?: string
   nama_perangkat?: string
-  status_data_pbb?: "belum_lengkap" | "sudah_lengkap"
 }
 
 export interface Laporan {
@@ -89,7 +87,6 @@ export interface Laporan {
 export interface DusunStatistik {
   id: number
   nama_dusun: string
-  status_data_pbb: string
   nama_kepala_dusun: string
   total_pajak_terhutang: number
   total_pajak_dibayar: number

@@ -27,7 +27,7 @@ export function DashboardKetuaRT() {
     nilai_jual_objek_pajak: "",
     jumlah_pajak_terhutang: "",
     tahun_pajak: activeYear.toString(),
-    status_pembayaran: "belum_bayar",
+    status_pembayaran: "tidak_diketahui",
     dusun_id: dusunId?.toString() || "",
   })
 
@@ -134,7 +134,7 @@ export function DashboardKetuaRT() {
           nilai_jual_objek_pajak: "",
           jumlah_pajak_terhutang: "",
           tahun_pajak: activeYear.toString(),
-          status_pembayaran: "belum_bayar",
+          status_pembayaran: "tidak_diketahui",
           dusun_id: dusunId?.toString() || "",
         })
         fetchSuratPBB()
@@ -304,10 +304,10 @@ export function DashboardKetuaRT() {
 
   const totalPajakTerhutang = suratPBB.reduce((sum, s) => sum + Number(s.jumlah_pajak_terhutang), 0)
   const totalPajakDibayar = suratPBB
-    .filter((s) => s.status_pembayaran === "bayar_sendiri_di_bank" || s.status_pembayaran === "bayar_lewat_perangkat_desa")
+    .filter((s) => s.status_pembayaran === "bayar_sendiri_di_bank" || s.status_pembayaran === "sudah_bayar")
     .reduce((sum, s) => sum + Number(s.jumlah_pajak_terhutang), 0)
   const totalSurat = suratPBB.length
-  const totalSuratDibayar = suratPBB.filter((s) => s.status_pembayaran === "bayar_sendiri_di_bank" || s.status_pembayaran === "bayar_lewat_perangkat_desa").length
+  const totalSuratDibayar = suratPBB.filter((s) => s.status_pembayaran === "bayar_sendiri_di_bank" || s.status_pembayaran === "sudah_bayar").length
   const totalSuratBelumBayar = totalSurat - totalSuratDibayar
   const persentasePembayaran = totalSurat > 0 ? (totalSuratDibayar / totalSurat) * 100 : 0
 
@@ -358,6 +358,7 @@ export function DashboardKetuaRT() {
           onFormChange={(field, value) => setSuratForm({ ...suratForm, [field]: value })}
           onSubmit={handleCreateSurat}
           onCancel={() => setShowForm(false)}
+          isPerangkatDesa={true}
         />
       ) : selectedSurat ? (
         <DetailSuratPBB
@@ -375,6 +376,7 @@ export function DashboardKetuaRT() {
             setEditForm(selectedSurat)
           }}
           showAdminActions={user?.roles === "admin" || user?.roles === "kepala_dusun" || user?.roles === "ketua_rt"}
+          isPerangkatDesa={user?.roles === "kepala_dusun" || user?.roles === "ketua_rt"}
         />
       ) : null}
     </div>

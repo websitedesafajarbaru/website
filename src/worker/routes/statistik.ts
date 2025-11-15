@@ -65,7 +65,7 @@ statistikRoutes.get("/dusun/:id", async (c) => {
       .first()
 
     const pajakDibayarResult = await c.env.DB.prepare(
-      "SELECT COALESCE(SUM(jumlah_pajak_terhutang), 0) as total_pajak_dibayar FROM surat_pbb WHERE id_dusun = ? AND tahun_pajak = ? AND status_pembayaran IN ('bayar_sendiri_di_bank', 'bayar_lewat_perangkat_desa')"
+      "SELECT COALESCE(SUM(jumlah_pajak_terhutang), 0) as total_pajak_dibayar FROM surat_pbb WHERE id_dusun = ? AND tahun_pajak = ? AND status_pembayaran IN ('bayar_sendiri_di_bank', 'sudah_bayar')"
     )
       .bind(dusunId, currentYear)
       .first()
@@ -77,7 +77,7 @@ statistikRoutes.get("/dusun/:id", async (c) => {
     const totalSurat = await c.env.DB.prepare("SELECT COUNT(*) as total FROM surat_pbb WHERE id_dusun = ? AND tahun_pajak = ?").bind(dusunId, currentYear).first()
 
     const totalSuratDibayar = await c.env.DB.prepare(
-      "SELECT COUNT(*) as total FROM surat_pbb WHERE id_dusun = ? AND tahun_pajak = ? AND status_pembayaran IN ('bayar_sendiri_di_bank', 'bayar_lewat_perangkat_desa')"
+      "SELECT COUNT(*) as total FROM surat_pbb WHERE id_dusun = ? AND tahun_pajak = ? AND status_pembayaran IN ('bayar_sendiri_di_bank', 'sudah_bayar')"
     )
       .bind(dusunId, currentYear)
       .first()
@@ -135,7 +135,7 @@ statistikRoutes.get("/laporan", async (c) => {
     const currentYear = activeYear ? parseInt(activeYear) : new Date().getFullYear()
 
     const dusunList = await c.env.DB.prepare(
-      `SELECT d.id, d.nama_dusun, d.status_data_pbb, 
+      `SELECT d.id, d.nama_dusun, 
        (SELECT p.nama_lengkap FROM perangkat_desa pd 
         JOIN pengguna p ON pd.id = p.id 
         WHERE pd.id_dusun = d.id AND pd.jabatan = 'kepala_dusun' LIMIT 1) as nama_kepala_dusun 
@@ -152,7 +152,7 @@ statistikRoutes.get("/laporan", async (c) => {
         .first()
 
       const pajakDibayarResult = await c.env.DB.prepare(
-        "SELECT COALESCE(SUM(jumlah_pajak_terhutang), 0) as total_pajak_dibayar FROM surat_pbb WHERE id_dusun = ? AND tahun_pajak = ? AND status_pembayaran IN ('bayar_sendiri_di_bank', 'bayar_lewat_perangkat_desa')"
+        "SELECT COALESCE(SUM(jumlah_pajak_terhutang), 0) as total_pajak_dibayar FROM surat_pbb WHERE id_dusun = ? AND tahun_pajak = ? AND status_pembayaran IN ('bayar_sendiri_di_bank', 'sudah_bayar')"
       )
         .bind(dusun.id, currentYear)
         .first()
@@ -160,7 +160,7 @@ statistikRoutes.get("/laporan", async (c) => {
       const totalSurat = await c.env.DB.prepare("SELECT COUNT(*) as total FROM surat_pbb WHERE id_dusun = ? AND tahun_pajak = ?").bind(dusun.id, currentYear).first()
 
       const totalSuratDibayar = await c.env.DB.prepare(
-        "SELECT COUNT(*) as total FROM surat_pbb WHERE id_dusun = ? AND tahun_pajak = ? AND status_pembayaran IN ('bayar_sendiri_di_bank', 'bayar_lewat_perangkat_desa')"
+        "SELECT COUNT(*) as total FROM surat_pbb WHERE id_dusun = ? AND tahun_pajak = ? AND status_pembayaran IN ('bayar_sendiri_di_bank', 'sudah_bayar')"
       )
         .bind(dusun.id, currentYear)
         .first()
@@ -199,7 +199,7 @@ statistikRoutes.get("/laporan", async (c) => {
       .first()
 
     const totalDibayarKeseluruhan = await c.env.DB.prepare(
-      "SELECT COALESCE(SUM(jumlah_pajak_terhutang), 0) as total_pajak_dibayar FROM surat_pbb WHERE tahun_pajak = ? AND status_pembayaran IN ('bayar_sendiri_di_bank', 'bayar_lewat_perangkat_desa')"
+      "SELECT COALESCE(SUM(jumlah_pajak_terhutang), 0) as total_pajak_dibayar FROM surat_pbb WHERE tahun_pajak = ? AND status_pembayaran IN ('bayar_sendiri_di_bank', 'sudah_bayar')"
     )
       .bind(currentYear)
       .first()
@@ -207,7 +207,7 @@ statistikRoutes.get("/laporan", async (c) => {
     const totalSuratKeseluruhan = await c.env.DB.prepare("SELECT COUNT(*) as total FROM surat_pbb WHERE tahun_pajak = ?").bind(currentYear).first()
 
     const totalSuratDibayarKeseluruhan = await c.env.DB.prepare(
-      "SELECT COUNT(*) as total FROM surat_pbb WHERE tahun_pajak = ? AND status_pembayaran IN ('bayar_sendiri_di_bank', 'bayar_lewat_perangkat_desa')"
+      "SELECT COUNT(*) as total FROM surat_pbb WHERE tahun_pajak = ? AND status_pembayaran IN ('bayar_sendiri_di_bank', 'sudah_bayar')"
     )
       .bind(currentYear)
       .first()

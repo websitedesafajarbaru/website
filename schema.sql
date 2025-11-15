@@ -30,7 +30,6 @@ CREATE TABLE masyarakat (
 CREATE TABLE dusun (
     id INT PRIMARY KEY,
     nama_dusun TEXT NOT NULL,
-    status_data_pbb TEXT NOT NULL CHECK (status_data_pbb IN ('belum_lengkap', 'sudah_lengkap')),
     waktu_dibuat TEXT DEFAULT (datetime('now')),
     waktu_diperbarui TEXT DEFAULT (datetime('now'))
 );
@@ -56,7 +55,7 @@ CREATE TABLE surat_pbb (
     nilai_jual_objek_pajak REAL NOT NULL,
     jumlah_pajak_terhutang REAL NOT NULL,
     tahun_pajak INT NOT NULL,
-    status_pembayaran TEXT NOT NULL CHECK (status_pembayaran IN ('bayar_sendiri_di_bank', 'bayar_lewat_perangkat_desa', 'belum_bayar', 'pindah_rumah', 'tidak_diketahui')),
+    status_pembayaran TEXT NOT NULL CHECK (status_pembayaran IN ('bayar_sendiri_di_bank', 'sudah_bayar', 'pindah_rumah', 'tidak_diketahui')),
     id_dusun INT NOT NULL,
     id_pengguna TEXT NOT NULL,
     waktu_dibuat TEXT DEFAULT (datetime('now')),

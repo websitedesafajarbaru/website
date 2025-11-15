@@ -12,6 +12,7 @@ interface DetailSuratPBBProps {
   onBack: () => void
   onStartEdit: () => void
   showAdminActions?: boolean
+  isPerangkatDesa?: boolean
 }
 
 export function DetailSuratPBB({
@@ -26,7 +27,22 @@ export function DetailSuratPBB({
   onBack,
   onStartEdit,
   showAdminActions = false,
+  isPerangkatDesa = false,
 }: DetailSuratPBBProps) {
+  // Define status options based on user role
+  const statusOptions = isPerangkatDesa
+    ? [
+        { value: "bayar_sendiri_di_bank", label: "Bayar Sendiri di Bank" },
+        { value: "pindah_rumah", label: "Pindah Rumah" },
+        { value: "tidak_diketahui", label: "Tidak Diketahui" },
+      ]
+    : [
+        { value: "bayar_sendiri_di_bank", label: "Bayar Sendiri di Bank" },
+        { value: "sudah_bayar", label: "Sudah Bayar" },
+        { value: "pindah_rumah", label: "Pindah Rumah" },
+        { value: "tidak_diketahui", label: "Tidak Diketahui" },
+      ]
+
   return (
     <div className="card">
       <div className="card-header">
@@ -102,13 +118,12 @@ export function DetailSuratPBB({
                 className="form-select"
                 value={editForm.status_pembayaran || ""}
                 onChange={(e) => onEditFormChange("status_pembayaran", e.target.value)}
-                disabled={surat.status_data_pbb === "belum_lengkap"}
               >
-                <option value="belum_bayar">Belum Bayar</option>
-                <option value="bayar_sendiri_di_bank">Bayar Sendiri di Bank</option>
-                <option value="bayar_lewat_perangkat_desa">Bayar Lewat Perangkat Desa</option>
-                <option value="pindah_rumah">Pindah Rumah</option>
-                <option value="tidak_diketahui">Tidak Diketahui</option>
+                {statusOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
               </select>
             ) : (
               <>
@@ -116,15 +131,13 @@ export function DetailSuratPBB({
                   className="form-select"
                   value={surat.status_pembayaran}
                   onChange={(e) => onStatusChange(e.target.value)}
-                  disabled={surat.status_data_pbb === "belum_lengkap"}
                 >
-                  <option value="belum_bayar">Belum Bayar</option>
-                  <option value="bayar_sendiri_di_bank">Bayar Sendiri di Bank</option>
-                  <option value="bayar_lewat_perangkat_desa">Bayar Lewat Perangkat Desa</option>
-                  <option value="pindah_rumah">Pindah Rumah</option>
-                  <option value="tidak_diketahui">Tidak Diketahui</option>
+                  {statusOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
                 </select>
-                {surat.status_data_pbb === "belum_lengkap" && <div className="small text-muted mt-1">Status tidak dapat diubah karena data PBB dusun belum lengkap.</div>}
               </>
             )}
           </div>

@@ -19,9 +19,24 @@ interface FormTambahSuratPBBProps {
   onCancel: () => void
   showDusunField?: boolean
   dusunOptions?: { id: number; nama_dusun: string }[]
+  isPerangkatDesa?: boolean
 }
 
-export function FormTambahSuratPBB({ suratForm, onFormChange, onSubmit, onCancel, showDusunField = false, dusunOptions = [] }: FormTambahSuratPBBProps) {
+export function FormTambahSuratPBB({ suratForm, onFormChange, onSubmit, onCancel, showDusunField = false, dusunOptions = [], isPerangkatDesa = false }: FormTambahSuratPBBProps) {
+  // Define status options based on user role
+  const statusOptions = isPerangkatDesa
+    ? [
+        { value: "bayar_sendiri_di_bank", label: "Bayar Sendiri di Bank" },
+        { value: "pindah_rumah", label: "Pindah Rumah" },
+        { value: "tidak_diketahui", label: "Tidak Diketahui" },
+      ]
+    : [
+        { value: "bayar_sendiri_di_bank", label: "Bayar Sendiri di Bank" },
+        { value: "sudah_bayar", label: "Sudah Bayar" },
+        { value: "pindah_rumah", label: "Pindah Rumah" },
+        { value: "tidak_diketahui", label: "Tidak Diketahui" },
+      ]
+
   return (
     <div className="card">
       <div className="card-header d-flex justify-content-between align-items-center">
@@ -72,11 +87,11 @@ export function FormTambahSuratPBB({ suratForm, onFormChange, onSubmit, onCancel
                 Status Pembayaran <span className="text-danger">*</span>
               </label>
               <select className="form-select" value={suratForm.status_pembayaran} onChange={(e) => onFormChange("status_pembayaran", e.target.value)} required>
-                <option value="belum_bayar">Belum Bayar</option>
-                <option value="bayar_sendiri_di_bank">Bayar Sendiri di Bank</option>
-                <option value="bayar_lewat_perangkat_desa">Bayar Lewat Perangkat Desa</option>
-                <option value="pindah_rumah">Pindah Rumah</option>
-                <option value="tidak_diketahui">Tidak Diketahui</option>
+                {statusOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
               </select>
             </div>
             <div className="col-12">

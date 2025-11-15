@@ -10,19 +10,10 @@ export const formatRole = (role: string): string => {
 
 export const formatStatusPembayaran = (status: string): string => {
   const statusMap: Record<string, string> = {
-    belum_bayar: "Belum Bayar",
     bayar_sendiri_di_bank: "Bayar Sendiri di Bank",
-    bayar_lewat_perangkat_desa: "Bayar Lewat Perangkat Desa",
+    sudah_bayar: "Sudah Bayar",
     pindah_rumah: "Pindah Rumah",
     tidak_diketahui: "Tidak Diketahui",
-  }
-  return statusMap[status] || status
-}
-
-export const formatStatusDataPBB = (status: string): string => {
-  const statusMap: Record<string, string> = {
-    belum_lengkap: "Belum Lengkap",
-    sudah_lengkap: "Sudah Lengkap",
   }
   return statusMap[status] || status
 }
@@ -50,19 +41,10 @@ export const formatKategoriAduan = (kategori: string): string => {
 
 export const getStatusPembayaranColor = (status: string): string => {
   const colorMap: Record<string, string> = {
-    belum_bayar: "warning",
     bayar_sendiri_di_bank: "success",
-    bayar_lewat_perangkat_desa: "success",
+    sudah_bayar: "success",
     pindah_rumah: "info",
     tidak_diketahui: "secondary",
-  }
-  return colorMap[status] || "secondary"
-}
-
-export const getStatusDataPBBColor = (status: string): string => {
-  const colorMap: Record<string, string> = {
-    belum_lengkap: "warning",
-    sudah_lengkap: "success",
   }
   return colorMap[status] || "secondary"
 }

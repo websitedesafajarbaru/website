@@ -39,7 +39,7 @@ export function DashboardAdminPBB() {
     nilai_jual_objek_pajak: "",
     tahun_pajak: new Date().getFullYear().toString(),
     jumlah_pajak_terhutang: "",
-    status_pembayaran: "belum_bayar",
+    status_pembayaran: "tidak_diketahui",
   })
 
   const [selectedSurat, setSelectedSurat] = useState<SuratPBB | null>(null)
@@ -83,9 +83,6 @@ export function DashboardAdminPBB() {
       return (
         stat.nama_dusun.toLowerCase().includes(searchLower) ||
         (stat.total_surat || 0).toString().includes(searchLower) ||
-        formatStatusDataPBB(stat.status_data_pbb || "belum_lengkap")
-          .toLowerCase()
-          .includes(searchLower) ||
         (stat.persentase_pembayaran || 0).toString().includes(searchLower)
       )
     }) || []
@@ -399,7 +396,7 @@ export function DashboardAdminPBB() {
           nilai_jual_objek_pajak: "",
           tahun_pajak: new Date().getFullYear().toString(),
           jumlah_pajak_terhutang: "",
-          status_pembayaran: "belum_bayar",
+          status_pembayaran: "tidak_diketahui",
         })
         fetchSuratPBB()
         Swal.fire({
@@ -663,70 +660,6 @@ export function DashboardAdminPBB() {
   const cancelEditDusun = () => {
     setIsEditingDusun(false)
     setEditDusunName("")
-  }
-
-  const formatStatusDataPBB = (status: string) => {
-    switch (status) {
-      case "belum_lengkap":
-        return "Belum Lengkap"
-      case "sudah_lengkap":
-        return "Sudah Lengkap"
-      default:
-        return "Belum Lengkap"
-    }
-  }
-
-  const getStatusDataPBBColor = (status: string) => {
-    switch (status) {
-      case "belum_lengkap":
-        return "warning"
-      case "sudah_lengkap":
-        return "success"
-      default:
-        return "secondary"
-    }
-  }
-
-  const updateDusunStatus = async (dusunId: number, status: string) => {
-    try {
-      const response = await fetch(`/api/dusun/${dusunId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ status_data_pbb: status }),
-      })
-
-      if (response.ok) {
-        Swal.fire({
-          title: "Berhasil!",
-          text: "Status data PBB berhasil diperbarui!",
-          icon: "success",
-          timer: 3000,
-          showConfirmButton: false,
-        })
-        fetchLaporan()
-      } else {
-        const error = await response.json()
-        Swal.fire({
-          title: "Error",
-          text: error.message || "Gagal memperbarui status data PBB",
-          icon: "error",
-          timer: 3000,
-          showConfirmButton: false,
-        })
-      }
-    } catch (err) {
-      console.error(err)
-      Swal.fire({
-        title: "Error",
-        text: "Terjadi kesalahan",
-        icon: "error",
-        timer: 3000,
-        showConfirmButton: false,
-      })
-    }
   }
 
   const handleStatusChange = async (newStatus: string) => {
@@ -1047,6 +980,7 @@ export function DashboardAdminPBB() {
                 setEditForm(selectedSurat)
               }}
               showAdminActions={true}
+              isPerangkatDesa={false}
             />
           )}
         </>
@@ -1210,7 +1144,6 @@ export function DashboardAdminPBB() {
                   <tr>
                     <th>Nama Dusun</th>
                     <th>Total Surat</th>
-                    <th>Status Data PBB</th>
                     <th>Persentase</th>
                     <th>Aksi</th>
                   </tr>
@@ -1223,11 +1156,6 @@ export function DashboardAdminPBB() {
                         <span className="badge bg-info">
                           <i className="bi bi-file-text me-1"></i>
                           {stat.total_surat || 0}
-                        </span>
-                      </td>
-                      <td>
-                        <span className={`badge bg-${getStatusDataPBBColor(stat.status_data_pbb || "belum_lengkap")}`}>
-                          {formatStatusDataPBB(stat.status_data_pbb || "belum_lengkap")}
                         </span>
                       </td>
                       <td>
@@ -1258,24 +1186,6 @@ export function DashboardAdminPBB() {
                             <i className="bi bi-eye me-1"></i>
                             Detail
                           </button>
-                          <select
-                            className="form-select form-select-sm"
-                            style={{
-                              width: "auto",
-                              minWidth: "120px",
-                              height: "31px",
-                              fontSize: "0.875rem",
-                              lineHeight: "1",
-                              paddingTop: "0.125rem",
-                              paddingBottom: "0.25rem",
-                              paddingRight: "2rem",
-                            }}
-                            value={stat.status_data_pbb || "belum_lengkap"}
-                            onChange={(e) => updateDusunStatus(stat.id, e.target.value)}
-                          >
-                            <option value="belum_lengkap">Belum Lengkap</option>
-                            <option value="sudah_lengkap">Sudah Lengkap</option>
-                          </select>
                         </div>
                       </td>
                     </tr>
