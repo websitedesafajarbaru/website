@@ -6,7 +6,6 @@ import { FormTambahSuratPBB } from "../../components/pengelolaan-pbb/FormTambahS
 import { TabelSuratPBB } from "../../components/pengelolaan-pbb/TabelSuratPBB"
 import { DetailSuratPBB } from "../../components/pengelolaan-pbb/DetailSuratPBB"
 import { DaftarKetuaRT } from "../../components/pengelolaan-pbb/DaftarKetuaRT"
-import { FormTambahKetuaRT } from "../../components/pengelolaan-pbb/FormTambahKetuaRT"
 
 interface DusunStatistik {
   dusun: {
@@ -40,7 +39,7 @@ interface DusunInfo {
 
 export function DashboardKepalaDusun() {
   const { token, user } = useAuth()
-  const [activeTab, setActiveTab] = useState<"ketua-rt" | "laporan" | "tambah-ketua-rt" | "tambah-surat-pbb" | "edit-ketua-rt">("ketua-rt")
+  const [activeTab, setActiveTab] = useState<"ketua-rt" | "laporan" | "tambah-surat-pbb">("laporan")
   const [ketuaRT, setKetuaRT] = useState<PerangkatDesa[]>([])
   const [dusunInfo, setDusunInfo] = useState<DusunInfo | null>(null)
   const [dusunId, setDusunId] = useState<number | null>(null)
@@ -52,7 +51,9 @@ export function DashboardKepalaDusun() {
   const [showStatistics, setShowStatistics] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [editForm, setEditForm] = useState<Partial<SuratPBB>>({})
-  const [ketuaRTForm, setKetuaRTForm] = useState({
+  const [isEditingKetuaRT, setIsEditingKetuaRT] = useState(false)
+  const [selectedKetuaRTForEdit, setSelectedKetuaRTForEdit] = useState<PerangkatDesa | null>(null)
+  const [editKetuaRTForm, setEditKetuaRTForm] = useState({
     nama_lengkap: "",
     username: "",
     password: "",
@@ -69,12 +70,6 @@ export function DashboardKepalaDusun() {
     tahun_pajak: activeYear.toString(),
     status_pembayaran: "belum_bayar",
     dusun_id: dusunId?.toString() || "",
-  })
-  const [selectedKetuaRT, setSelectedKetuaRT] = useState<PerangkatDesa | null>(null)
-  const [editKetuaRTForm, setEditKetuaRTForm] = useState({
-    nama_lengkap: "",
-    username: "",
-    password: "",
   })
 
   const fetchActiveYear = useCallback(async () => {
@@ -171,80 +166,19 @@ export function DashboardKepalaDusun() {
     setSelectedSurat(surat)
   }
 
-  const handleCreateKetuaRT = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!dusunId) return
-
-    try {
-      const response = await fetch("/api/perangkat-desa", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          nama_lengkap: ketuaRTForm.nama_lengkap,
-          username: ketuaRTForm.username,
-          password: ketuaRTForm.password,
-          jabatan: "ketua_rt",
-          id_dusun: dusunId,
-        }),
-      })
-      if (response.ok) {
-        setActiveTab("ketua-rt")
-        setKetuaRTForm({
-          nama_lengkap: "",
-          username: "",
-          password: "",
-        })
-
-        const response = await fetch(`/api/perangkat-desa?dusun_id=${dusunId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        const result = await response.json()
-        if (response.ok) {
-          const ketuaList = result.filter((p: PerangkatDesa) => p.jabatan === "ketua_rt")
-          setKetuaRT(ketuaList)
-        }
-        Swal.fire({
-          title: "Berhasil!",
-          text: "Ketua RT berhasil ditambahkan!",
-          icon: "success",
-          confirmButtonText: "OK",
-        })
-      } else {
-        const error = await response.json()
-        Swal.fire({
-          title: "Error",
-          text: error.message || "Gagal menambahkan ketua RT",
-          icon: "error",
-          confirmButtonText: "OK",
-        })
-      }
-    } catch (err) {
-      console.error(err)
-      Swal.fire({
-        title: "Error",
-        text: "Terjadi kesalahan",
-        icon: "error",
-        confirmButtonText: "OK",
-      })
-    }
-  }
-
   const handleEditKetuaRT = (ketua: PerangkatDesa) => {
-    setSelectedKetuaRT(ketua)
+    setSelectedKetuaRTForEdit(ketua)
     setEditKetuaRTForm({
       nama_lengkap: ketua.nama_lengkap,
       username: ketua.username,
       password: "",
     })
-    setActiveTab("edit-ketua-rt")
+    setIsEditingKetuaRT(true)
   }
 
   const handleSaveEditKetuaRT = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!selectedKetuaRT || !token) return
+    if (!selectedKetuaRTForEdit || !token) return
 
     try {
       const updateData: {
@@ -264,7 +198,7 @@ export function DashboardKepalaDusun() {
         updateData.password = editKetuaRTForm.password
       }
 
-      const response = await fetch(`/api/perangkat-desa/${selectedKetuaRT.id}`, {
+      const response = await fetch(`/api/perangkat-desa/${selectedKetuaRTForEdit.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -274,8 +208,8 @@ export function DashboardKepalaDusun() {
       })
 
       if (response.ok) {
-        setSelectedKetuaRT(null)
-        setActiveTab("ketua-rt")
+        setSelectedKetuaRTForEdit(null)
+        setIsEditingKetuaRT(false)
         setEditKetuaRTForm({
           nama_lengkap: "",
           username: "",
@@ -302,62 +236,6 @@ export function DashboardKepalaDusun() {
         Swal.fire({
           title: "Error",
           text: error.message || "Gagal memperbarui data ketua RT",
-          icon: "error",
-          confirmButtonText: "OK",
-        })
-      }
-    } catch (err) {
-      console.error(err)
-      Swal.fire({
-        title: "Error",
-        text: "Terjadi kesalahan",
-        icon: "error",
-        confirmButtonText: "OK",
-      })
-    }
-  }
-
-  const handleDeleteKetuaRT = async (ketua: PerangkatDesa) => {
-    const result = await Swal.fire({
-      title: "Konfirmasi Hapus",
-      text: `Apakah Anda yakin ingin menghapus ketua RT "${ketua.nama_lengkap}"? Tindakan ini tidak dapat dibatalkan.`,
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "Ya, Hapus",
-      cancelButtonText: "Batal",
-    })
-
-    if (!result.isConfirmed) return
-
-    try {
-      const response = await fetch(`/api/perangkat-desa/${ketua.id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      })
-
-      if (response.ok) {
-        const response = await fetch(`/api/perangkat-desa?dusun_id=${dusunId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        const result = await response.json()
-        if (response.ok) {
-          const ketuaList = result.filter((p: PerangkatDesa) => p.jabatan === "ketua_rt")
-          setKetuaRT(ketuaList)
-        }
-
-        Swal.fire({
-          title: "Berhasil!",
-          text: "Ketua RT berhasil dihapus!",
-          icon: "success",
-          confirmButtonText: "OK",
-        })
-      } else {
-        const error = await response.json()
-        Swal.fire({
-          title: "Error",
-          text: error.message || "Gagal menghapus ketua RT",
           icon: "error",
           confirmButtonText: "OK",
         })
@@ -613,13 +491,13 @@ export function DashboardKepalaDusun() {
 
       <ul className="nav nav-tabs mb-3" style={{ backgroundColor: "#fff", padding: "0.5rem 1rem", borderRadius: "4px", border: "1px solid #dee2e6" }}>
         <li className="nav-item">
-          <button className={`nav-link ${activeTab === "ketua-rt" ? "active" : ""}`} onClick={() => setActiveTab("ketua-rt")} style={{ border: "none", fontSize: "0.9rem" }}>
-            <i className="bi bi-people me-2"></i>Daftar Ketua RT
+          <button className={`nav-link ${activeTab === "laporan" ? "active" : ""}`} onClick={() => setActiveTab("laporan")} style={{ border: "none", fontSize: "0.9rem" }}>
+            <i className="bi bi-bar-chart me-2"></i>Laporan & Surat PBB
           </button>
         </li>
         <li className="nav-item">
-          <button className={`nav-link ${activeTab === "laporan" ? "active" : ""}`} onClick={() => setActiveTab("laporan")} style={{ border: "none", fontSize: "0.9rem" }}>
-            <i className="bi bi-bar-chart me-2"></i>Laporan & Surat PBB
+          <button className={`nav-link ${activeTab === "ketua-rt" ? "active" : ""}`} onClick={() => setActiveTab("ketua-rt")} style={{ border: "none", fontSize: "0.9rem" }}>
+            <i className="bi bi-people me-2"></i>Daftar Ketua RT
           </button>
         </li>
       </ul>
@@ -631,12 +509,9 @@ export function DashboardKepalaDusun() {
               <h6 className="mb-0">
                 <i className="bi bi-people me-2"></i>Daftar Ketua RT di {dusunInfo?.nama_dusun || "Dusun Ini"}
               </h6>
-              <button className="btn btn-sm btn-primary" onClick={() => setActiveTab("tambah-ketua-rt")}>
-                <i className="bi bi-plus-circle me-1"></i>Tambah Ketua RT
-              </button>
             </div>
           </div>
-          <DaftarKetuaRT ketuaRT={ketuaRT} searchTerm={searchKetuaRT} onSearchChange={setSearchKetuaRT} onEdit={handleEditKetuaRT} onDelete={handleDeleteKetuaRT} />
+          <DaftarKetuaRT ketuaRT={ketuaRT} searchTerm={searchKetuaRT} onSearchChange={setSearchKetuaRT} onEdit={handleEditKetuaRT} showDeleteButton={false} />
         </>
       )}
 
@@ -695,15 +570,6 @@ export function DashboardKepalaDusun() {
         </div>
       )}
 
-      {activeTab === "tambah-ketua-rt" && (
-        <FormTambahKetuaRT
-          form={ketuaRTForm}
-          onFormChange={(field, value) => setKetuaRTForm({ ...ketuaRTForm, [field]: value })}
-          onSubmit={handleCreateKetuaRT}
-          onCancel={() => setActiveTab("ketua-rt")}
-        />
-      )}
-
       {activeTab === "tambah-surat-pbb" && (
         <FormTambahSuratPBB
           suratForm={suratForm}
@@ -713,63 +579,67 @@ export function DashboardKepalaDusun() {
         />
       )}
 
-      {activeTab === "edit-ketua-rt" && (
-        <div className="card">
-          <div className="card-header d-flex justify-content-between align-items-center">
-            <h6 className="mb-0">Edit Ketua RT</h6>
-            <button className="btn btn-sm btn-secondary" onClick={() => setActiveTab("ketua-rt")}>
-              <i className="bi bi-arrow-left me-1"></i>Kembali ke Daftar
-            </button>
-          </div>
-          <div className="card-body">
-            <form onSubmit={handleSaveEditKetuaRT}>
-              <div className="row g-3">
-                <div className="col-md-6">
-                  <label className="form-label">
-                    Nama Lengkap <span className="text-danger">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={editKetuaRTForm.nama_lengkap}
-                    onChange={(e) => setEditKetuaRTForm({ ...editKetuaRTForm, nama_lengkap: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="col-md-6">
-                  <label className="form-label">
-                    Username <span className="text-danger">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={editKetuaRTForm.username}
-                    onChange={(e) => setEditKetuaRTForm({ ...editKetuaRTForm, username: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="col-md-6">
-                  <label className="form-label">Password Baru (kosongkan jika tidak ingin mengubah)</label>
-                  <input
-                    type="password"
-                    className="form-control"
-                    value={editKetuaRTForm.password}
-                    onChange={(e) => setEditKetuaRTForm({ ...editKetuaRTForm, password: e.target.value })}
-                  />
-                </div>
+      {/* Modal Edit Ketua RT */}
+      {isEditingKetuaRT && (
+        <div className="modal show d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Edit Ketua RT</h5>
+                <button type="button" className="btn-close" onClick={() => setIsEditingKetuaRT(false)}></button>
               </div>
-              <div className="d-flex gap-2 mt-4">
-                <button type="submit" className="btn btn-primary">
-                  <i className="bi bi-save me-1"></i>Simpan Perubahan
-                </button>
-                <button type="button" className="btn btn-secondary" onClick={() => setActiveTab("ketua-rt")}>
-                  Batal
-                </button>
-              </div>
-            </form>
+              <form onSubmit={handleSaveEditKetuaRT}>
+                <div className="modal-body">
+                  <div className="row g-3">
+                    <div className="col-md-12">
+                      <label className="form-label">
+                        Nama Lengkap <span className="text-danger">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={editKetuaRTForm.nama_lengkap}
+                        onChange={(e) => setEditKetuaRTForm({ ...editKetuaRTForm, nama_lengkap: e.target.value })}
+                        required
+                      />
+                    </div>
+                    <div className="col-md-12">
+                      <label className="form-label">
+                        Username <span className="text-danger">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={editKetuaRTForm.username}
+                        onChange={(e) => setEditKetuaRTForm({ ...editKetuaRTForm, username: e.target.value })}
+                        required
+                      />
+                    </div>
+                    <div className="col-md-12">
+                      <label className="form-label">Password Baru (kosongkan jika tidak ingin mengubah)</label>
+                      <input
+                        type="password"
+                        className="form-control"
+                        value={editKetuaRTForm.password}
+                        onChange={(e) => setEditKetuaRTForm({ ...editKetuaRTForm, password: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className="modal-footer">
+                  <button type="button" className="btn btn-secondary" onClick={() => setIsEditingKetuaRT(false)}>
+                    Batal
+                  </button>
+                  <button type="submit" className="btn btn-primary">
+                    <i className="bi bi-save me-1"></i>Simpan Perubahan
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       )}
+
     </div>
   )
 }

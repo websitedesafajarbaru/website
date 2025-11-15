@@ -11,7 +11,8 @@ interface DaftarKetuaRTProps {
   searchTerm: string
   onSearchChange: (value: string) => void
   onEdit: (ketua: PerangkatDesa) => void
-  onDelete: (ketua: PerangkatDesa) => void
+  onDelete?: (ketua: PerangkatDesa) => void
+  showDeleteButton?: boolean
 }
 
 const formatJabatan = (jabatan: string) => {
@@ -25,7 +26,7 @@ const formatJabatan = (jabatan: string) => {
   }
 }
 
-export function DaftarKetuaRT({ ketuaRT, searchTerm, onSearchChange, onEdit, onDelete }: DaftarKetuaRTProps) {
+export function DaftarKetuaRT({ ketuaRT, searchTerm, onSearchChange, onEdit, onDelete, showDeleteButton = true }: DaftarKetuaRTProps) {
   const filteredKetuaRT = ketuaRT.filter((k) => {
     const searchLower = searchTerm.toLowerCase()
     return k.nama_lengkap.toLowerCase().includes(searchLower) || k.username.toLowerCase().includes(searchLower) || k.jabatan.toLowerCase().includes(searchLower)
@@ -67,9 +68,11 @@ export function DaftarKetuaRT({ ketuaRT, searchTerm, onSearchChange, onEdit, onD
                     <button className="btn btn-sm btn-outline-primary me-2" onClick={() => onEdit(k)} title="Edit">
                       <i className="bi bi-pencil"></i>
                     </button>
-                    <button className="btn btn-sm btn-outline-danger" onClick={() => onDelete(k)} title="Hapus">
-                      <i className="bi bi-trash"></i>
-                    </button>
+                    {showDeleteButton && onDelete && (
+                      <button className="btn btn-sm btn-outline-danger" onClick={() => onDelete(k)} title="Hapus">
+                        <i className="bi bi-trash"></i>
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}

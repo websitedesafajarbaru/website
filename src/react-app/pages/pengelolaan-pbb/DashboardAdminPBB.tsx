@@ -21,7 +21,7 @@ interface PerangkatDesa {
 export function DashboardAdminPBB() {
   const { token } = useAuth()
   const [activeTab, setActiveTab] = useState<
-    "dusun" | "surat" | "laporan" | "tambah-dusun" | "tambah-surat" | "detail-dusun" | "detail-perangkat" | "tambah-perangkat" | "detail-laporan-dusun"
+    "dusun" | "surat" | "laporan" | "tambah-dusun" | "tambah-surat" | "detail-dusun" | "detail-perangkat" | "detail-laporan-dusun"
   >("dusun")
   const [dusun, setDusun] = useState<Dusun[]>([])
   const [suratPBB, setSuratPBB] = useState<SuratPBB[]>([])
@@ -47,7 +47,6 @@ export function DashboardAdminPBB() {
   const [availableYears, setAvailableYears] = useState<number[]>([])
   const [isEditingDusun, setIsEditingDusun] = useState<boolean>(false)
   const [editDusunName, setEditDusunName] = useState<string>("")
-  const [isAddingPerangkat, setIsAddingPerangkat] = useState<boolean>(false)
   const [isEditing, setIsEditing] = useState(false)
   const [editForm, setEditForm] = useState<Partial<SuratPBB>>({})
   const [selectedDusun, setSelectedDusun] = useState<Dusun | null>(null)
@@ -286,7 +285,6 @@ export function DashboardAdminPBB() {
         const data = await response.json()
         setSelectedDusun(data)
         setIsEditingDusun(false)
-        setIsAddingPerangkat(false)
         setActiveTab("detail-dusun")
 
         const tokenResponse = await fetch(`/api/dusun/${dusunId}/tokens`, {
@@ -433,65 +431,6 @@ export function DashboardAdminPBB() {
     }
   }
 
-  const handleCreatePerangkatDesa = async (e: React.FormEvent) => {
-    e.preventDefault()
-    try {
-      const response = await fetch("/api/perangkat-desa", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          nama_lengkap: perangkatForm.nama_lengkap,
-          username: perangkatForm.username,
-          password: perangkatForm.password,
-          jabatan: perangkatForm.jabatan,
-          id_dusun: Number(perangkatForm.id_dusun),
-        }),
-      })
-      if (response.ok) {
-        setActiveTab("detail-dusun")
-        setPerangkatForm({
-          nama_lengkap: "",
-          username: "",
-          password: "",
-          id_dusun: "",
-          jabatan: "",
-        })
-        setIsAddingPerangkat(false)
-        if (selectedDusun) {
-          openDusunDetail(selectedDusun.id)
-        }
-        Swal.fire({
-          title: "Berhasil!",
-          text: "Perangkat desa berhasil ditambahkan!",
-          icon: "success",
-          timer: 3000,
-          showConfirmButton: false,
-        })
-      } else {
-        const error = await response.json()
-        Swal.fire({
-          title: "Error",
-          text: error.message || "Gagal menambahkan perangkat desa",
-          icon: "error",
-          timer: 3000,
-          showConfirmButton: false,
-        })
-      }
-    } catch (err) {
-      console.error(err)
-      Swal.fire({
-        title: "Error",
-        text: "Terjadi kesalahan",
-        icon: "error",
-        timer: 3000,
-        showConfirmButton: false,
-      })
-    }
-  }
-
   const updatePerangkatDesa = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!selectedPerangkat) return
@@ -560,20 +499,6 @@ export function DashboardAdminPBB() {
   const deletePerangkatDesa = async (perangkat?: PerangkatDesa) => {
     const targetPerangkat = perangkat || selectedPerangkat
     if (!targetPerangkat) return
-
-    const result = await Swal.fire({
-      title: "Konfirmasi Hapus",
-      text: `Apakah Anda yakin ingin menghapus perangkat desa "${targetPerangkat.nama_lengkap}"? Tindakan ini tidak dapat dibatalkan.`,
-      icon: "warning",
-      showCancelButton: true,
-      showCloseButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "Ya, Hapus",
-      cancelButtonText: "Batal",
-    })
-
-    if (!result.isConfirmed) return
 
     try {
       const response = await fetch(`/api/perangkat-desa/${targetPerangkat.id}`, {
@@ -1408,92 +1333,6 @@ export function DashboardAdminPBB() {
         />
       )}
 
-      {activeTab === "tambah-perangkat" && (
-        <div className="card">
-          <div className="card-header d-flex justify-content-between align-items-center">
-            <h6 className="mb-0">Tambah Perangkat Desa Baru</h6>
-            <button className="btn btn-sm btn-secondary" onClick={() => setActiveTab("detail-dusun")}>
-              <i className="bi bi-arrow-left me-1"></i>
-              Kembali ke Detail Dusun
-            </button>
-          </div>
-          <div className="card-body">
-            <form onSubmit={handleCreatePerangkatDesa}>
-              <div className="row g-3">
-                <div className="col-md-6">
-                  <label className="form-label">
-                    Nama Lengkap <span className="text-danger">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={perangkatForm.nama_lengkap}
-                    onChange={(e) => setPerangkatForm({ ...perangkatForm, nama_lengkap: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="col-md-6">
-                  <label className="form-label">
-                    Username <span className="text-danger">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={perangkatForm.username}
-                    onChange={(e) => setPerangkatForm({ ...perangkatForm, username: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="col-md-6">
-                  <label className="form-label">
-                    Password <span className="text-danger">*</span>
-                  </label>
-                  <input
-                    type="password"
-                    className="form-control"
-                    value={perangkatForm.password}
-                    onChange={(e) => setPerangkatForm({ ...perangkatForm, password: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="col-md-6">
-                  <label className="form-label">
-                    Jabatan <span className="text-danger">*</span>
-                  </label>
-                  <select className="form-select" value={perangkatForm.jabatan} onChange={(e) => setPerangkatForm({ ...perangkatForm, jabatan: e.target.value })} required>
-                    <option value="">Pilih Jabatan</option>
-                    <option value="kepala_dusun">Kepala Dusun</option>
-                    <option value="ketua_rt">Ketua RT</option>
-                  </select>
-                </div>
-                <div className="col-12">
-                  <label className="form-label">
-                    Dusun <span className="text-danger">*</span>
-                  </label>
-                  <select className="form-select" value={perangkatForm.id_dusun} onChange={(e) => setPerangkatForm({ ...perangkatForm, id_dusun: e.target.value })} required>
-                    <option value="">Pilih Dusun</option>
-                    {dusun.map((d) => (
-                      <option key={d.id} value={d.id}>
-                        {d.nama_dusun}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              <div className="d-flex gap-2 mt-4">
-                <button type="submit" className="btn btn-primary">
-                  <i className="bi bi-save me-1"></i>
-                  Simpan
-                </button>
-                <button type="button" className="btn btn-secondary" onClick={() => setActiveTab("detail-dusun")}>
-                  Batal
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
       {activeTab === "detail-dusun" && selectedDusun && (
         <div className="card">
           <div className="card-header d-flex justify-content-between align-items-center">
@@ -1723,167 +1562,80 @@ export function DashboardAdminPBB() {
 
               <div className="col-12">
                 <div className="card mb-3">
-                  <div className="card-header d-flex justify-content-between align-items-center">
+                  <div className="card-header">
                     <h6 className="mb-0">
                       <i className="bi bi-people me-2"></i>
                       Daftar Perangkat Desa
                     </h6>
-                    <button
-                      className="btn btn-success btn-sm"
-                      onClick={() => {
-                        setPerangkatForm({
-                          nama_lengkap: "",
-                          username: "",
-                          password: "",
-                          id_dusun: selectedDusun.id.toString(),
-                          jabatan: "",
-                        })
-                        setIsAddingPerangkat(true)
-                      }}
-                    >
-                      <i className="bi bi-person me-1"></i>
-                      Tambah Perangkat
-                    </button>
                   </div>
                 </div>
-                {isAddingPerangkat ? (
-                  <div className="card">
-                    <div className="card-body">
-                      <form onSubmit={handleCreatePerangkatDesa}>
-                        <div className="row g-3">
-                          <div className="col-md-6">
-                            <label className="form-label">
-                              Nama Lengkap <span className="text-danger">*</span>
-                            </label>
-                            <input
-                              type="text"
-                              className="form-control"
-                              value={perangkatForm.nama_lengkap}
-                              onChange={(e) => setPerangkatForm({ ...perangkatForm, nama_lengkap: e.target.value })}
-                              required
-                            />
-                          </div>
-                          <div className="col-md-6">
-                            <label className="form-label">
-                              Username <span className="text-danger">*</span>
-                            </label>
-                            <input
-                              type="text"
-                              className="form-control"
-                              value={perangkatForm.username}
-                              onChange={(e) => setPerangkatForm({ ...perangkatForm, username: e.target.value })}
-                              required
-                            />
-                          </div>
-                          <div className="col-md-6">
-                            <label className="form-label">
-                              Password <span className="text-danger">*</span>
-                            </label>
-                            <input
-                              type="password"
-                              className="form-control"
-                              value={perangkatForm.password}
-                              onChange={(e) => setPerangkatForm({ ...perangkatForm, password: e.target.value })}
-                              required
-                            />
-                          </div>
-                          <div className="col-md-6">
-                            <label className="form-label">
-                              Jabatan <span className="text-danger">*</span>
-                            </label>
-                            <select
-                              className="form-select"
-                              value={perangkatForm.jabatan}
-                              onChange={(e) => setPerangkatForm({ ...perangkatForm, jabatan: e.target.value })}
-                              required
-                            >
-                              <option value="">Pilih Jabatan</option>
-                              <option value="kepala_dusun">Kepala Dusun</option>
-                              <option value="ketua_rt">Ketua RT</option>
-                            </select>
-                          </div>
-                        </div>
-                        <div className="d-flex gap-2 mt-4">
-                          <button type="submit" className="btn btn-primary">
-                            <i className="bi bi-save me-1"></i>
-                            Simpan
-                          </button>
-                          <button type="button" className="btn btn-secondary" onClick={() => setIsAddingPerangkat(false)}>
-                            Batal
-                          </button>
-                        </div>
-                      </form>
-                    </div>
+                <>
+                  <div className="mb-3">
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Cari perangkat desa..."
+                      value={searchPerangkat}
+                      onChange={(e) => setSearchPerangkat(e.target.value)}
+                    />
                   </div>
-                ) : (
-                  <>
-                    <div className="mb-3">
-                      <input
-                        type="text"
-                        className="form-control"
-                        placeholder="Cari perangkat desa..."
-                        value={searchPerangkat}
-                        onChange={(e) => setSearchPerangkat(e.target.value)}
-                      />
-                    </div>
-                    <div className="table-container mx-auto" style={{ maxHeight: "500px", overflowY: "auto", maxWidth: "100%" }}>
-                      <table className="table table-hover">
-                        <thead className="table-light" style={{ position: "sticky", top: 0, zIndex: 1 }}>
-                          <tr>
-                            <th>Nama Lengkap</th>
-                            <th>Username</th>
-                            <th>Jabatan</th>
-                            <th>Aksi</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {filteredPerangkat.map((perangkat: PerangkatDesa) => (
-                            <tr key={perangkat.id}>
-                              <td>{perangkat.nama_lengkap}</td>
-                              <td>{perangkat.username}</td>
-                              <td>
-                                <span className={`badge bg-${perangkat.jabatan === "kepala_dusun" ? "success" : "warning"}`}>
-                                  {perangkat.jabatan === "kepala_dusun" ? "Kepala Dusun" : "Ketua RT"}
-                                </span>
-                              </td>
-                              <td>
-                                <div className="d-flex gap-1">
-                                  <button className="btn btn-sm btn-primary" onClick={() => openPerangkatDetail(perangkat)}>
-                                    <i className="bi bi-pencil me-1"></i>
-                                    Edit
-                                  </button>
-                                  <button
-                                    className="btn btn-sm btn-danger"
-                                    onClick={async () => {
-                                      const result = await Swal.fire({
-                                        title: "Konfirmasi Hapus",
-                                        text: `Apakah Anda yakin ingin menghapus perangkat desa "${perangkat.nama_lengkap}"? Tindakan ini tidak dapat dibatalkan.`,
-                                        icon: "warning",
-                                        showCancelButton: true,
-                                        showCloseButton: true,
-                                        confirmButtonColor: "#d33",
-                                        cancelButtonColor: "#3085d6",
-                                        confirmButtonText: "Ya, Hapus",
-                                        cancelButtonText: "Batal",
-                                      })
+                  <div className="table-container mx-auto" style={{ maxHeight: "500px", overflowY: "auto", maxWidth: "100%" }}>
+                    <table className="table table-hover">
+                      <thead className="table-light" style={{ position: "sticky", top: 0, zIndex: 1 }}>
+                        <tr>
+                          <th>Nama Lengkap</th>
+                          <th>Username</th>
+                          <th>Jabatan</th>
+                          <th>Aksi</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredPerangkat.map((perangkat: PerangkatDesa) => (
+                          <tr key={perangkat.id}>
+                            <td>{perangkat.nama_lengkap}</td>
+                            <td>{perangkat.username}</td>
+                            <td>
+                              <span className={`badge bg-${perangkat.jabatan === "kepala_dusun" ? "success" : "warning"}`}>
+                                {perangkat.jabatan === "kepala_dusun" ? "Kepala Dusun" : "Ketua RT"}
+                              </span>
+                            </td>
+                            <td>
+                              <div className="d-flex gap-1">
+                                <button className="btn btn-sm btn-primary" onClick={() => openPerangkatDetail(perangkat)}>
+                                  <i className="bi bi-pencil me-1"></i>
+                                  Edit
+                                </button>
+                                <button
+                                  className="btn btn-sm btn-danger"
+                                  onClick={async () => {
+                                    const result = await Swal.fire({
+                                      title: "Konfirmasi Hapus",
+                                      text: `Apakah Anda yakin ingin menghapus perangkat desa "${perangkat.nama_lengkap}"? Tindakan ini tidak dapat dibatalkan.`,
+                                      icon: "warning",
+                                      showCancelButton: true,
+                                      showCloseButton: true,
+                                      confirmButtonColor: "#d33",
+                                      cancelButtonColor: "#3085d6",
+                                      confirmButtonText: "Ya, Hapus",
+                                      cancelButtonText: "Batal",
+                                    })
 
-                                      if (result.isConfirmed) {
-                                        deletePerangkatDesa(perangkat)
-                                      }
-                                    }}
-                                  >
-                                    <i className="bi bi-trash me-1"></i>
-                                    Hapus
-                                  </button>
-                                </div>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </>
-                )}
+                                    if (result.isConfirmed) {
+                                      deletePerangkatDesa(perangkat)
+                                    }
+                                  }}
+                                >
+                                  <i className="bi bi-trash me-1"></i>
+                                  Hapus
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
               </div>
             </div>
           </div>
