@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { SuratPBB } from "../../types"
 import { formatStatusPembayaran, getStatusPembayaranColor } from "../../utils/formatters"
 
@@ -29,6 +29,7 @@ export function DetailDusunLaporan({ dusunId, onBack }: DetailDusunLaporanProps)
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [isRefreshing, setIsRefreshing] = useState(false)
+  const [hasFetched, setHasFetched] = useState(false)
 
   const filteredSuratPBB =
     statistik?.surat_pbb.filter((surat) => {
@@ -43,7 +44,7 @@ export function DetailDusunLaporan({ dusunId, onBack }: DetailDusunLaporanProps)
       )
     }) || []
 
-  const fetchStatistik = async () => {
+  const fetchStatistik = useCallback(async () => {
     if (!dusunId) return
     try {
       setLoading(true)
@@ -53,6 +54,7 @@ export function DetailDusunLaporan({ dusunId, onBack }: DetailDusunLaporanProps)
       const data = await response.json()
       if (response.ok) {
         setStatistik(data)
+        setHasFetched(true)
       } else {
         Swal.fire({
           icon: "error",
@@ -74,12 +76,13 @@ export function DetailDusunLaporan({ dusunId, onBack }: DetailDusunLaporanProps)
     } finally {
       setLoading(false)
     }
-  }
+  }, [dusunId])
 
   useEffect(() => {
-    fetchStatistik()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dusunId])
+    if (!hasFetched) {
+      fetchStatistik()
+    }
+  }, [fetchStatistik, hasFetched])
 
   const handleSuratClick = (surat: SuratPBB) => {
     setSelectedSurat(surat)
