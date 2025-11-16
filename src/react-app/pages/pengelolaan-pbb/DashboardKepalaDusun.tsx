@@ -46,7 +46,6 @@ export function DashboardKepalaDusun() {
   const [selectedSurat, setSelectedSurat] = useState<SuratPBB | null>(null)
   const [searchKetuaRT, setSearchKetuaRT] = useState("")
   const [searchSuratPBB, setSearchSuratPBB] = useState("")
-  const [showStatistics, setShowStatistics] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [editForm, setEditForm] = useState<Partial<SuratPBB>>({})
   const [isEditingKetuaRT, setIsEditingKetuaRT] = useState(false)
@@ -518,14 +517,10 @@ export function DashboardKepalaDusun() {
               totalPajakDibayar: statistik.total_pajak_dibayar,
               totalSurat: statistik.total_surat,
               totalSuratDibayar: statistik.total_surat_dibayar,
-              totalSuratBelumBayar: statistik.total_surat_belum_bayar,
-              persentasePembayaran: statistik.persentase_pembayaran,
-            }}
-            showStatistics={showStatistics}
-            onToggle={() => setShowStatistics(!showStatistics)}
-          />
-
-          {!selectedSurat ? (
+            totalSuratBelumBayar: statistik.total_surat_belum_bayar,
+            persentasePembayaran: statistik.persentase_pembayaran,
+          }}
+        />          {!selectedSurat ? (
             <>
               <div className="card mb-3">
                 <div className="card-header d-flex justify-content-between align-items-center">

@@ -14,7 +14,6 @@ export function DashboardKetuaRT() {
   const [showForm, setShowForm] = useState(false)
   const [selectedSurat, setSelectedSurat] = useState<SuratPBB | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
-  const [showStatistics, setShowStatistics] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [editForm, setEditForm] = useState<Partial<SuratPBB>>({})
   const [suratForm, setSuratForm] = useState({
@@ -328,14 +327,10 @@ export function DashboardKetuaRT() {
           totalPajakDibayar,
           totalSurat,
           totalSuratDibayar,
-          totalSuratBelumBayar,
-          persentasePembayaran,
-        }}
-        showStatistics={showStatistics}
-        onToggle={() => setShowStatistics(!showStatistics)}
-      />
-
-      {!showForm && !selectedSurat ? (
+        totalSuratBelumBayar,
+        persentasePembayaran,
+      }}
+    />      {!showForm && !selectedSurat ? (
         <>
           <div className="card mb-3">
             <div className="card-header d-flex justify-content-between align-items-center">

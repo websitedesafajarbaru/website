@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react"
 import { useAuth } from "../contexts/AuthContext"
+import Swal from "sweetalert2"
 
 interface ProfileData {
   id: string
@@ -59,7 +60,11 @@ export function Settings() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (formData.password && formData.password !== formData.confirmPassword) {
-      alert("Password dan konfirmasi password tidak cocok")
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Password dan konfirmasi password tidak cocok",
+      })
       return
     }
 
@@ -83,12 +88,22 @@ export function Settings() {
         body: JSON.stringify(updateData),
       })
 
-      alert("Profil berhasil diperbarui")
+      Swal.fire({
+        icon: "success",
+        title: "Berhasil!",
+        text: "Profil berhasil diperbarui",
+        timer: 2000,
+        showConfirmButton: false,
+      })
       updateUser({ ...user!, nama_lengkap: formData.nama_lengkap, username: formData.username })
       fetchProfile()
     } catch (error) {
       console.error("Error updating profile:", error)
-      alert("Gagal memperbarui profil")
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Gagal memperbarui profil",
+      })
     } finally {
       setSaving(false)
     }
@@ -151,7 +166,7 @@ export function Settings() {
                     </div>
                   </>
                 )}
-                <button type="submit" className="btn btn-primary" disabled={saving}>
+                <button type="submit" className="btn btn-primary w-100" disabled={saving}>
                   {saving ? "Menyimpan..." : "Simpan Perubahan"}
                 </button>
               </form>

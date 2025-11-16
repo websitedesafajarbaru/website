@@ -62,7 +62,6 @@ export function DashboardAdminPBB() {
   const [searchSuratPBB, setSearchSuratPBB] = useState("")
   const [searchStatistik, setSearchStatistik] = useState("")
   const [searchPerangkat, setSearchPerangkat] = useState("")
-  const [showStatistics, setShowStatistics] = useState(false)
   const [dusunTokens, setDusunTokens] = useState<{ tokenKepalaDusun: string; tokenKetuaRT: string } | null>(null)
   const [perangkatDesa, setPerangkatDesa] = useState<PerangkatDesa[]>([])
   const [selectedDusunId, setSelectedDusunId] = useState<string | null>(null)
@@ -988,105 +987,95 @@ export function DashboardAdminPBB() {
         <div>
           <div className="card mb-3">
             <div className="card-header">
-              <button
-                className="btn btn-link text-decoration-none p-0 d-flex align-items-center justify-content-between w-100"
-                type="button"
-                onClick={() => setShowStatistics(!showStatistics)}
-                aria-expanded={showStatistics}
-                aria-controls="statisticsCollapse"
-              >
-                <h6 className="mb-0">
-                  <i className="bi bi-bar-chart me-2"></i>
-                  Statistik Keseluruhan
-                </h6>
-                {showStatistics ? <i className="bi bi-chevron-up"></i> : <i className="bi bi-chevron-down"></i>}
-              </button>
+              <h6 className="mb-0">
+                <i className="bi bi-bar-chart me-2"></i>
+                Statistik Keseluruhan
+              </h6>
             </div>
-            <div className={`collapse ${showStatistics ? "show" : ""}`} id="statisticsCollapse">
-              <div className="card-body">
-                <div className="row g-1 g-md-2">
-            <div className="col-md-4">
-              <div className="card h-100">
-                <div className="card-body p-1 p-md-3">
-                  <div className="d-flex align-items-center">
-                    <div className="flex-grow-1">
-                      <div className="text-muted small mb-1">Total Pajak Terhutang</div>
-                      <div className="h4 mb-0">
-                        Rp {laporan.statistik_per_dusun.reduce((sum, stat) => sum + (stat.total_pajak_terhutang || 0), 0).toLocaleString("id-ID")}
+            <div className="card-body">
+              <div className="row g-1 g-md-2">
+                <div className="col-md-4">
+                  <div className="card h-100">
+                    <div className="card-body p-1 p-md-3">
+                      <div className="d-flex align-items-center">
+                        <div className="flex-grow-1">
+                          <div className="text-muted small mb-1">Total Pajak Terhutang</div>
+                          <div className="h4 mb-0">
+                            Rp {laporan.statistik_per_dusun.reduce((sum, stat) => sum + (stat.total_pajak_terhutang || 0), 0).toLocaleString("id-ID")}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>                  <div className="col-md-4">
-                    <div className="card h-100">
-                      <div className="card-body p-1 p-md-3">
-                        <div className="d-flex align-items-center">
-                          <div className="flex-grow-1">
-                            <div className="text-muted small mb-1">Total Pajak Terbayar</div>
-                            <div className="h4 mb-0">
-                              Rp {laporan.statistik_per_dusun.reduce((sum, stat) => sum + (stat.total_pajak_dibayar || 0), 0).toLocaleString("id-ID")}
-                            </div>
+                <div className="col-md-4">
+                  <div className="card h-100">
+                    <div className="card-body p-1 p-md-3">
+                      <div className="d-flex align-items-center">
+                        <div className="flex-grow-1">
+                          <div className="text-muted small mb-1">Total Pajak Terbayar</div>
+                          <div className="h4 mb-0">
+                            Rp {laporan.statistik_per_dusun.reduce((sum, stat) => sum + (stat.total_pajak_dibayar || 0), 0).toLocaleString("id-ID")}
                           </div>
                         </div>
                       </div>
                     </div>
                   </div>
+                </div>
 
-                  <div className="col-md-4">
-                    <div className="card h-100">
-                      <div className="card-body p-1 p-md-3">
-                        <div className="d-flex align-items-center">
-                          <div className="flex-grow-1">
-                            <div className="text-muted small mb-1">Persentase Pembayaran</div>
-                            <div className="h4 mb-0">
-                              {(() => {
-                                const totalSurat = laporan.statistik_per_dusun.reduce((sum, stat) => sum + (stat.total_surat || 0), 0)
-                                const totalSuratDibayar = laporan.statistik_per_dusun.reduce((sum, stat) => sum + (stat.total_surat_dibayar || 0), 0)
-                                const percentage = totalSurat > 0 ? (totalSuratDibayar / totalSurat) * 100 : 0
-                                return `${percentage.toFixed(1)}%`
-                              })()}
-                            </div>
+                <div className="col-md-4">
+                  <div className="card h-100">
+                    <div className="card-body p-1 p-md-3">
+                      <div className="d-flex align-items-center">
+                        <div className="flex-grow-1">
+                          <div className="text-muted small mb-1">Persentase Pembayaran</div>
+                          <div className="h4 mb-0">
+                            {(() => {
+                              const totalSurat = laporan.statistik_per_dusun.reduce((sum, stat) => sum + (stat.total_surat || 0), 0)
+                              const totalSuratDibayar = laporan.statistik_per_dusun.reduce((sum, stat) => sum + (stat.total_surat_dibayar || 0), 0)
+                              const percentage = totalSurat > 0 ? (totalSuratDibayar / totalSurat) * 100 : 0
+                              return `${percentage.toFixed(1)}%`
+                            })()}
                           </div>
                         </div>
                       </div>
                     </div>
                   </div>
+                </div>
 
-                  <div className="col-md-4">
-                    <div className="card h-100">
-                      <div className="card-body p-1 p-md-3">
-                        <div className="d-flex align-items-center">
-                          <div className="flex-grow-1">
-                            <div className="text-muted small mb-1">Total Surat</div>
-                            <div className="h4 mb-0">{laporan.total_surat_keseluruhan}</div>
-                          </div>
+                <div className="col-md-4">
+                  <div className="card h-100">
+                    <div className="card-body p-1 p-md-3">
+                      <div className="d-flex align-items-center">
+                        <div className="flex-grow-1">
+                          <div className="text-muted small mb-1">Total Surat</div>
+                          <div className="h4 mb-0">{laporan.total_surat_keseluruhan}</div>
                         </div>
                       </div>
                     </div>
                   </div>
+                </div>
 
-                  <div className="col-md-4">
-                    <div className="card h-100">
-                      <div className="card-body p-1 p-md-3">
-                        <div className="d-flex align-items-center">
-                          <div className="flex-grow-1">
-                            <div className="text-muted small mb-1">Surat Sudah Dibayar</div>
-                            <div className="h4 mb-0">{laporan.statistik_per_dusun.reduce((sum, stat) => sum + (stat.total_surat_dibayar || 0), 0)}</div>
-                          </div>
+                <div className="col-md-4">
+                  <div className="card h-100">
+                    <div className="card-body p-1 p-md-3">
+                      <div className="d-flex align-items-center">
+                        <div className="flex-grow-1">
+                          <div className="text-muted small mb-1">Surat Sudah Dibayar</div>
+                          <div className="h4 mb-0">{laporan.statistik_per_dusun.reduce((sum, stat) => sum + (stat.total_surat_dibayar || 0), 0)}</div>
                         </div>
                       </div>
                     </div>
                   </div>
+                </div>
 
-                  <div className="col-md-4">
-                    <div className="card h-100">
-                      <div className="card-body p-1 p-md-3">
-                        <div className="d-flex align-items-center">
-                          <div className="flex-grow-1">
-                            <div className="text-muted small mb-1">Surat Belum Dibayar</div>
-                            <div className="h4 mb-0">{laporan.statistik_per_dusun.reduce((sum, stat) => sum + (stat.total_surat_belum_bayar || 0), 0)}</div>
-                          </div>
+                <div className="col-md-4">
+                  <div className="card h-100">
+                    <div className="card-body p-1 p-md-3">
+                      <div className="d-flex align-items-center">
+                        <div className="flex-grow-1">
+                          <div className="text-muted small mb-1">Surat Belum Dibayar</div>
+                          <div className="h4 mb-0">{laporan.statistik_per_dusun.reduce((sum, stat) => sum + (stat.total_surat_belum_bayar || 0), 0)}</div>
                         </div>
                       </div>
                     </div>

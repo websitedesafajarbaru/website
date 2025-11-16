@@ -38,9 +38,9 @@ aduanRoutes.get("/saya", authMiddleware, async (c) => {
     const user = c.get("user") as JWTPayload
 
     const aduan = await c.env.DB.prepare(
-      "SELECT a.*, COUNT(t.id) as jumlah_tanggapan FROM aduan a LEFT JOIN tanggapan_aduan t ON a.id = t.id_aduan WHERE a.id_masyarakat = ? GROUP BY a.id ORDER BY a.waktu_dibuat DESC"
+      "SELECT a.*, COUNT(t.id) as jumlah_tanggapan, CASE WHEN adb.id IS NOT NULL THEN 1 ELSE 0 END as is_read FROM aduan a LEFT JOIN tanggapan_aduan t ON a.id = t.id_aduan LEFT JOIN aduan_dibaca adb ON a.id = adb.id_aduan AND adb.id_pengguna = ? WHERE a.id_masyarakat = ? GROUP BY a.id ORDER BY a.waktu_dibuat DESC"
     )
-      .bind(user.userId)
+      .bind(user.userId, user.userId)
       .all()
 
     return c.json(aduan.results)
@@ -95,7 +95,7 @@ aduanRoutes.get("/", authMiddleware, async (c) => {
 
     const status = c.req.query("status")
     let query =
-      "SELECT a.*, m.alamat_rumah, m.nomor_telepon, p.nama_lengkap, COUNT(t.id) as jumlah_tanggapan FROM aduan a JOIN masyarakat m ON a.id_masyarakat = m.id JOIN pengguna p ON m.id = p.id LEFT JOIN tanggapan_aduan t ON a.id = t.id_aduan"
+      "SELECT a.*, m.alamat_rumah, m.nomor_telepon, p.nama_lengkap, COUNT(t.id) as jumlah_tanggapan, CASE WHEN adb.id IS NOT NULL THEN 1 ELSE 0 END as is_read FROM aduan a JOIN masyarakat m ON a.id_masyarakat = m.id JOIN pengguna p ON m.id = p.id LEFT JOIN tanggapan_aduan t ON a.id = t.id_aduan LEFT JOIN aduan_dibaca adb ON a.id = adb.id_aduan AND adb.id_pengguna = ?"
 
     if (status) {
       query += " WHERE a.status = ?"
@@ -103,7 +103,7 @@ aduanRoutes.get("/", authMiddleware, async (c) => {
 
     query += " GROUP BY a.id ORDER BY a.waktu_dibuat DESC"
 
-    const result = status ? await c.env.DB.prepare(query).bind(status).all() : await c.env.DB.prepare(query).all()
+    const result = status ? await c.env.DB.prepare(query).bind(user.userId, status).all() : await c.env.DB.prepare(query).bind(user.userId).all()
 
     return c.json(result.results)
   } catch (error) {
@@ -172,6 +172,37 @@ aduanRoutes.post("/:id/tanggapan", authMiddleware, async (c) => {
       },
       201
     )
+  } catch (error) {
+    console.error(error)
+    return c.json({ error: "Terjadi kesalahan server" }, 500)
+  }
+})
+
+aduanRoutes.post("/:id/dibaca", authMiddleware, async (c) => {
+  try {
+    const user = c.get("user") as JWTPayload
+    const aduanId = c.req.param("id")
+
+    const aduan = await c.env.DB.prepare("SELECT id_masyarakat FROM aduan WHERE id = ?").bind(aduanId).first()
+    if (!aduan) {
+      return c.json({ error: "Aduan tidak ditemukan" }, 404)
+    }
+
+    if (user.roles !== "admin" && aduan.id_masyarakat !== user.userId) {
+      return c.json({ error: "Tidak memiliki akses" }, 403)
+    }
+
+    // Check if already marked as read
+    const existing = await c.env.DB.prepare("SELECT id FROM aduan_dibaca WHERE id_aduan = ? AND id_pengguna = ?").bind(aduanId, user.userId).first()
+
+    if (!existing) {
+      const readId = generateId()
+      await c.env.DB.prepare("INSERT INTO aduan_dibaca (id, id_aduan, id_pengguna) VALUES (?, ?, ?)")
+        .bind(readId, aduanId, user.userId)
+        .run()
+    }
+
+    return c.json({ message: "Aduan ditandai sebagai dibaca" })
   } catch (error) {
     console.error(error)
     return c.json({ error: "Terjadi kesalahan server" }, 500)

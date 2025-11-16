@@ -13,10 +13,9 @@ interface AduanTableProps {
   itemsPerPage: number
   totalItems: number
   onPageChange: (page: number) => void
-  readAduan?: Set<string>
 }
 
-export function AduanTable({ aduan, loading, onViewDetail, role, currentPage, itemsPerPage, totalItems, onPageChange, readAduan }: AduanTableProps) {
+export function AduanTable({ aduan, loading, onViewDetail, role, currentPage, itemsPerPage, totalItems, onPageChange }: AduanTableProps) {
   const paginatedAduan = aduan.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
   const totalPages = Math.ceil(totalItems / itemsPerPage)
 
@@ -82,7 +81,7 @@ export function AduanTable({ aduan, loading, onViewDetail, role, currentPage, it
           {paginatedAduan.map((item) => (
             <tr key={item.id} className={role === "admin" ? "" : "align-middle"}>
               <td>
-                {item.jumlah_tanggapan && item.jumlah_tanggapan > 0 && (!readAduan || !readAduan.has(item.id)) ? (
+                {item.jumlah_tanggapan && item.jumlah_tanggapan > 0 && !item.is_read ? (
                   <span className="badge bg-danger">{item.jumlah_tanggapan}</span>
                 ) : null}
               </td>

@@ -15,6 +15,7 @@ export interface Aduan {
   nomor_telepon?: string
   tanggapan?: Tanggapan[] | string
   jumlah_tanggapan?: number
+  is_read?: boolean
 }
 
 export interface Tanggapan {

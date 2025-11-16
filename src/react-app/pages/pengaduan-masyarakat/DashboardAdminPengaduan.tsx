@@ -24,7 +24,6 @@ export function DashboardAdminPengaduan() {
   const [currentPage, setCurrentPage] = useState(1)
   const [currentPageMasyarakat, setCurrentPageMasyarakat] = useState(1)
   const itemsPerPage = 100
-  const [readAduan, setReadAduan] = useState<Set<string>>(new Set())
 
   const fetchAduan = useCallback(async () => {
     try {
@@ -75,7 +74,10 @@ export function DashboardAdminPengaduan() {
       setSelectedAduan(result)
       setTanggapan("")
       setActiveTab("detail")
-      setReadAduan((prev) => new Set(prev).add(id))
+      // Mark as read
+      await apiRequest(`/api/aduan/${id}/dibaca`, {
+        method: "POST",
+      })
     } catch (err) {
       console.error(err)
     }
@@ -290,7 +292,6 @@ export function DashboardAdminPengaduan() {
             itemsPerPage={itemsPerPage}
             totalItems={filteredAduan.length}
             onPageChange={setCurrentPage}
-            readAduan={readAduan}
           />
         </>
       )}

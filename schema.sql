@@ -2,9 +2,11 @@ DROP TABLE IF EXISTS masyarakat;
 DROP TABLE IF EXISTS perangkat_desa;
 DROP TABLE IF EXISTS dusun;
 DROP TABLE IF EXISTS tanggapan_aduan;
+DROP TABLE IF EXISTS aduan_dibaca;
 DROP TABLE IF EXISTS aduan;
 DROP TABLE IF EXISTS surat_pbb;
 DROP TABLE IF EXISTS pengguna;
+DROP TABLE IF EXISTS gambar_aduan;
 
 CREATE TABLE pengguna (
     id TEXT PRIMARY KEY,
@@ -95,4 +97,14 @@ CREATE TABLE tanggapan_aduan (
     FOREIGN KEY (id_aduan) REFERENCES aduan(id) ON DELETE CASCADE,
     FOREIGN KEY (id_perangkat_desa) REFERENCES perangkat_desa(id) ON DELETE SET NULL,
     FOREIGN KEY (id_pengguna) REFERENCES pengguna(id) ON DELETE CASCADE
+);
+
+CREATE TABLE aduan_dibaca (
+    id TEXT PRIMARY KEY,
+    id_aduan TEXT NOT NULL,
+    id_pengguna TEXT NOT NULL,
+    waktu_dibaca TEXT DEFAULT (datetime('now')),
+    FOREIGN KEY (id_aduan) REFERENCES aduan(id) ON DELETE CASCADE,
+    FOREIGN KEY (id_pengguna) REFERENCES pengguna(id) ON DELETE CASCADE,
+    UNIQUE(id_aduan, id_pengguna)
 );
