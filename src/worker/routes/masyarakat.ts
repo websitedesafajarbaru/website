@@ -15,7 +15,7 @@ masyarakatRoutes.get("/", authMiddleware, async (c) => {
     }
 
     const masyarakat = await c.env.DB.prepare(
-      "SELECT p.id, p.nama_lengkap, p.username, p.roles, p.waktu_dibuat, p.waktu_diperbarui, m.alamat_rumah, m.nomor_telepon, m.email, m.status FROM pengguna p JOIN masyarakat m ON p.id = m.id ORDER BY p.waktu_dibuat DESC"
+      "SELECT p.id, p.nama_lengkap, p.username, p.roles, p.waktu_dibuat, p.waktu_diperbarui, m.alamat_rumah, m.nomor_telepon, m.status FROM pengguna p JOIN masyarakat m ON p.id = m.id ORDER BY p.waktu_dibuat DESC"
     ).all()
 
     return c.json(masyarakat.results)
@@ -33,9 +33,9 @@ masyarakatRoutes.post("/", authMiddleware, async (c) => {
       return c.json({ error: "Hanya admin yang dapat membuat masyarakat" }, 403)
     }
 
-    const { nama_lengkap, username, nomor_telepon, email, alamat_rumah, password } = await c.req.json()
+    const { nama_lengkap, username, nomor_telepon, alamat_rumah, password } = await c.req.json()
 
-    if (!nama_lengkap || !username || !nomor_telepon || !email || !alamat_rumah || !password) {
+    if (!nama_lengkap || !username || !nomor_telepon || !alamat_rumah || !password) {
       return c.json({ error: "Semua field harus diisi" }, 400)
     }
 
@@ -56,7 +56,7 @@ masyarakatRoutes.post("/", authMiddleware, async (c) => {
         hashedPassword,
         "masyarakat"
       ),
-      c.env.DB.prepare("INSERT INTO masyarakat (id, alamat_rumah, nomor_telepon, email) VALUES (?, ?, ?, ?)").bind(userId, alamat_rumah, nomor_telepon, email),
+      c.env.DB.prepare("INSERT INTO masyarakat (id, alamat_rumah, nomor_telepon) VALUES (?, ?, ?)").bind(userId, alamat_rumah, nomor_telepon),
     ])
 
     return c.json(
@@ -81,7 +81,7 @@ masyarakatRoutes.put("/:id", authMiddleware, async (c) => {
     }
 
     const masyarakatId = c.req.param("id")
-    const { nama_lengkap, username, nomor_telepon, alamat_rumah, password, email } = await c.req.json()
+    const { nama_lengkap, username, nomor_telepon, alamat_rumah, password } = await c.req.json()
 
     if (!nama_lengkap || !username || !nomor_telepon || !alamat_rumah) {
       return c.json({ error: "Nama lengkap, username, nomor telepon, dan alamat rumah harus diisi" }, 400)
@@ -115,8 +115,8 @@ masyarakatRoutes.put("/:id", authMiddleware, async (c) => {
       .bind(...values)
       .run()
 
-    await c.env.DB.prepare('UPDATE masyarakat SET alamat_rumah = ?, nomor_telepon = ?, email = ?, waktu_diperbarui = datetime("now") WHERE id = ?')
-      .bind(alamat_rumah, nomor_telepon, email, masyarakatId)
+    await c.env.DB.prepare('UPDATE masyarakat SET alamat_rumah = ?, nomor_telepon = ?, waktu_diperbarui = datetime("now") WHERE id = ?')
+      .bind(alamat_rumah, nomor_telepon, masyarakatId)
       .run()
 
     return c.json({ message: "Masyarakat berhasil diperbarui" })

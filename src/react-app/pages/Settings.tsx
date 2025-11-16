@@ -8,7 +8,6 @@ interface ProfileData {
   roles: string
   alamat_rumah?: string
   nomor_telepon?: string
-  email?: string
 }
 
 interface UpdateProfileData {
@@ -17,7 +16,6 @@ interface UpdateProfileData {
   password?: string
   alamat_rumah?: string
   nomor_telepon?: string
-  email?: string
 }
 
 export function Settings() {
@@ -32,7 +30,6 @@ export function Settings() {
     confirmPassword: "",
     alamat_rumah: "",
     nomor_telepon: "",
-    email: "",
   })
 
   const fetchProfile = useCallback(async () => {
@@ -47,7 +44,6 @@ export function Settings() {
         confirmPassword: "",
         alamat_rumah: data.alamat_rumah || "",
         nomor_telepon: data.nomor_telepon || "",
-        email: data.email || "",
       })
     } catch (error) {
       console.error("Error fetching profile:", error)
@@ -79,7 +75,6 @@ export function Settings() {
       if (user?.roles === "masyarakat") {
         updateData.alamat_rumah = formData.alamat_rumah
         updateData.nomor_telepon = formData.nomor_telepon
-        updateData.email = formData.email
       }
 
       await apiRequest("/api/auth/profile", {
@@ -153,10 +148,6 @@ export function Settings() {
                         onChange={(e) => setFormData({ ...formData, nomor_telepon: e.target.value })}
                         required
                       />
-                    </div>
-                    <div className="mb-3">
-                      <label className="form-label">Email</label>
-                      <input type="email" className="form-control" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} required />
                     </div>
                   </>
                 )}

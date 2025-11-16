@@ -75,11 +75,6 @@ export function Login() {
               <div className="mb-3">
                 <label className="form-label">Password</label>
                 <input type="password" className="form-control" name="password" value={formData.password} onChange={handleChange} required />
-                <div className="form-text">
-                  <Link to="/lupa-password" className="text-decoration-none">
-                    Lupa password?
-                  </Link>
-                </div>
               </div>
 
               <button type="submit" className="btn btn-primary w-100" disabled={loading}>

@@ -9,7 +9,6 @@ export function RegistrasiMasyarakat() {
     nama_lengkap: "",
     username: "",
     nomor_telepon: "",
-    email: "",
     alamat_rumah: "",
     password: "",
   })
@@ -80,11 +79,6 @@ export function RegistrasiMasyarakat() {
               <div className="mb-3">
                 <label className="form-label">Nomor Telepon</label>
                 <input type="tel" className="form-control" name="nomor_telepon" value={formData.nomor_telepon} onChange={handleChange} required />
-              </div>
-
-              <div className="mb-3">
-                <label className="form-label">Email</label>
-                <input type="email" className="form-control" name="email" value={formData.email} onChange={handleChange} required />
               </div>
 
               <div className="mb-3">

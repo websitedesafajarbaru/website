@@ -4,7 +4,6 @@ import { Layout } from "./components/Layout"
 import { ProtectedRoute } from "./components/ProtectedRoute"
 import { LandingPage } from "./pages/LandingPage"
 import { Login } from "./pages/Login"
-import { ForgotPassword } from "./pages/ForgotPassword"
 import { CekPembayaran } from "./pages/CekPembayaran"
 import { RegistrasiMasyarakat } from "./pages/pengaduan-masyarakat/RegistrasiMasyarakat"
 import { DashboardMasyarakat } from "./pages/pengaduan-masyarakat/DashboardMasyarakat"
@@ -23,7 +22,6 @@ function App() {
           <Route element={<Layout />}>
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/lupa-password" element={<ForgotPassword />} />
             <Route path="/cek-pembayaran" element={<CekPembayaran />} />
 
             <Route path="/pengaduan-masyarakat/registrasi" element={<RegistrasiMasyarakat />} />

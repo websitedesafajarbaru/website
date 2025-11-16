@@ -13,7 +13,6 @@ export interface MasyarakatFormData {
   nama_lengkap: string
   username: string
   nomor_telepon: string
-  email: string
   alamat_rumah: string
   password?: string
 }
@@ -23,7 +22,6 @@ export function MasyarakatForm({ masyarakat, onSubmit, onCancel, loading, onTogg
     nama_lengkap: "",
     username: "",
     nomor_telepon: "",
-    email: "",
     alamat_rumah: "",
     password: "",
   })
@@ -36,7 +34,6 @@ export function MasyarakatForm({ masyarakat, onSubmit, onCancel, loading, onTogg
         nama_lengkap: masyarakat.nama_lengkap,
         username: masyarakat.username,
         nomor_telepon: masyarakat.nomor_telepon,
-        email: masyarakat.email || "",
         alamat_rumah: masyarakat.alamat_rumah,
         password: "",
       })
@@ -130,13 +127,6 @@ export function MasyarakatForm({ masyarakat, onSubmit, onCancel, loading, onTogg
             placeholder="Masukkan nomor telepon"
           />
           {errors.nomor_telepon && <div className="invalid-feedback">{errors.nomor_telepon}</div>}
-        </div>
-
-        <div className="col-md-6">
-          <label htmlFor="email" className="form-label">
-            Email
-          </label>
-          <input type="email" className="form-control" id="email" value={formData.email} onChange={(e) => handleChange("email", e.target.value)} placeholder="Masukkan email" />
         </div>
 
         <div className="col-12">

@@ -6,9 +6,9 @@ const pengaduanMasyarakatRoutes = new Hono<{ Bindings: Env }>()
 
 pengaduanMasyarakatRoutes.post("/registrasi", async (c) => {
   try {
-    const { nama_lengkap, username, nomor_telepon, email, alamat_rumah, password } = await c.req.json()
+    const { nama_lengkap, username, nomor_telepon, alamat_rumah, password } = await c.req.json()
 
-    if (!nama_lengkap || !username || !nomor_telepon || !email || !alamat_rumah || !password) {
+    if (!nama_lengkap || !username || !nomor_telepon || !alamat_rumah || !password) {
       return c.json({ error: "Semua field harus diisi" }, 400)
     }
 

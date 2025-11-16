@@ -81,7 +81,7 @@ authRoutes.post("/logout", async (c) => {
 authRoutes.put("/profile", authMiddleware, async (c) => {
   try {
     const user = c.get("user") as JWTPayload
-    const { nama_lengkap, username, password, alamat_rumah, nomor_telepon, email } = await c.req.json()
+    const { nama_lengkap, username, password, alamat_rumah, nomor_telepon } = await c.req.json()
 
     if (!nama_lengkap || !username) {
       return c.json({ error: "Nama lengkap dan username harus diisi" }, 400)
@@ -115,11 +115,11 @@ authRoutes.put("/profile", authMiddleware, async (c) => {
       .run()
 
     if (user.roles === "masyarakat") {
-      if (!alamat_rumah || !nomor_telepon || !email) {
-        return c.json({ error: "Alamat rumah, nomor telepon, dan email harus diisi untuk masyarakat" }, 400)
+      if (!alamat_rumah || !nomor_telepon) {
+        return c.json({ error: "Alamat rumah dan nomor telepon harus diisi untuk masyarakat" }, 400)
       }
-      await c.env.DB.prepare('UPDATE masyarakat SET alamat_rumah = ?, nomor_telepon = ?, email = ?, waktu_diperbarui = datetime("now") WHERE id = ?')
-        .bind(alamat_rumah, nomor_telepon, email, user.userId)
+      await c.env.DB.prepare('UPDATE masyarakat SET alamat_rumah = ?, nomor_telepon = ?, waktu_diperbarui = datetime("now") WHERE id = ?')
+        .bind(alamat_rumah, nomor_telepon, user.userId)
         .run()
     }
 
@@ -142,7 +142,7 @@ authRoutes.get("/profile", authMiddleware, async (c) => {
     let profile = { ...pengguna }
 
     if (user.roles === "masyarakat") {
-      const masyarakat = await c.env.DB.prepare("SELECT alamat_rumah, nomor_telepon, email FROM masyarakat WHERE id = ?").bind(user.userId).first()
+      const masyarakat = await c.env.DB.prepare("SELECT alamat_rumah, nomor_telepon FROM masyarakat WHERE id = ?").bind(user.userId).first()
       if (masyarakat) {
         profile = { ...profile, ...masyarakat }
       }

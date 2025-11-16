@@ -35,7 +35,6 @@ export interface Masyarakat {
   roles: string
   alamat_rumah: string
   nomor_telepon: string
-  email?: string
   status: "active" | "banned"
   waktu_dibuat: string
   waktu_diperbarui: string
