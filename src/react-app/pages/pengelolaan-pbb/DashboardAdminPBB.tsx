@@ -264,6 +264,10 @@ export function DashboardAdminPBB() {
   }, [fetchActiveYear])
 
   useEffect(() => {
+    setSuratForm(prev => ({ ...prev, tahun_pajak: activeYear.toString() }))
+  }, [activeYear])
+
+  useEffect(() => {
     if (activeTab === "dusun") fetchDusun()
     if (activeTab === "surat") fetchSuratPBB()
     if (activeTab === "laporan") fetchLaporan()
@@ -388,7 +392,7 @@ export function DashboardAdminPBB() {
           alamat_objek_pajak: "",
           luas_tanah: "",
           luas_bangunan: "",
-          tahun_pajak: "2025",
+          tahun_pajak: activeYear.toString(),
           jumlah_pajak_terhutang: "",
           status_pembayaran: "tidak_diketahui",
         })
@@ -1001,36 +1005,28 @@ export function DashboardAdminPBB() {
             <div className={`collapse ${showStatistics ? "show" : ""}`} id="statisticsCollapse">
               <div className="card-body">
                 <div className="row g-1 g-md-2">
-                  <div className="col-md-4">
-                    <div className="card border-primary h-100">
-                      <div className="card-body p-1 p-md-3">
-                        <div className="d-flex align-items-center">
-                          <div className="flex-grow-1">
-                            <div className="text-muted small mb-1">Total Pajak Terhutang</div>
-                            <div className="h4 mb-0 text-primary">
-                              Rp {laporan.statistik_per_dusun.reduce((sum, stat) => sum + (stat.total_pajak_terhutang || 0), 0).toLocaleString("id-ID")}
-                            </div>
-                          </div>
-                          <div className="ms-3">
-                            <i className="bi bi-wallet text-primary opacity-75" style={{ fontSize: "2rem" }}></i>
-                          </div>
-                        </div>
+            <div className="col-md-4">
+              <div className="card h-100">
+                <div className="card-body p-1 p-md-3">
+                  <div className="d-flex align-items-center">
+                    <div className="flex-grow-1">
+                      <div className="text-muted small mb-1">Total Pajak Terhutang</div>
+                      <div className="h4 mb-0">
+                        Rp {laporan.statistik_per_dusun.reduce((sum, stat) => sum + (stat.total_pajak_terhutang || 0), 0).toLocaleString("id-ID")}
                       </div>
                     </div>
                   </div>
-
-                  <div className="col-md-4">
-                    <div className="card border-success h-100">
+                </div>
+              </div>
+            </div>                  <div className="col-md-4">
+                    <div className="card h-100">
                       <div className="card-body p-1 p-md-3">
                         <div className="d-flex align-items-center">
                           <div className="flex-grow-1">
                             <div className="text-muted small mb-1">Total Pajak Terbayar</div>
-                            <div className="h4 mb-0 text-success">
+                            <div className="h4 mb-0">
                               Rp {laporan.statistik_per_dusun.reduce((sum, stat) => sum + (stat.total_pajak_dibayar || 0), 0).toLocaleString("id-ID")}
                             </div>
-                          </div>
-                          <div className="ms-3">
-                            <i className="bi bi-check-circle text-success opacity-75" style={{ fontSize: "2rem" }}></i>
                           </div>
                         </div>
                       </div>
@@ -1038,12 +1034,12 @@ export function DashboardAdminPBB() {
                   </div>
 
                   <div className="col-md-4">
-                    <div className="card border-info h-100">
+                    <div className="card h-100">
                       <div className="card-body p-1 p-md-3">
                         <div className="d-flex align-items-center">
                           <div className="flex-grow-1">
                             <div className="text-muted small mb-1">Persentase Pembayaran</div>
-                            <div className="h4 mb-0 text-info">
+                            <div className="h4 mb-0">
                               {(() => {
                                 const totalSurat = laporan.statistik_per_dusun.reduce((sum, stat) => sum + (stat.total_surat || 0), 0)
                                 const totalSuratDibayar = laporan.statistik_per_dusun.reduce((sum, stat) => sum + (stat.total_surat_dibayar || 0), 0)
@@ -1052,24 +1048,18 @@ export function DashboardAdminPBB() {
                               })()}
                             </div>
                           </div>
-                          <div className="ms-3">
-                            <i className="bi bi-percent text-info opacity-75" style={{ fontSize: "2rem" }}></i>
-                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
 
                   <div className="col-md-4">
-                    <div className="card border-secondary h-100">
+                    <div className="card h-100">
                       <div className="card-body p-1 p-md-3">
                         <div className="d-flex align-items-center">
                           <div className="flex-grow-1">
                             <div className="text-muted small mb-1">Total Surat</div>
-                            <div className="h4 mb-0 text-secondary">{laporan.total_surat_keseluruhan}</div>
-                          </div>
-                          <div className="ms-3">
-                            <i className="bi bi-file-text text-secondary opacity-75" style={{ fontSize: "2rem" }}></i>
+                            <div className="h4 mb-0">{laporan.total_surat_keseluruhan}</div>
                           </div>
                         </div>
                       </div>
@@ -1077,15 +1067,12 @@ export function DashboardAdminPBB() {
                   </div>
 
                   <div className="col-md-4">
-                    <div className="card border-success h-100">
+                    <div className="card h-100">
                       <div className="card-body p-1 p-md-3">
                         <div className="d-flex align-items-center">
                           <div className="flex-grow-1">
                             <div className="text-muted small mb-1">Surat Sudah Dibayar</div>
-                            <div className="h4 mb-0 text-success">{laporan.statistik_per_dusun.reduce((sum, stat) => sum + (stat.total_surat_dibayar || 0), 0)}</div>
-                          </div>
-                          <div className="ms-3">
-                            <i className="bi bi-check-square text-success opacity-75" style={{ fontSize: "2rem" }}></i>
+                            <div className="h4 mb-0">{laporan.statistik_per_dusun.reduce((sum, stat) => sum + (stat.total_surat_dibayar || 0), 0)}</div>
                           </div>
                         </div>
                       </div>
@@ -1093,15 +1080,12 @@ export function DashboardAdminPBB() {
                   </div>
 
                   <div className="col-md-4">
-                    <div className="card border-warning h-100">
+                    <div className="card h-100">
                       <div className="card-body p-1 p-md-3">
                         <div className="d-flex align-items-center">
                           <div className="flex-grow-1">
                             <div className="text-muted small mb-1">Surat Belum Dibayar</div>
-                            <div className="h4 mb-0 text-warning">{laporan.statistik_per_dusun.reduce((sum, stat) => sum + (stat.total_surat_belum_bayar || 0), 0)}</div>
-                          </div>
-                          <div className="ms-3">
-                            <i className="bi bi-exclamation-triangle text-warning opacity-75" style={{ fontSize: "2rem" }}></i>
+                            <div className="h4 mb-0">{laporan.statistik_per_dusun.reduce((sum, stat) => sum + (stat.total_surat_belum_bayar || 0), 0)}</div>
                           </div>
                         </div>
                       </div>
@@ -1148,7 +1132,6 @@ export function DashboardAdminPBB() {
                       <td>{stat.nama_dusun}</td>
                       <td>
                         <span className="badge bg-info">
-                          <i className="bi bi-file-text me-1"></i>
                           {stat.total_surat || 0}
                         </span>
                       </td>

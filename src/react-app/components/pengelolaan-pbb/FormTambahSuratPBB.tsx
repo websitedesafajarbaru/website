@@ -73,7 +73,7 @@ export function FormTambahSuratPBB({ suratForm, onFormChange, onSubmit, onCancel
               <label className="form-label">
                 Tahun Pajak <span className="text-danger">*</span>
               </label>
-              <input type="number" className="form-control" value="2025" readOnly />
+              <input type="number" className="form-control" value={suratForm.tahun_pajak} readOnly />
             </div>
             <div className="col-md-6">
               <label className="form-label">

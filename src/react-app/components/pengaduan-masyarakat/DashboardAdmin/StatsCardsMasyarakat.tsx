@@ -15,7 +15,6 @@ export function StatsCardsMasyarakat({ masyarakat }: StatsCardsMasyarakatProps) 
                 <div className="text-muted small">Total Masyarakat</div>
                 <div className="h4 mb-0">{masyarakat.length}</div>
               </div>
-              <i className="bi bi-person text-primary" style={{ fontSize: "2rem" }}></i>
             </div>
           </div>
         </div>
