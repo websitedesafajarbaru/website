@@ -6,11 +6,27 @@ import { FormTambahSuratPBB } from "../../components/pengelolaan-pbb/FormTambahS
 import { TabelSuratPBB } from "../../components/pengelolaan-pbb/TabelSuratPBB"
 import { DetailSuratPBB } from "../../components/pengelolaan-pbb/DetailSuratPBB"
 
+interface DusunStatistik {
+  dusun: {
+    id: number
+    nama_dusun: string
+  }
+  active_year: number
+  total_pajak_terhutang: number
+  total_pajak_dibayar: number
+  total_surat: number
+  total_surat_dibayar: number
+  total_surat_belum_bayar: number
+  persentase_pembayaran: number
+  surat_pbb: SuratPBB[]
+}
+
 export function DashboardKetuaRT() {
-  const { token, user } = useAuth()
+  const { user } = useAuth()
   const [suratPBB, setSuratPBB] = useState<SuratPBB[]>([])
   const [activeYear, setActiveYear] = useState<number>(new Date().getFullYear())
   const [dusunId, setDusunId] = useState<number | null>(null)
+  const [statistik, setStatistik] = useState<DusunStatistik | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [selectedSurat, setSelectedSurat] = useState<SuratPBB | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
@@ -25,14 +41,14 @@ export function DashboardKetuaRT() {
     luas_bangunan: "",
     jumlah_pajak_terhutang: "",
     tahun_pajak: "2025",
-    status_pembayaran: "tidak_diketahui",
+    status_pembayaran: "menunggu_dicek_oleh_admin",
     dusun_id: dusunId?.toString() || "",
   })
 
   const fetchActiveYear = useCallback(async () => {
     try {
       const response = await fetch("/api/statistik/active-year", {
-        headers: { Authorization: `Bearer ${token}` },
+        credentials: "include",
       })
       if (response.ok) {
         const data = await response.json()
@@ -41,40 +57,22 @@ export function DashboardKetuaRT() {
     } catch (error) {
       console.error("Error fetching active year:", error)
     }
-  }, [token])
-
-  const fetchSuratPBB = useCallback(async () => {
-    try {
-      const response = await fetch("/api/surat-pbb", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      const result = await response.json()
-      if (response.ok) {
-        setSuratPBB(result.surat_pbb || result)
-        if (result.active_year) {
-          setActiveYear(result.active_year)
-        }
-      }
-    } catch (err) {
-      console.error(err)
-    }
-  }, [token])
+  }, [])
 
   useEffect(() => {
     const loadDusunInfo = async () => {
-      if (!user?.id || !token) return
+      if (!user?.id) return
 
       await fetchActiveYear()
 
       try {
         const response = await fetch(`/api/perangkat-desa/${user.id}`, {
-          headers: { Authorization: `Bearer ${token}` },
+          credentials: "include",
         })
         const perangkat = await response.json()
 
         if (response.ok && perangkat.id_dusun) {
           setDusunId(perangkat.id_dusun)
-          await fetchSuratPBB()
         }
       } catch (err) {
         console.error(err)
@@ -82,7 +80,28 @@ export function DashboardKetuaRT() {
     }
 
     loadDusunInfo()
-  }, [user, token, fetchActiveYear, fetchSuratPBB])
+  }, [user, fetchActiveYear])
+
+  useEffect(() => {
+    const loadStatistik = async () => {
+      if (!dusunId) return
+
+      try {
+        const response = await fetch(`/api/statistik/dusun/${dusunId}`, {
+          credentials: "include",
+        })
+        const data = await response.json()
+        if (response.ok) {
+          setStatistik(data)
+          setSuratPBB(data.surat_pbb || [])
+        }
+      } catch (err) {
+        console.error("Error loading statistik:", err)
+      }
+    }
+
+    loadStatistik()
+  }, [dusunId])
 
   useEffect(() => {
     setSuratForm((prev) => ({
@@ -104,8 +123,8 @@ export function DashboardKetuaRT() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
+        credentials: "include",
         body: JSON.stringify({
           nomor_objek_pajak: suratForm.nomor_objek_pajak,
           nama_wajib_pajak: suratForm.nama_wajib_pajak,
@@ -130,10 +149,20 @@ export function DashboardKetuaRT() {
           luas_bangunan: "",
           jumlah_pajak_terhutang: "",
           tahun_pajak: "2025",
-          status_pembayaran: "tidak_diketahui",
+          status_pembayaran: "menunggu_dicek_oleh_admin",
           dusun_id: dusunId?.toString() || "",
         })
-        fetchSuratPBB()
+
+        // Reload statistik after creating surat
+        const statistikResponse = await fetch(`/api/statistik/dusun/${dusunId}`, {
+          credentials: "include",
+        })
+        const statistikData = await statistikResponse.json()
+        if (statistikResponse.ok) {
+          setStatistik(statistikData)
+          setSuratPBB(statistikData.surat_pbb || [])
+        }
+
         Swal.fire({
           icon: "success",
           title: "Berhasil!",
@@ -160,21 +189,33 @@ export function DashboardKetuaRT() {
   }
 
   const handleStatusChange = async (newStatus: string) => {
-    if (!selectedSurat || !token) return
+    if (!selectedSurat) return
 
     try {
       const response = await fetch(`/api/surat-pbb/${selectedSurat.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
+        credentials: "include",
         body: JSON.stringify({ status_pembayaran: newStatus }),
       })
 
       if (response.ok) {
         setSelectedSurat({ ...selectedSurat, status_pembayaran: newStatus as SuratPBB["status_pembayaran"] })
         setEditForm({ ...editForm, status_pembayaran: newStatus as SuratPBB["status_pembayaran"] })
+
+        // Reload statistik after status change
+        if (dusunId) {
+          const statistikResponse = await fetch(`/api/statistik/dusun/${dusunId}`, {
+            credentials: "include",
+          })
+          const statistikData = await statistikResponse.json()
+          if (statistikResponse.ok) {
+            setStatistik(statistikData)
+            setSuratPBB(statistikData.surat_pbb || [])
+          }
+        }
       } else {
         try {
           const error = await response.json()
@@ -206,21 +247,34 @@ export function DashboardKetuaRT() {
   }
 
   const handleSaveEdit = async () => {
-    if (!selectedSurat || !token) return
+    if (!selectedSurat) return
 
     try {
       const response = await fetch(`/api/surat-pbb/${selectedSurat.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
+        credentials: "include",
         body: JSON.stringify(editForm),
       })
 
       if (response.ok) {
         setSelectedSurat(editForm as SuratPBB)
         setIsEditing(false)
+
+        // Reload statistik after edit
+        if (dusunId) {
+          const statistikResponse = await fetch(`/api/statistik/dusun/${dusunId}`, {
+            credentials: "include",
+          })
+          const statistikData = await statistikResponse.json()
+          if (statistikResponse.ok) {
+            setStatistik(statistikData)
+            setSuratPBB(statistikData.surat_pbb || [])
+          }
+        }
+
         Swal.fire({
           icon: "success",
           title: "Berhasil!",
@@ -251,62 +305,6 @@ export function DashboardKetuaRT() {
     setIsEditing(false)
   }
 
-  const handleDelete = async () => {
-    const result = await Swal.fire({
-      title: "Apakah Anda yakin?",
-      text: "Apakah Anda yakin ingin menghapus surat PBB ini? Tindakan ini tidak dapat dibatalkan.",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "Ya, Hapus!",
-      cancelButtonText: "Batal",
-    })
-
-    if (!result.isConfirmed || !selectedSurat || !token) return
-
-    try {
-      const response = await fetch(`/api/surat-pbb/${selectedSurat.id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      })
-
-      if (response.ok) {
-        Swal.fire({
-          icon: "success",
-          title: "Berhasil!",
-          text: "Surat PBB berhasil dihapus",
-          timer: 2000,
-          showConfirmButton: false,
-        })
-        setSelectedSurat(null)
-      } else {
-        const error = await response.json()
-        Swal.fire({
-          icon: "error",
-          title: "Gagal!",
-          text: error.error || "Gagal menghapus surat PBB",
-        })
-      }
-    } catch (err) {
-      console.error("Error deleting surat:", err)
-      Swal.fire({
-        icon: "error",
-        title: "Terjadi Kesalahan!",
-        text: "Terjadi kesalahan saat menghapus surat PBB",
-      })
-    }
-  }
-
-  const totalPajakTerhutang = suratPBB.reduce((sum, s) => sum + Number(s.jumlah_pajak_terhutang), 0)
-  const totalPajakDibayar = suratPBB
-    .filter((s) => s.status_pembayaran === "bayar_sendiri_di_bank" || s.status_pembayaran === "sudah_bayar")
-    .reduce((sum, s) => sum + Number(s.jumlah_pajak_terhutang), 0)
-  const totalSurat = suratPBB.length
-  const totalSuratDibayar = suratPBB.filter((s) => s.status_pembayaran === "bayar_sendiri_di_bank" || s.status_pembayaran === "sudah_bayar").length
-  const totalSuratBelumBayar = totalSurat - totalSuratDibayar
-  const persentasePembayaran = totalSurat > 0 ? (totalSuratDibayar / totalSurat) * 100 : 0
-
   return (
     <div>
       <div className="d-flex justify-content-between align-items-center mb-4">
@@ -321,16 +319,20 @@ export function DashboardKetuaRT() {
         </div>
       </div>
 
-      <StatistikCards
-        data={{
-          totalPajakTerhutang,
-          totalPajakDibayar,
-          totalSurat,
-          totalSuratDibayar,
-        totalSuratBelumBayar,
-        persentasePembayaran,
-      }}
-    />      {!showForm && !selectedSurat ? (
+      {statistik && (
+        <StatistikCards
+          data={{
+            totalPajakTerhutang: statistik.total_pajak_terhutang,
+            totalPajakDibayar: statistik.total_pajak_dibayar,
+            totalSurat: statistik.total_surat,
+            totalSuratDibayar: statistik.total_surat_dibayar,
+            totalSuratBelumBayar: statistik.total_surat_belum_bayar,
+            persentasePembayaran: statistik.persentase_pembayaran,
+          }}
+        />
+      )}
+
+      {!showForm && !selectedSurat ? (
         <>
           <div className="card mb-3">
             <div className="card-header d-flex justify-content-between align-items-center">
@@ -361,7 +363,6 @@ export function DashboardKetuaRT() {
           onSaveEdit={handleSaveEdit}
           onCancelEdit={handleCancelEdit}
           onStatusChange={handleStatusChange}
-          onDelete={handleDelete}
           onBack={() => setSelectedSurat(null)}
           onStartEdit={() => {
             setIsEditing(true)

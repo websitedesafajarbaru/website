@@ -17,21 +17,18 @@ export class ApiError extends Error {
 declare const Swal: any
 
 export async function apiRequest<T = unknown>(url: string, options: RequestInit = {}, logout?: () => void): Promise<T> {
-  const token = localStorage.getItem("token")
-
   const headers = new Headers({
     "Content-Type": "application/json",
     ...(options.headers as Record<string, string>),
   })
 
-  if (token) {
-    headers.set("Authorization", `Bearer ${token}`)
-  }
+  // Cookies akan dikirim otomatis oleh browser untuk same-origin requests
 
   try {
     const response = await fetch(url, {
       ...options,
       headers,
+      credentials: "include", // Pastikan cookies dikirim
     })
 
     if (response.status === 401) {

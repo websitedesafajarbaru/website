@@ -114,9 +114,7 @@ export function CreateAduanForm({ formData, setFormData, onSubmit, onCancel }: C
                   const response = await fetch("/api/aduan/upload-image", {
                     method: "POST",
                     body: formDataUpload,
-                    headers: {
-                      Authorization: `Bearer ${localStorage.getItem("token")}`,
-                    },
+                    credentials: "include",
                   })
 
                   if (!response.ok) {

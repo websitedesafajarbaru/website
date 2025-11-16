@@ -10,54 +10,58 @@ interface User {
 
 interface AuthContextType {
   user: User | null
-  token: string | null
-  login: (token: string, user: User) => void
+  login: (user: User) => void
   logout: () => void
   updateUser: (user: User) => void
   isAuthenticated: boolean
   apiRequest: <T = unknown>(url: string, options?: RequestInit) => Promise<T>
+  checkAuth: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
-  const [token, setToken] = useState<string | null>(null)
 
   useEffect(() => {
-    const storedToken = localStorage.getItem("token")
-    const storedUser = localStorage.getItem("user")
-
-    if (storedToken && storedUser) {
-      setToken(storedToken)
-      setUser(JSON.parse(storedUser))
-    }
+    checkAuth()
   }, [])
 
-  const login = (newToken: string, newUser: User) => {
-    localStorage.setItem("token", newToken)
-    localStorage.setItem("user", JSON.stringify(newUser))
-    setToken(newToken)
+  const checkAuth = async () => {
+    try {
+      const profile = await apiRequest<{ id: string; nama_lengkap: string; username: string; roles: string }>("/auth/profile")
+      setUser(profile)
+    } catch {
+      setUser(null)
+    }
+  }
+
+  const login = (newUser: User) => {
     setUser(newUser)
   }
 
-  const logout = () => {
-    localStorage.removeItem("token")
-    localStorage.removeItem("user")
-    setToken(null)
-    setUser(null)
+  const logout = async () => {
+    try {
+      await apiRequest("/auth/logout", { method: "POST" })
+    } catch (error) {
+      console.error("Logout error:", error)
+    } finally {
+      setUser(null)
+    }
   }
 
   const updateUser = (newUser: User) => {
-    localStorage.setItem("user", JSON.stringify(newUser))
     setUser(newUser)
   }
 
   const authenticatedApiRequest = async <T = unknown,>(url: string, options: RequestInit = {}): Promise<T> => {
     try {
-      return await apiRequest<T>(url, options, logout)
+      return await apiRequest<T>(url, options, () => {
+        setUser(null)
+      })
     } catch (error) {
       if (error instanceof ApiError && error.status === 401) {
+        setUser(null)
         throw error
       }
       throw error
@@ -68,12 +72,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider
       value={{
         user,
-        token,
         login,
         logout,
         updateUser,
-        isAuthenticated: !!token,
+        isAuthenticated: !!user,
         apiRequest: authenticatedApiRequest,
+        checkAuth,
       }}
     >
       {children}

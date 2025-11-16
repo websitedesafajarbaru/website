@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from "react"
-import { useAuth } from "../../contexts/AuthContext"
 import { Dusun, SuratPBB, Laporan } from "../../types"
 import { TabelSuratPBB } from "../../components/pengelolaan-pbb/TabelSuratPBB"
 import { DetailSuratPBB } from "../../components/pengelolaan-pbb/DetailSuratPBB"
@@ -19,7 +18,6 @@ interface PerangkatDesa {
 }
 
 export function DashboardAdminPBB() {
-  const { token } = useAuth()
   const [activeTab, setActiveTab] = useState<
     "dusun" | "surat" | "laporan" | "tambah-dusun" | "tambah-surat" | "detail-dusun" | "detail-perangkat" | "detail-laporan-dusun"
   >("dusun")
@@ -38,7 +36,7 @@ export function DashboardAdminPBB() {
     luas_bangunan: "",
     tahun_pajak: "2025",
     jumlah_pajak_terhutang: "",
-    status_pembayaran: "tidak_diketahui",
+    status_pembayaran: "menunggu_dicek_oleh_admin",
   })
 
   const [selectedSurat, setSelectedSurat] = useState<SuratPBB | null>(null)
@@ -159,7 +157,7 @@ export function DashboardAdminPBB() {
   const fetchActiveYear = useCallback(async () => {
     try {
       const response = await fetch("/api/statistik/active-year", {
-        headers: { Authorization: `Bearer ${token}` },
+        credentials: "include",
       })
       if (response.ok) {
         const data = await response.json()
@@ -168,7 +166,7 @@ export function DashboardAdminPBB() {
     } catch (error) {
       console.error("Error fetching active year:", error)
     }
-  }, [token])
+  }, [])
 
   const setYear = async (year: number) => {
     try {
@@ -176,9 +174,9 @@ export function DashboardAdminPBB() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ year }),
+        credentials: "include",
       })
       if (response.ok) {
         setActiveYear(year)
@@ -210,7 +208,7 @@ export function DashboardAdminPBB() {
   const fetchDusun = useCallback(async () => {
     try {
       const response = await fetch("/api/dusun", {
-        headers: { Authorization: `Bearer ${token}` },
+        credentials: "include",
       })
       if (response.ok) {
         const data = await response.json()
@@ -219,12 +217,12 @@ export function DashboardAdminPBB() {
     } catch (error) {
       console.error("Error fetching dusun:", error)
     }
-  }, [token])
+  }, [])
 
   const fetchSuratPBB = useCallback(async () => {
     try {
       const response = await fetch("/api/surat-pbb", {
-        headers: { Authorization: `Bearer ${token}` },
+        credentials: "include",
       })
       if (response.ok) {
         const data = await response.json()
@@ -236,12 +234,12 @@ export function DashboardAdminPBB() {
     } catch (error) {
       console.error("Error fetching surat PBB:", error)
     }
-  }, [token])
+  }, [])
 
   const fetchLaporan = useCallback(async () => {
     try {
       const response = await fetch("/api/statistik/laporan", {
-        headers: { Authorization: `Bearer ${token}` },
+        credentials: "include",
       })
       if (response.ok) {
         const data = await response.json()
@@ -250,7 +248,7 @@ export function DashboardAdminPBB() {
     } catch (error) {
       console.error("Error fetching laporan:", error)
     }
-  }, [token])
+  }, [])
 
   useEffect(() => {
     const currentYear = new Date().getFullYear()
@@ -275,7 +273,7 @@ export function DashboardAdminPBB() {
   const openDusunDetail = async (dusunId: number) => {
     try {
       const response = await fetch(`/api/dusun/${dusunId}`, {
-        headers: { Authorization: `Bearer ${token}` },
+        credentials: "include",
       })
       if (response.ok) {
         const data = await response.json()
@@ -284,7 +282,7 @@ export function DashboardAdminPBB() {
         setActiveTab("detail-dusun")
 
         const tokenResponse = await fetch(`/api/dusun/${dusunId}/tokens`, {
-          headers: { Authorization: `Bearer ${token}` },
+          credentials: "include",
         })
         if (tokenResponse.ok) {
           const tokenData = await tokenResponse.json()
@@ -292,7 +290,7 @@ export function DashboardAdminPBB() {
         }
 
         const perangkatResponse = await fetch(`/api/perangkat-desa?dusun_id=${dusunId}`, {
-          headers: { Authorization: `Bearer ${token}` },
+          credentials: "include",
         })
         if (perangkatResponse.ok) {
           const perangkatData = await perangkatResponse.json()
@@ -323,9 +321,9 @@ export function DashboardAdminPBB() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(dusunForm),
+        credentials: "include",
       })
       if (response.ok) {
         setActiveTab("dusun")
@@ -366,7 +364,6 @@ export function DashboardAdminPBB() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           nomor_objek_pajak: suratForm.nomor_objek_pajak,
@@ -380,6 +377,7 @@ export function DashboardAdminPBB() {
           status_pembayaran: suratForm.status_pembayaran,
           id_dusun: Number(suratForm.dusun_id),
         }),
+        credentials: "include",
       })
       if (response.ok) {
         setActiveTab("surat")
@@ -393,7 +391,7 @@ export function DashboardAdminPBB() {
           luas_bangunan: "",
           tahun_pajak: activeYear.toString(),
           jumlah_pajak_terhutang: "",
-          status_pembayaran: "tidak_diketahui",
+          status_pembayaran: "menunggu_dicek_oleh_admin",
         })
         fetchSuratPBB()
         Swal.fire({
@@ -451,9 +449,9 @@ export function DashboardAdminPBB() {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(updateData),
+        credentials: "include",
       })
 
       if (response.ok) {
@@ -497,9 +495,7 @@ export function DashboardAdminPBB() {
     try {
       const response = await fetch(`/api/perangkat-desa/${targetPerangkat.id}`, {
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        credentials: "include",
       })
 
       if (response.ok) {
@@ -556,9 +552,7 @@ export function DashboardAdminPBB() {
     try {
       const response = await fetch(`/api/dusun/${selectedDusun.id}`, {
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        credentials: "include",
       })
 
       if (response.ok) {
@@ -616,9 +610,9 @@ export function DashboardAdminPBB() {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ nama_dusun: editDusunName.trim() }),
+        credentials: "include",
       })
 
       if (response.ok) {
@@ -660,16 +654,16 @@ export function DashboardAdminPBB() {
   }
 
   const handleStatusChange = async (newStatus: string) => {
-    if (!selectedSurat || !token) return
+    if (!selectedSurat) return
 
     try {
       const response = await fetch(`/api/surat-pbb/${selectedSurat.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ status_pembayaran: newStatus }),
+        credentials: "include",
       })
 
       if (response.ok) {
@@ -701,16 +695,16 @@ export function DashboardAdminPBB() {
   }
 
   const handleSaveEdit = async () => {
-    if (!selectedSurat || !token) return
+    if (!selectedSurat) return
 
     try {
       const response = await fetch(`/api/surat-pbb/${selectedSurat.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(editForm),
+        credentials: "include",
       })
 
       if (response.ok) {
@@ -751,11 +745,11 @@ export function DashboardAdminPBB() {
   }
 
   const handleDelete = async () => {
-    if (!selectedSurat || !token) return
+    if (!selectedSurat) return
 
     const result = await Swal.fire({
       title: "Konfirmasi Hapus",
-      text: "Apakah Anda yakin ingin menghapus surat PBB ini? Tindakan ini tidak dapat dibatalkan.",
+      text: `Apakah Anda yakin ingin menghapus surat PBB "${selectedSurat.nomor_objek_pajak}"? Tindakan ini tidak dapat dibatalkan.`,
       icon: "warning",
       showCancelButton: true,
       showCloseButton: true,
@@ -770,13 +764,13 @@ export function DashboardAdminPBB() {
     try {
       const response = await fetch(`/api/surat-pbb/${selectedSurat.id}`, {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
+        credentials: "include",
       })
 
       if (response.ok) {
         Swal.fire({
           title: "Berhasil!",
-          text: "Surat PBB berhasil dihapus",
+          text: "Surat PBB berhasil dihapus!",
           icon: "success",
           timer: 3000,
           showConfirmButton: false,
@@ -1212,7 +1206,7 @@ export function DashboardAdminPBB() {
       {activeTab === "detail-dusun" && selectedDusun && (
         <div className="card">
           <div className="card-header d-flex justify-content-between align-items-center">
-            <h6 className="mb-0">Detail Dusun: {selectedDusun.nama_dusun}</h6>
+            <h6 className="mb-0">Detail Dusun</h6>
             <button
               className="btn btn-sm btn-secondary"
               onClick={() => {
@@ -1321,9 +1315,7 @@ export function DashboardAdminPBB() {
                           try {
                             const response = await fetch(`/api/dusun/${selectedDusun.id}/regenerate-tokens`, {
                               method: "POST",
-                              headers: {
-                                Authorization: `Bearer ${token}`,
-                              },
+                              credentials: "include",
                             })
 
                             if (response.ok) {
@@ -1521,7 +1513,7 @@ export function DashboardAdminPBB() {
       {activeTab === "detail-perangkat" && selectedPerangkat && (
         <div className="card">
           <div className="card-header d-flex justify-content-between align-items-center">
-            <h6 className="mb-0">Edit Perangkat Desa: {selectedPerangkat.nama_lengkap}</h6>
+            <h6 className="mb-0">Edit Perangkat Desa</h6>
             <button className="btn btn-sm btn-secondary" onClick={() => setActiveTab("detail-dusun")}>
               <i className="bi bi-arrow-left me-1"></i>
               Kembali ke Detail Dusun
@@ -1598,7 +1590,7 @@ export function DashboardAdminPBB() {
         </div>
       )}
 
-      {activeTab === "detail-laporan-dusun" && selectedDusunId && token && <DetailDusunLaporan dusunId={selectedDusunId} token={token} onBack={() => setActiveTab("laporan")} />}
+      {activeTab === "detail-laporan-dusun" && selectedDusunId && <DetailDusunLaporan dusunId={selectedDusunId} onBack={() => setActiveTab("laporan")} />}
     </div>
   )
 }

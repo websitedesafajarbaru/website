@@ -272,7 +272,7 @@ export function DashboardAdminPengaduan() {
       </ul>
 
       {activeTab === "daftar" && (
-        <>
+        <div key="daftar">
           <div className="card mb-3">
             <div className="card-header d-flex justify-content-between align-items-center">
               <h6 className="mb-0">Daftar Aduan</h6>
@@ -293,13 +293,13 @@ export function DashboardAdminPengaduan() {
             totalItems={filteredAduan.length}
             onPageChange={setCurrentPage}
           />
-        </>
+        </div>
       )}
 
       {activeTab === "detail" && selectedAduan && (
-        <div className="card">
+        <div key="detail" className="card">
           <div className="card-header d-flex justify-content-between align-items-center">
-            <h6 className="mb-0">Detail Aduan - {selectedAduan.judul}</h6>
+            <h6 className="mb-0">Detail Aduan</h6>
             <button className="btn btn-sm btn-secondary" onClick={() => setActiveTab("daftar")}>
               <i className="bi bi-arrow-left me-1"></i>Kembali ke Daftar
             </button>
@@ -319,7 +319,7 @@ export function DashboardAdminPengaduan() {
       )}
 
       {activeTab === "masyarakat" && (
-        <>
+        <div key="masyarakat">
           <div className="card mb-3">
             <div className="card-header d-flex justify-content-between align-items-center">
               <h6 className="mb-0">Daftar Masyarakat</h6>
@@ -350,11 +350,11 @@ export function DashboardAdminPengaduan() {
             totalItems={filteredMasyarakat.length}
             onPageChange={setCurrentPageMasyarakat}
           />
-        </>
+        </div>
       )}
 
       {activeTab === "masyarakat-form" && (
-        <div className="card">
+        <div key="masyarakat-form" className="card">
           <div className="card-header d-flex justify-content-between align-items-center">
             <h6 className="mb-0">{selectedMasyarakat ? "Edit Masyarakat" : "Tambah Masyarakat Baru"}</h6>
             <button className="btn btn-sm btn-secondary" onClick={() => setActiveTab("masyarakat")}>

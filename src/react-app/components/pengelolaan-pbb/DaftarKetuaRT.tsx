@@ -4,6 +4,7 @@ interface PerangkatDesa {
   username: string
   jabatan: string
   nama_dusun?: string
+  jumlahSurat?: number
 }
 
 interface DaftarKetuaRTProps {
@@ -53,6 +54,7 @@ export function DaftarKetuaRT({ ketuaRT, searchTerm, onSearchChange, onEdit, onD
                 <th>Nama Lengkap</th>
                 <th>Username</th>
                 <th>Jabatan</th>
+                <th>Jumlah Surat Diinput</th>
                 <th>Aksi</th>
               </tr>
             </thead>
@@ -63,6 +65,9 @@ export function DaftarKetuaRT({ ketuaRT, searchTerm, onSearchChange, onEdit, onD
                   <td>{k.username}</td>
                   <td>
                     <span className="badge bg-warning">{formatJabatan(k.jabatan)}</span>
+                  </td>
+                  <td>
+                    <span className="badge bg-info">{k.jumlahSurat || 0}</span>
                   </td>
                   <td>
                     <button className="btn btn-sm btn-outline-primary me-2" onClick={() => onEdit(k)} title="Edit">

@@ -155,4 +155,40 @@ masyarakatRoutes.put("/:id/ban", authMiddleware, async (c) => {
   }
 })
 
+masyarakatRoutes.delete("/:id", authMiddleware, async (c) => {
+  try {
+    const user = c.get("user") as JWTPayload
+
+    if (user.roles !== "admin") {
+      return c.json({ error: "Hanya admin yang dapat menghapus masyarakat" }, 403)
+    }
+
+    const masyarakatId = c.req.param("id")
+
+    const existingUser = await c.env.DB.prepare("SELECT id FROM pengguna WHERE id = ?").bind(masyarakatId).first()
+    if (!existingUser) {
+      return c.json({ error: "Masyarakat tidak ditemukan" }, 404)
+    }
+
+    // Hapus semua session user dari KV sebelum menghapus user
+    const userSessionsKey = `user_sessions:${masyarakatId}`
+    const userSessions = await c.env.KV.get(userSessionsKey)
+    if (userSessions) {
+      const sessionIds = JSON.parse(userSessions)
+      const deletePromises = sessionIds.map((sessionId: string) => c.env.KV.delete(`session:${sessionId}`))
+      await Promise.all(deletePromises)
+      await c.env.KV.delete(userSessionsKey)
+    }
+
+    await c.env.DB.prepare("DELETE FROM aduan WHERE id_masyarakat = ?").bind(masyarakatId).run()
+    await c.env.DB.prepare("DELETE FROM masyarakat WHERE id = ?").bind(masyarakatId).run()
+    await c.env.DB.prepare("DELETE FROM pengguna WHERE id = ?").bind(masyarakatId).run()
+
+    return c.json({ message: "Masyarakat berhasil dihapus" })
+  } catch (error) {
+    console.error(error)
+    return c.json({ error: "Terjadi kesalahan server" }, 500)
+  }
+})
+
 export default masyarakatRoutes

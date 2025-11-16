@@ -43,10 +43,10 @@ suratPBBRoutes.post("/", async (c) => {
       const perangkat = await c.env.DB.prepare("SELECT jabatan FROM perangkat_desa WHERE id = ?").bind(user.userId).first()
       
       if (perangkat?.jabatan === "kepala_dusun" || perangkat?.jabatan === "ketua_rt") {
-        const allowedStatuses = ["bayar_sendiri_di_bank", "pindah_rumah", "tidak_diketahui"]
+        const allowedStatuses = ["menunggu_dicek_oleh_admin", "bayar_sendiri_di_bank", "pindah_rumah", "tidak_diketahui"]
         if (!allowedStatuses.includes(status_pembayaran)) {
           return c.json({ 
-            error: "Sebagai perangkat desa, Anda hanya dapat membuat surat PBB dengan status: Bayar Sendiri di Bank, Pindah Rumah, atau Tidak Diketahui" 
+            error: "Sebagai perangkat desa, Anda hanya dapat membuat surat PBB dengan status: Menunggu Dicek Oleh Admin, Bayar Sendiri di Bank, Pindah Rumah, atau Tidak Diketahui" 
           }, 400)
         }
       }
@@ -224,10 +224,10 @@ suratPBBRoutes.put("/:id", async (c) => {
         const perangkat = await c.env.DB.prepare("SELECT jabatan FROM perangkat_desa WHERE id = ?").bind(user.userId).first()
         
         if (perangkat?.jabatan === "kepala_dusun" || perangkat?.jabatan === "ketua_rt") {
-          const allowedStatuses = ["bayar_sendiri_di_bank", "pindah_rumah", "tidak_diketahui"]
+          const allowedStatuses = ["menunggu_dicek_oleh_admin", "bayar_sendiri_di_bank", "pindah_rumah", "tidak_diketahui"]
           if (!allowedStatuses.includes(updates.status_pembayaran)) {
             return c.json({ 
-              error: "Sebagai perangkat desa, Anda hanya dapat mengubah status pembayaran ke: Bayar Sendiri di Bank, Pindah Rumah, atau Tidak Diketahui" 
+              error: "Sebagai perangkat desa, Anda hanya dapat mengubah status pembayaran ke: Menunggu Dicek Oleh Admin, Bayar Sendiri di Bank, Pindah Rumah, atau Tidak Diketahui" 
             }, 403)
           }
         }
@@ -267,26 +267,9 @@ suratPBBRoutes.delete("/:id", async (c) => {
     const user = c.get("user") as JWTPayload
     const suratId = c.req.param("id")
 
+    // Only admin can delete surat PBB
     if (user.roles !== "admin") {
-      const perangkat = await c.env.DB.prepare("SELECT jabatan FROM perangkat_desa WHERE id = ?").bind(user.userId).first()
-
-      if (perangkat?.jabatan === "kepala_dusun") {
-        const perangkatData = await c.env.DB.prepare("SELECT id_dusun FROM perangkat_desa WHERE id = ?").bind(user.userId).first()
-        const suratDusun = await c.env.DB.prepare("SELECT id_dusun FROM surat_pbb WHERE id = ?").bind(suratId).first()
-
-        if (!perangkatData || !suratDusun || perangkatData.id_dusun !== suratDusun.id_dusun) {
-          return c.json({ error: "Anda hanya dapat menghapus surat PBB di dusun yang Anda kelola" }, 403)
-        }
-      } else if (perangkat?.jabatan === "ketua_rt") {
-        const perangkatData = await c.env.DB.prepare("SELECT id_dusun FROM perangkat_desa WHERE id = ?").bind(user.userId).first()
-        const suratDusun = await c.env.DB.prepare("SELECT id_dusun FROM surat_pbb WHERE id = ?").bind(suratId).first()
-
-        if (!perangkatData || !suratDusun || perangkatData.id_dusun !== suratDusun.id_dusun) {
-          return c.json({ error: "Anda hanya dapat menghapus surat PBB di dusun yang Anda kelola" }, 403)
-        }
-      } else {
-        return c.json({ error: "Anda tidak memiliki izin untuk menghapus surat" }, 403)
-      }
+      return c.json({ error: "Anda tidak memiliki izin untuk menghapus surat PBB" }, 403)
     }
 
     await c.env.DB.prepare("DELETE FROM surat_pbb WHERE id = ?").bind(suratId).run()

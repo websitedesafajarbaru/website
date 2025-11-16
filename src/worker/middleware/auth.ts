@@ -1,30 +1,49 @@
 import { Context, Next } from "hono"
-import { verifyJWT } from "../utils/jwt"
+import { getCookie } from "hono/cookie"
 import { JWTPayload } from "../types"
 
 export async function authMiddleware(c: Context, next: Next) {
-  const authHeader = c.req.header("Authorization")
+  const sessionId = getCookie(c, "session_id")
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+  if (!sessionId) {
     return c.json({ error: "Unauthorized" }, 401)
   }
 
-  const token = authHeader.substring(7)
-  const payload = await verifyJWT(token)
+  try {
+    const sessionData = await c.env.KV.get(`session:${sessionId}`)
 
-  if (!payload) {
-    return c.json({ error: "Invalid or expired token" }, 401)
+    if (!sessionData) {
+      return c.json({ error: "Session not found" }, 401)
+    }
+
+    const session = JSON.parse(sessionData)
+    const now = Date.now()
+
+    if (session.expiresAt < now) {
+      // Hapus session expired dari KV
+      await c.env.KV.delete(`session:${sessionId}`)
+      return c.json({ error: "Session expired" }, 401)
+    }
+
+    // Ambil data user
+    const user = await c.env.DB.prepare("SELECT id, nama_lengkap, username, roles FROM pengguna WHERE id = ?").bind(session.userId).first()
+
+    if (!user) {
+      return c.json({ error: "User not found" }, 401)
+    }
+
+    const payload: JWTPayload = {
+      userId: user.id as string,
+      username: user.username as string,
+      roles: user.roles as string,
+    }
+
+    c.set("user", payload)
+    await next()
+  } catch (error) {
+    console.error("Auth middleware error:", error)
+    return c.json({ error: "Authentication error" }, 500)
   }
-
-  const sessionKey = `session:${payload.userId}`
-  const session = await c.env.KV.get(sessionKey)
-
-  if (!session || session !== token) {
-    return c.json({ error: "Session not found or invalid" }, 401)
-  }
-
-  c.set("user", payload)
-  await next()
 }
 
 export function requireRole(...allowedRoles: string[]) {

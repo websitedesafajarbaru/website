@@ -248,6 +248,16 @@ perangkatDesaRoutes.delete("/:id", requireRole("admin"), async (c) => {
       return c.json({ error: "Perangkat desa tidak ditemukan" }, 404)
     }
 
+    // Hapus semua session user dari KV sebelum menghapus user
+    const userSessionsKey = `user_sessions:${id}`
+    const userSessions = await c.env.KV.get(userSessionsKey)
+    if (userSessions) {
+      const sessionIds = JSON.parse(userSessions)
+      const deletePromises = sessionIds.map((sessionId: string) => c.env.KV.delete(`session:${sessionId}`))
+      await Promise.all(deletePromises)
+      await c.env.KV.delete(userSessionsKey)
+    }
+
     await c.env.DB.prepare("DELETE FROM tanggapan_aduan WHERE id_perangkat_desa = ?").bind(id).run()
     await c.env.DB.prepare("DELETE FROM surat_pbb WHERE id_pengguna = ?").bind(id).run()
     await c.env.DB.prepare("DELETE FROM perangkat_desa WHERE id = ?").bind(id).run()

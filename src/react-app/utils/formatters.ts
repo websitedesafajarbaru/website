@@ -10,6 +10,7 @@ export const formatRole = (role: string): string => {
 
 export const formatStatusPembayaran = (status: string): string => {
   const statusMap: Record<string, string> = {
+    menunggu_dicek_oleh_admin: "Menunggu dicek oleh admin",
     bayar_sendiri_di_bank: "Bayar Sendiri di Bank",
     sudah_bayar: "Sudah Bayar",
     pindah_rumah: "Pindah Rumah",
@@ -41,6 +42,7 @@ export const formatKategoriAduan = (kategori: string): string => {
 
 export const getStatusPembayaranColor = (status: string): string => {
   const colorMap: Record<string, string> = {
+    menunggu_dicek_oleh_admin: "warning",
     bayar_sendiri_di_bank: "success",
     sudah_bayar: "success",
     pindah_rumah: "info",

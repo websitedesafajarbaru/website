@@ -1,7 +1,7 @@
 import { Hono } from "hono"
 import { authMiddleware } from "../middleware/auth"
 import { verifyPassword, hashPassword } from "../utils/hash"
-import { generateJWT } from "../utils/jwt"
+import { setCookie, getCookie } from "hono/cookie"
 import { Variables, JWTPayload } from "../types"
 
 const authRoutes = new Hono<{ Bindings: Env; Variables: Variables }>()
@@ -33,18 +33,39 @@ authRoutes.post("/login", async (c) => {
       }
     }
 
-    const token = await generateJWT({
-      userId: user.id as string,
-      username: user.username as string,
-      roles: user.roles as string,
+    // Buat session ID unik
+    const sessionId = crypto.randomUUID()
+    const expiresAt = Date.now() + 30 * 24 * 60 * 60 * 1000 // 30 hari dalam milliseconds
+
+    // Simpan session ke KV dengan TTL
+    await c.env.KV.put(`session:${sessionId}`, JSON.stringify({
+      userId: user.id,
+      expiresAt
+    }), {
+      expirationTtl: 30 * 24 * 60 * 60 // 30 hari dalam detik
     })
 
-    const sessionKey = `session:${user.id}`
-    await c.env.KV.put(sessionKey, token, { expirationTtl: 86400 })
+    // Simpan mapping user ke sessions untuk cleanup saat user dihapus
+    const userSessionsKey = `user_sessions:${user.id}`
+    const existingSessions = await c.env.KV.get(userSessionsKey)
+    const sessionList = existingSessions ? JSON.parse(existingSessions) : []
+    sessionList.push(sessionId)
+
+    await c.env.KV.put(userSessionsKey, JSON.stringify(sessionList), {
+      expirationTtl: 30 * 24 * 60 * 60 // 30 hari dalam detik
+    })
+
+    // Set cookie
+    setCookie(c, "session_id", sessionId, {
+      httpOnly: true,
+      secure: c.req.url.startsWith("https://"), // Hanya secure di production
+      sameSite: "lax", // Lebih permissive untuk development
+      maxAge: 30 * 24 * 60 * 60, // 30 hari dalam detik
+      path: "/",
+    })
 
     return c.json({
       message: "Login berhasil",
-      token,
       user: {
         id: user.id,
         nama_lengkap: user.nama_lengkap,
@@ -60,16 +81,40 @@ authRoutes.post("/login", async (c) => {
 
 authRoutes.post("/logout", async (c) => {
   try {
-    const authHeader = c.req.header("Authorization")
+    const sessionId = getCookie(c, "session_id")
 
-    if (authHeader && authHeader.startsWith("Bearer ")) {
-      const token = authHeader.substring(7)
-      const payload = await c.env.KV.get(`session:${token}`)
+    if (sessionId) {
+      // Hapus session dari KV
+      const sessionData = await c.env.KV.get(`session:${sessionId}`)
+      if (sessionData) {
+        const session = JSON.parse(sessionData)
+        const userSessionsKey = `user_sessions:${session.userId}`
 
-      if (payload) {
-        await c.env.KV.delete(`session:${token}`)
+        // Hapus session ID dari list user sessions
+        const existingSessions = await c.env.KV.get(userSessionsKey)
+        if (existingSessions) {
+          const sessionList = JSON.parse(existingSessions).filter((id: string) => id !== sessionId)
+          if (sessionList.length > 0) {
+            await c.env.KV.put(userSessionsKey, JSON.stringify(sessionList), {
+              expirationTtl: 30 * 24 * 60 * 60
+            })
+          } else {
+            await c.env.KV.delete(userSessionsKey)
+          }
+        }
       }
+
+      await c.env.KV.delete(`session:${sessionId}`)
     }
+
+    // Clear cookie
+    setCookie(c, "session_id", "", {
+      httpOnly: true,
+      secure: c.req.url.startsWith("https://"), // Hanya secure di production
+      sameSite: "lax", // Lebih permissive untuk development
+      maxAge: 0,
+      path: "/",
+    })
 
     return c.json({ message: "Logout berhasil" })
   } catch (error) {

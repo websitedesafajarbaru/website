@@ -37,7 +37,7 @@ export function Login() {
         throw new Error(result.error || "Terjadi kesalahan")
       }
 
-      login(result.token, result.user)
+      login(result.user)
 
       if (result.user.roles === "admin") {
         navigate("/pengaduan-masyarakat/dashboard-admin")

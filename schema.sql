@@ -55,7 +55,7 @@ CREATE TABLE surat_pbb (
     luas_bangunan REAL NOT NULL,
     jumlah_pajak_terhutang REAL NOT NULL,
     tahun_pajak INT NOT NULL,
-    status_pembayaran TEXT NOT NULL CHECK (status_pembayaran IN ('bayar_sendiri_di_bank', 'sudah_bayar', 'pindah_rumah', 'tidak_diketahui')),
+    status_pembayaran TEXT NOT NULL DEFAULT 'menunggu_dicek_oleh_admin' CHECK (status_pembayaran IN ('menunggu_dicek_oleh_admin', 'bayar_sendiri_di_bank', 'sudah_bayar', 'pindah_rumah', 'tidak_diketahui')),
     id_dusun INT NOT NULL,
     id_pengguna TEXT NOT NULL,
     waktu_dibuat TEXT DEFAULT (datetime('now')),

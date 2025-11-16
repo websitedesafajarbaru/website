@@ -28,6 +28,7 @@ interface PerangkatDesa {
   username: string
   jabatan: string
   nama_dusun?: string
+  jumlahSurat?: number
 }
 
 interface DusunInfo {
@@ -36,8 +37,8 @@ interface DusunInfo {
 }
 
 export function DashboardKepalaDusun() {
-  const { token, user } = useAuth()
-  const [activeTab, setActiveTab] = useState<"ketua-rt" | "laporan" | "tambah-surat-pbb">("laporan")
+  const { user } = useAuth()
+  const [activeTab, setActiveTab] = useState<"ketua-rt" | "laporan" | "tambah-surat-pbb" | "edit-ketua-rt">("laporan")
   const [ketuaRT, setKetuaRT] = useState<PerangkatDesa[]>([])
   const [dusunInfo, setDusunInfo] = useState<DusunInfo | null>(null)
   const [dusunId, setDusunId] = useState<number | null>(null)
@@ -48,7 +49,6 @@ export function DashboardKepalaDusun() {
   const [searchSuratPBB, setSearchSuratPBB] = useState("")
   const [isEditing, setIsEditing] = useState(false)
   const [editForm, setEditForm] = useState<Partial<SuratPBB>>({})
-  const [isEditingKetuaRT, setIsEditingKetuaRT] = useState(false)
   const [selectedKetuaRTForEdit, setSelectedKetuaRTForEdit] = useState<PerangkatDesa | null>(null)
   const [editKetuaRTForm, setEditKetuaRTForm] = useState({
     nama_lengkap: "",
@@ -64,14 +64,15 @@ export function DashboardKepalaDusun() {
     luas_bangunan: "",
     jumlah_pajak_terhutang: "",
     tahun_pajak: "2025",
-    status_pembayaran: "tidak_diketahui",
+    status_pembayaran: "menunggu_dicek_oleh_admin",
     dusun_id: dusunId?.toString() || "",
   })
+  const [ketuaRTStats, setKetuaRTStats] = useState<{ totalSuratByRT: number }>({ totalSuratByRT: 0 })
 
   const fetchActiveYear = useCallback(async () => {
     try {
       const response = await fetch("/api/statistik/active-year", {
-        headers: { Authorization: `Bearer ${token}` },
+        credentials: "include",
       })
       if (response.ok) {
         const data = await response.json()
@@ -80,24 +81,24 @@ export function DashboardKepalaDusun() {
     } catch (error) {
       console.error("Error fetching active year:", error)
     }
-  }, [token])
+  }, [])
 
   useEffect(() => {
     const loadDusunInfo = async () => {
-      if (!user?.id || !token) return
+      if (!user?.id) return
 
       await fetchActiveYear()
 
       try {
         const response = await fetch(`/api/perangkat-desa/${user.id}`, {
-          headers: { Authorization: `Bearer ${token}` },
+          credentials: "include",
         })
         const perangkat = await response.json()
 
         if (response.ok && perangkat.id_dusun) {
           setDusunId(perangkat.id_dusun)
           const dusunResponse = await fetch(`/api/dusun/${perangkat.id_dusun}`, {
-            headers: { Authorization: `Bearer ${token}` },
+            credentials: "include",
           })
           const dusun = await dusunResponse.json()
           setDusunInfo(dusun)
@@ -108,15 +109,15 @@ export function DashboardKepalaDusun() {
     }
 
     loadDusunInfo()
-  }, [user, token, fetchActiveYear])
+  }, [user, fetchActiveYear])
 
   useEffect(() => {
     const loadKetuaRT = async () => {
-      if (!dusunId || !token) return
+      if (!dusunId) return
 
       try {
         const response = await fetch(`/api/perangkat-desa?dusun_id=${dusunId}`, {
-          headers: { Authorization: `Bearer ${token}` },
+          credentials: "include",
         })
         const result = await response.json()
         if (response.ok) {
@@ -129,15 +130,15 @@ export function DashboardKepalaDusun() {
     }
 
     loadKetuaRT()
-  }, [dusunId, token])
+  }, [dusunId])
 
   useEffect(() => {
     const loadStatistik = async () => {
-      if (!dusunId || !token) return
+      if (!dusunId) return
 
       try {
         const response = await fetch(`/api/statistik/dusun/${dusunId}`, {
-          headers: { Authorization: `Bearer ${token}` },
+          credentials: "include",
         })
         const data = await response.json()
         if (response.ok) {
@@ -149,7 +150,51 @@ export function DashboardKepalaDusun() {
     }
 
     loadStatistik()
-  }, [dusunId, token])
+  }, [dusunId])
+
+  useEffect(() => {
+    const loadKetuaRTStats = async () => {
+      if (!dusunId) return
+
+      try {
+        // Get all ketua RT IDs in this dusun
+        const perangkatResponse = await fetch(`/api/perangkat-desa?dusun_id=${dusunId}`, {
+          credentials: "include",
+        })
+        const perangkatData = await perangkatResponse.json()
+        
+        if (perangkatResponse.ok) {
+          const ketuaRTList = perangkatData.filter((p: PerangkatDesa) => p.jabatan === 'ketua_rt')
+          
+          // Get surat PBB created by ketua RT
+          const suratResponse = await fetch(`/api/surat-pbb?dusun_id=${dusunId}`, {
+            credentials: "include",
+          })
+          const suratData = await suratResponse.json()
+          
+          if (suratResponse.ok) {
+            // Calculate total surat by all RT
+            const totalSuratByRT = suratData.surat_pbb?.filter((surat: SuratPBB) => 
+              ketuaRTList.some((rt: PerangkatDesa) => rt.id === surat.id_pengguna)
+            ).length || 0
+            
+            // Calculate per RT stats
+            const ketuaRTWithStats = ketuaRTList.map((rt: PerangkatDesa) => ({
+              ...rt,
+              jumlahSurat: suratData.surat_pbb?.filter((surat: SuratPBB) => surat.id_pengguna === rt.id).length || 0
+            }))
+            
+            setKetuaRT(ketuaRTWithStats)
+            setKetuaRTStats({ totalSuratByRT })
+          }
+        }
+      } catch (err) {
+        console.error("Error loading ketua RT stats:", err)
+      }
+    }
+
+    loadKetuaRTStats()
+  }, [dusunId, ketuaRT])
 
   useEffect(() => {
     setSuratForm((prev) => ({
@@ -169,12 +214,12 @@ export function DashboardKepalaDusun() {
       username: ketua.username,
       password: "",
     })
-    setIsEditingKetuaRT(true)
+    setActiveTab("edit-ketua-rt")
   }
 
   const handleSaveEditKetuaRT = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!selectedKetuaRTForEdit || !token) return
+    if (!selectedKetuaRTForEdit) return
 
     try {
       const updateData: {
@@ -198,27 +243,40 @@ export function DashboardKepalaDusun() {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
+        credentials: "include",
         body: JSON.stringify(updateData),
       })
 
       if (response.ok) {
         setSelectedKetuaRTForEdit(null)
-        setIsEditingKetuaRT(false)
         setEditKetuaRTForm({
           nama_lengkap: "",
           username: "",
           password: "",
         })
+        setActiveTab("ketua-rt")
 
         const response = await fetch(`/api/perangkat-desa?dusun_id=${dusunId}`, {
-          headers: { Authorization: `Bearer ${token}` },
+          credentials: "include",
         })
         const result = await response.json()
         if (response.ok) {
           const ketuaList = result.filter((p: PerangkatDesa) => p.jabatan === "ketua_rt")
-          setKetuaRT(ketuaList)
+          
+          // Reload stats after update
+          const suratResponse = await fetch(`/api/surat-pbb?dusun_id=${dusunId}`, {
+            credentials: "include",
+          })
+          const suratData = await suratResponse.json()
+          
+          if (suratResponse.ok) {
+            const ketuaRTWithStats = ketuaList.map((rt: PerangkatDesa) => ({
+              ...rt,
+              jumlahSurat: suratData.surat_pbb?.filter((surat: SuratPBB) => surat.id_pengguna === rt.id).length || 0
+            }))
+            setKetuaRT(ketuaRTWithStats)
+          }
         }
 
         Swal.fire({
@@ -256,8 +314,8 @@ export function DashboardKepalaDusun() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
+        credentials: "include",
         body: JSON.stringify({
           nomor_objek_pajak: suratForm.nomor_objek_pajak,
           nama_wajib_pajak: suratForm.nama_wajib_pajak,
@@ -282,13 +340,13 @@ export function DashboardKepalaDusun() {
           luas_bangunan: "",
           jumlah_pajak_terhutang: "",
           tahun_pajak: "2025",
-          status_pembayaran: "tidak_diketahui",
+          status_pembayaran: "menunggu_dicek_oleh_admin",
           dusun_id: dusunId?.toString() || "",
         })
 
         if (dusunId) {
           const statistikResponse = await fetch(`/api/statistik/dusun/${dusunId}`, {
-            headers: { Authorization: `Bearer ${token}` },
+            credentials: "include",
           })
           const statistikData = await statistikResponse.json()
           if (statistikResponse.ok) {
@@ -323,15 +381,15 @@ export function DashboardKepalaDusun() {
   }
 
   const handleStatusChange = async (newStatus: string) => {
-    if (!selectedSurat || !token) return
+    if (!selectedSurat) return
 
     try {
       const response = await fetch(`/api/surat-pbb/${selectedSurat.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
+        credentials: "include",
         body: JSON.stringify({ status_pembayaran: newStatus }),
       })
 
@@ -372,15 +430,15 @@ export function DashboardKepalaDusun() {
   }
 
   const handleSaveEdit = async () => {
-    if (!selectedSurat || !token) return
+    if (!selectedSurat) return
 
     try {
       const response = await fetch(`/api/surat-pbb/${selectedSurat.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
+        credentials: "include",
         body: JSON.stringify(editForm),
       })
 
@@ -416,57 +474,6 @@ export function DashboardKepalaDusun() {
   const handleCancelEdit = () => {
     setEditForm(selectedSurat || {})
     setIsEditing(false)
-  }
-
-  const handleDelete = async () => {
-    if (!selectedSurat || !token) return
-
-    const result = await Swal.fire({
-      title: "Konfirmasi Hapus",
-      text: "Apakah Anda yakin ingin menghapus surat PBB ini? Tindakan ini tidak dapat dibatalkan.",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "Ya, Hapus",
-      cancelButtonText: "Batal",
-    })
-
-    if (!result.isConfirmed) return
-
-    try {
-      const response = await fetch(`/api/surat-pbb/${selectedSurat.id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      })
-
-      if (response.ok) {
-        Swal.fire({
-          title: "Berhasil!",
-          text: "Surat PBB berhasil dihapus",
-          icon: "success",
-          confirmButtonText: "OK",
-        })
-        setSelectedSurat(null)
-        setActiveTab("laporan")
-      } else {
-        const error = await response.json()
-        Swal.fire({
-          title: "Error",
-          text: error.error || "Gagal menghapus surat PBB",
-          icon: "error",
-          confirmButtonText: "OK",
-        })
-      }
-    } catch (err) {
-      console.error("Error deleting surat:", err)
-      Swal.fire({
-        title: "Error",
-        text: "Terjadi kesalahan",
-        icon: "error",
-        confirmButtonText: "OK",
-      })
-    }
   }
 
   return (
@@ -519,6 +526,7 @@ export function DashboardKepalaDusun() {
               totalSuratDibayar: statistik.total_surat_dibayar,
             totalSuratBelumBayar: statistik.total_surat_belum_bayar,
             persentasePembayaran: statistik.persentase_pembayaran,
+            totalSuratByRT: ketuaRTStats.totalSuratByRT,
           }}
         />          {!selectedSurat ? (
             <>
@@ -548,7 +556,6 @@ export function DashboardKepalaDusun() {
               onSaveEdit={handleSaveEdit}
               onCancelEdit={handleCancelEdit}
               onStatusChange={handleStatusChange}
-              onDelete={handleDelete}
               onBack={() => setSelectedSurat(null)}
               onStartEdit={() => {
                 setIsEditing(true)
@@ -571,63 +578,61 @@ export function DashboardKepalaDusun() {
         />
       )}
 
-      {/* Modal Edit Ketua RT */}
-      {isEditingKetuaRT && (
-        <div className="modal show d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
-          <div className="modal-dialog">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Edit Ketua RT</h5>
-                <button type="button" className="btn-close" onClick={() => setIsEditingKetuaRT(false)}></button>
+      {activeTab === "edit-ketua-rt" && selectedKetuaRTForEdit && (
+        <div className="card">
+          <div className="card-header d-flex justify-content-between align-items-center">
+            <h6 className="mb-0">Edit Ketua RT</h6>
+            <button className="btn btn-sm btn-secondary" onClick={() => setActiveTab("ketua-rt")}>
+              <i className="bi bi-arrow-left me-1"></i>
+              Kembali ke Daftar
+            </button>
+          </div>
+          <div className="card-body">
+            <form onSubmit={handleSaveEditKetuaRT}>
+              <div className="row g-3">
+                <div className="col-md-12">
+                  <label className="form-label">
+                    Nama Lengkap <span className="text-danger">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={editKetuaRTForm.nama_lengkap}
+                    onChange={(e) => setEditKetuaRTForm({ ...editKetuaRTForm, nama_lengkap: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="col-md-12">
+                  <label className="form-label">
+                    Username <span className="text-danger">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={editKetuaRTForm.username}
+                    onChange={(e) => setEditKetuaRTForm({ ...editKetuaRTForm, username: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="col-md-12">
+                  <label className="form-label">Password Baru (kosongkan jika tidak ingin mengubah)</label>
+                  <input
+                    type="password"
+                    className="form-control"
+                    value={editKetuaRTForm.password}
+                    onChange={(e) => setEditKetuaRTForm({ ...editKetuaRTForm, password: e.target.value })}
+                  />
+                </div>
               </div>
-              <form onSubmit={handleSaveEditKetuaRT}>
-                <div className="modal-body">
-                  <div className="row g-3">
-                    <div className="col-md-12">
-                      <label className="form-label">
-                        Nama Lengkap <span className="text-danger">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={editKetuaRTForm.nama_lengkap}
-                        onChange={(e) => setEditKetuaRTForm({ ...editKetuaRTForm, nama_lengkap: e.target.value })}
-                        required
-                      />
-                    </div>
-                    <div className="col-md-12">
-                      <label className="form-label">
-                        Username <span className="text-danger">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={editKetuaRTForm.username}
-                        onChange={(e) => setEditKetuaRTForm({ ...editKetuaRTForm, username: e.target.value })}
-                        required
-                      />
-                    </div>
-                    <div className="col-md-12">
-                      <label className="form-label">Password Baru (kosongkan jika tidak ingin mengubah)</label>
-                      <input
-                        type="password"
-                        className="form-control"
-                        value={editKetuaRTForm.password}
-                        onChange={(e) => setEditKetuaRTForm({ ...editKetuaRTForm, password: e.target.value })}
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div className="modal-footer">
-                  <button type="button" className="btn btn-secondary" onClick={() => setIsEditingKetuaRT(false)}>
-                    Batal
-                  </button>
-                  <button type="submit" className="btn btn-primary">
-                    <i className="bi bi-save me-1"></i>Simpan Perubahan
-                  </button>
-                </div>
-              </form>
-            </div>
+              <div className="d-flex gap-2 mt-4">
+                <button type="submit" className="btn btn-primary">
+                  <i className="bi bi-save me-1"></i>Simpan Perubahan
+                </button>
+                <button type="button" className="btn btn-secondary" onClick={() => setActiveTab("ketua-rt")}>
+                  Batal
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

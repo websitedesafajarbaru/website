@@ -8,7 +8,7 @@ interface DetailSuratPBBProps {
   onSaveEdit: () => void
   onCancelEdit: () => void
   onStatusChange: (newStatus: string) => void
-  onDelete: () => void
+  onDelete?: () => void
   onBack: () => void
   onStartEdit: () => void
   showAdminActions?: boolean
@@ -32,27 +32,29 @@ export function DetailSuratPBB({
   // Define status options based on user role
   const statusOptions = isPerangkatDesa
     ? [
+        { value: "menunggu_dicek_oleh_admin", label: "Menunggu Dicek Oleh Admin" },
         { value: "bayar_sendiri_di_bank", label: "Bayar Sendiri di Bank" },
         { value: "pindah_rumah", label: "Pindah Rumah" },
         { value: "tidak_diketahui", label: "Tidak Diketahui" },
       ]
     : [
+        { value: "menunggu_dicek_oleh_admin", label: "Menunggu Dicek Oleh Admin" },
         { value: "bayar_sendiri_di_bank", label: "Bayar Sendiri di Bank" },
         { value: "sudah_bayar", label: "Sudah Bayar" },
         { value: "pindah_rumah", label: "Pindah Rumah" },
         { value: "tidak_diketahui", label: "Tidak Diketahui" },
       ]
 
+  // Check if the surat is readonly for perangkat desa when status is sudah_bayar
+  const isReadonlyForPerangkatDesa = isPerangkatDesa && surat.status_pembayaran === "sudah_bayar"
+
   return (
     <div className="card">
       <div className="card-header">
-        <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
-          <h6 className="mb-0">
-            <span className="d-none d-md-inline">Detail Surat PBB - {surat.nomor_objek_pajak}</span>
-            <span className="d-md-none">Detail Surat PBB - {surat.nomor_objek_pajak.substring(0, 15)}...</span>
-          </h6>
-          <div className="d-flex flex-wrap gap-2 w-100 w-md-auto">
-            {showAdminActions && (
+        <div className="d-flex justify-content-between align-items-center">
+          <h6 className="mb-0">Detail Surat PBB</h6>
+          <div className="d-flex flex-wrap gap-2">
+            {showAdminActions && !isReadonlyForPerangkatDesa && (
               <>
                 {!isEditing ? (
                   <button className="btn btn-warning btn-sm flex-grow-1 flex-md-grow-0" onClick={onStartEdit}>
@@ -71,10 +73,12 @@ export function DetailSuratPBB({
                     </button>
                   </>
                 )}
-                <button className="btn btn-danger btn-sm flex-grow-1 flex-md-grow-0" onClick={onDelete}>
-                  <i className="bi bi-trash me-1"></i>
-                  <span className="d-none d-sm-inline">Hapus</span>
-                </button>
+                {!isPerangkatDesa && onDelete && (
+                  <button className="btn btn-danger btn-sm flex-grow-1 flex-md-grow-0" onClick={onDelete}>
+                    <i className="bi bi-trash me-1"></i>
+                    <span className="d-none d-sm-inline">Hapus</span>
+                  </button>
+                )}
               </>
             )}
             <button className="btn btn-secondary btn-sm flex-grow-1 flex-md-grow-0" onClick={onBack}>
@@ -126,19 +130,17 @@ export function DetailSuratPBB({
                 ))}
               </select>
             ) : (
-              <>
-                <select
-                  className="form-select"
-                  value={surat.status_pembayaran}
-                  onChange={(e) => onStatusChange(e.target.value)}
-                >
-                  {statusOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </>
+              <select
+                className="form-select"
+                value={surat.status_pembayaran}
+                onChange={(e) => onStatusChange(e.target.value)}
+              >
+                {statusOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
             )}
           </div>
           <div className="col-12">

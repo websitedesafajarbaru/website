@@ -20,16 +20,14 @@ interface DusunStatistik {
 
 interface DetailDusunLaporanProps {
   dusunId: string
-  token: string
   onBack?: () => void
 }
 
-export function DetailDusunLaporan({ dusunId, token, onBack }: DetailDusunLaporanProps) {
+export function DetailDusunLaporan({ dusunId, onBack }: DetailDusunLaporanProps) {
   const [statistik, setStatistik] = useState<DusunStatistik | null>(null)
   const [selectedSurat, setSelectedSurat] = useState<SuratPBB | null>(null)
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
-  const [showStatistics, setShowStatistics] = useState(false)
 
   const filteredSuratPBB =
     statistik?.surat_pbb.filter((surat) => {
@@ -50,7 +48,7 @@ export function DetailDusunLaporan({ dusunId, token, onBack }: DetailDusunLapora
       try {
         setLoading(true)
         const response = await fetch(`/api/statistik/dusun/${dusunId}`, {
-          headers: { Authorization: `Bearer ${token}` },
+          credentials: "include",
         })
         const data = await response.json()
         if (response.ok) {
@@ -78,7 +76,7 @@ export function DetailDusunLaporan({ dusunId, token, onBack }: DetailDusunLapora
       }
     }
     fetchStatistik()
-  }, [dusunId, token])
+  }, [dusunId])
 
   const handleSuratClick = (surat: SuratPBB) => {
     setSelectedSurat(surat)
@@ -106,31 +104,16 @@ export function DetailDusunLaporan({ dusunId, token, onBack }: DetailDusunLapora
 
   return (
     <div>
-      <div className="dashboard-header">
-        <div>
-          <h2>Laporan {statistik.dusun.nama_dusun}</h2>
-          <p className="text-muted mb-0 small">Detail statistik dan daftar surat PBB</p>
-        </div>
-        <div className="text-end">
-          <div className="badge bg-primary fs-6">
-            <i className="bi bi-calendar me-1"></i>
-            Tahun {statistik.active_year || new Date().getFullYear()}
-          </div>
-          <div className="small text-muted mt-1">Data yang ditampilkan untuk tahun {statistik.active_year || new Date().getFullYear()}</div>
-        </div>
-      </div>
       <div className="card mb-4">
-        <div className="card-header" style={{ cursor: "pointer" }} onClick={() => setShowStatistics(!showStatistics)}>
+        <div className="card-header">
           <div className="d-flex justify-content-between align-items-center">
             <h6 className="mb-0">
               <i className="bi bi-bar-chart me-2"></i>
               Statistik PBB
             </h6>
-            {showStatistics ? <i className="bi bi-chevron-up"></i> : <i className="bi bi-chevron-down"></i>}
           </div>
         </div>
-        {showStatistics && (
-          <div className="card-body">
+        <div className="card-body">
             <div className="row g-1 g-md-2">
               <div className="col-md-4">
                 <div className="card h-100">
@@ -211,8 +194,7 @@ export function DetailDusunLaporan({ dusunId, token, onBack }: DetailDusunLapora
               </div>
             </div>
           </div>
-        )}
-      </div>
+        </div>
 
       {!selectedSurat && (
         <>
@@ -281,7 +263,7 @@ export function DetailDusunLaporan({ dusunId, token, onBack }: DetailDusunLapora
       {selectedSurat && (
         <div className="card">
           <div className="card-header d-flex justify-content-between align-items-center">
-            <h6 className="mb-0">Detail Surat PBB - {selectedSurat.nomor_objek_pajak}</h6>
+            <h6 className="mb-0">Detail Surat PBB</h6>
             <button className="btn btn-sm btn-secondary" onClick={() => setSelectedSurat(null)}>
               <i className="bi bi-arrow-left me-1"></i>
               Kembali ke Daftar

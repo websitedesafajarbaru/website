@@ -223,7 +223,7 @@ export function DashboardMasyarakat() {
       {activeTab === "detail" && selectedAduan && (
         <div className="card">
           <div className="card-header d-flex justify-content-between align-items-center">
-            <h6 className="mb-0">Detail Aduan - {selectedAduan.judul}</h6>
+            <h6 className="mb-0">Detail Aduan</h6>
             <button className="btn btn-sm btn-secondary" onClick={() => setActiveTab("daftar")}>
               <i className="bi bi-arrow-left me-1"></i>Kembali ke Daftar
             </button>

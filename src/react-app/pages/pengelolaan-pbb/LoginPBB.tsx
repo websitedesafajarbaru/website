@@ -30,7 +30,7 @@ export function LoginPBB() {
         throw new Error(result.error || "Terjadi kesalahan")
       }
 
-      login(result.token, result.user)
+      login(result.user)
 
       if (result.user.roles === "admin") {
         navigate("/pengelolaan-pbb/dashboard-admin")
