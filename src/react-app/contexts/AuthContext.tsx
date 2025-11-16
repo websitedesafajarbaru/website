@@ -14,6 +14,7 @@ interface AuthContextType {
   logout: () => void
   updateUser: (user: User) => void
   isAuthenticated: boolean
+  isLoading: boolean
   apiRequest: <T = unknown>(url: string, options?: RequestInit) => Promise<T>
   checkAuth: () => Promise<void>
 }
@@ -22,6 +23,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     checkAuth()
@@ -29,10 +31,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const checkAuth = async () => {
     try {
-      const profile = await apiRequest<{ id: string; nama_lengkap: string; username: string; roles: string }>("/auth/profile")
+      const profile = await apiRequest<{ id: string; nama_lengkap: string; username: string; roles: string }>("/api/auth/profile")
       setUser(profile)
-    } catch {
+    } catch (error) {
+      console.error("Check auth error:", error)
       setUser(null)
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -42,7 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     try {
-      await apiRequest("/auth/logout", { method: "POST" })
+      await apiRequest("/api/auth/logout", { method: "POST" })
     } catch (error) {
       console.error("Logout error:", error)
     } finally {
@@ -76,6 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         logout,
         updateUser,
         isAuthenticated: !!user,
+        isLoading,
         apiRequest: authenticatedApiRequest,
         checkAuth,
       }}
