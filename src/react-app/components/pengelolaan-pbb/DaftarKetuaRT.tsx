@@ -1,3 +1,5 @@
+import { useState } from "react"
+
 interface PerangkatDesa {
   id: string
   nama_lengkap: string
@@ -14,6 +16,7 @@ interface DaftarKetuaRTProps {
   onEdit: (ketua: PerangkatDesa) => void
   onDelete?: (ketua: PerangkatDesa) => void
   showDeleteButton?: boolean
+  onRefresh?: () => void
 }
 
 const formatJabatan = (jabatan: string) => {
@@ -27,7 +30,9 @@ const formatJabatan = (jabatan: string) => {
   }
 }
 
-export function DaftarKetuaRT({ ketuaRT, searchTerm, onSearchChange, onEdit, onDelete, showDeleteButton = true }: DaftarKetuaRTProps) {
+export function DaftarKetuaRT({ ketuaRT, searchTerm, onSearchChange, onEdit, onDelete, showDeleteButton = true, onRefresh }: DaftarKetuaRTProps) {
+  const [isRefreshing, setIsRefreshing] = useState(false)
+  
   const filteredKetuaRT = ketuaRT.filter((k) => {
     const searchLower = searchTerm.toLowerCase()
     return k.nama_lengkap.toLowerCase().includes(searchLower) || k.username.toLowerCase().includes(searchLower) || k.jabatan.toLowerCase().includes(searchLower)
@@ -35,10 +40,51 @@ export function DaftarKetuaRT({ ketuaRT, searchTerm, onSearchChange, onEdit, onD
 
   return (
     <>
-      <div className="mb-3">
-        <input type="text" className="form-control" placeholder="Cari ketua RT..." value={searchTerm} onChange={(e) => onSearchChange(e.target.value)} />
+      <div className="card mb-2">
+        <div className="card-body p-3">
+          <div className="row align-items-center g-2">
+            <div className="col-md-10">
+              <div className="input-group">
+                <span className="input-group-text" style={{ width: "40px" }}>
+                  <i className="bi bi-search"></i>
+                </span>
+                <input
+                  type="text"
+                  className="form-control"
+                  style={{ height: "50px" }}
+                  placeholder="Cari ketua RT..."
+                  value={searchTerm}
+                  onChange={(e) => onSearchChange(e.target.value)}
+                />
+              </div>
+            </div>
+            {onRefresh && (
+              <div className="col-md-2">
+                <button
+                  className="btn btn-outline-secondary"
+                  style={{ width: "100%", height: "50px" }}
+                  onClick={async () => {
+                    setIsRefreshing(true)
+                    await onRefresh()
+                    setTimeout(() => setIsRefreshing(false), 500)
+                  }}
+                  disabled={isRefreshing}
+                >
+                  <i className={`bi bi-arrow-clockwise ${isRefreshing ? "spin" : ""}`}></i>
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
-      {filteredKetuaRT.length === 0 ? (
+      {isRefreshing ? (
+        <div className="text-center py-5">
+          <div className="spinner-border text-primary" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+          <p className="mt-3 text-muted">Memuat data ketua RT...</p>
+        </div>
+      ) : filteredKetuaRT.length === 0 ? (
         <div className="card">
           <div className="card-body text-center py-5">
             <i className="bi bi-box text-muted mb-3" style={{ fontSize: "4rem" }}></i>

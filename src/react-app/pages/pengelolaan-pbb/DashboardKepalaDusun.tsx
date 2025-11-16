@@ -68,6 +68,9 @@ export function DashboardKepalaDusun() {
     dusun_id: dusunId?.toString() || "",
   })
   const [ketuaRTStats, setKetuaRTStats] = useState<{ totalSuratByRT: number }>({ totalSuratByRT: 0 })
+  
+  // Cache flag to prevent unnecessary fetches
+  const [hasDataFetched, setHasDataFetched] = useState(false)
 
   const fetchActiveYear = useCallback(async () => {
     try {
@@ -97,11 +100,7 @@ export function DashboardKepalaDusun() {
 
         if (response.ok && perangkat.id_dusun) {
           setDusunId(perangkat.id_dusun)
-          const dusunResponse = await fetch(`/api/dusun/${perangkat.id_dusun}`, {
-            credentials: "include",
-          })
-          const dusun = await dusunResponse.json()
-          setDusunInfo(dusun)
+          // Nama dusun akan diambil dari statistik
         }
       } catch (err) {
         console.error(err)
@@ -111,90 +110,71 @@ export function DashboardKepalaDusun() {
     loadDusunInfo()
   }, [user, fetchActiveYear])
 
-  useEffect(() => {
-    const loadKetuaRT = async () => {
-      if (!dusunId) return
+  const loadData = async () => {
+    if (!dusunId) return
 
-      try {
-        const response = await fetch(`/api/perangkat-desa?dusun_id=${dusunId}`, {
-          credentials: "include",
-        })
-        const result = await response.json()
-        if (response.ok) {
-          const ketuaList = result.filter((p: PerangkatDesa) => p.jabatan === "ketua_rt")
-          setKetuaRT(ketuaList)
-        }
-      } catch (err) {
-        console.error("Error loading ketua RT:", err)
-      }
-    }
-
-    loadKetuaRT()
-  }, [dusunId])
-
-  useEffect(() => {
-    const loadStatistik = async () => {
-      if (!dusunId) return
-
-      try {
-        const response = await fetch(`/api/statistik/dusun/${dusunId}`, {
-          credentials: "include",
-        })
-        const data = await response.json()
-        if (response.ok) {
-          setStatistik(data)
-        }
-      } catch (err) {
-        console.error("Error loading statistik:", err)
-      }
-    }
-
-    loadStatistik()
-  }, [dusunId])
-
-  useEffect(() => {
-    const loadKetuaRTStats = async () => {
-      if (!dusunId) return
-
-      try {
-        // Get all ketua RT IDs in this dusun
-        const perangkatResponse = await fetch(`/api/perangkat-desa?dusun_id=${dusunId}`, {
-          credentials: "include",
-        })
-        const perangkatData = await perangkatResponse.json()
-        
-        if (perangkatResponse.ok) {
-          const ketuaRTList = perangkatData.filter((p: PerangkatDesa) => p.jabatan === 'ketua_rt')
-          
-          // Get surat PBB created by ketua RT
-          const suratResponse = await fetch(`/api/surat-pbb?dusun_id=${dusunId}`, {
-            credentials: "include",
+    try {
+      // Load statistik
+      const statistikResponse = await fetch(`/api/statistik/dusun/${dusunId}`, {
+        credentials: "include",
+      })
+      const statistikData = await statistikResponse.json()
+      if (statistikResponse.ok) {
+        setStatistik(statistikData)
+        // Set dusun info dari statistik
+        if (statistikData.dusun) {
+          setDusunInfo({
+            id: statistikData.dusun.id,
+            nama_dusun: statistikData.dusun.nama_dusun
           })
-          const suratData = await suratResponse.json()
-          
-          if (suratResponse.ok) {
-            // Calculate total surat by all RT
-            const totalSuratByRT = suratData.surat_pbb?.filter((surat: SuratPBB) => 
-              ketuaRTList.some((rt: PerangkatDesa) => rt.id === surat.id_pengguna)
-            ).length || 0
-            
-            // Calculate per RT stats
-            const ketuaRTWithStats = ketuaRTList.map((rt: PerangkatDesa) => ({
-              ...rt,
-              jumlahSurat: suratData.surat_pbb?.filter((surat: SuratPBB) => surat.id_pengguna === rt.id).length || 0
-            }))
-            
-            setKetuaRT(ketuaRTWithStats)
-            setKetuaRTStats({ totalSuratByRT })
-          }
         }
-      } catch (err) {
-        console.error("Error loading ketua RT stats:", err)
       }
-    }
 
-    loadKetuaRTStats()
-  }, [dusunId, ketuaRT])
+      // Load ketua RT with stats
+      const perangkatResponse = await fetch(`/api/perangkat-desa?dusun_id=${dusunId}`, {
+        credentials: "include",
+      })
+      const perangkatData = await perangkatResponse.json()
+      
+      if (perangkatResponse.ok) {
+        const ketuaRTList = perangkatData.filter((p: PerangkatDesa) => p.jabatan === 'ketua_rt')
+        
+        // Get surat PBB created by ketua RT
+        const suratResponse = await fetch(`/api/surat-pbb?dusun_id=${dusunId}`, {
+          credentials: "include",
+        })
+        const suratData = await suratResponse.json()
+        
+        if (suratResponse.ok) {
+          // Calculate total surat by all RT
+          const totalSuratByRT = suratData.surat_pbb?.filter((surat: SuratPBB) => 
+            ketuaRTList.some((rt: PerangkatDesa) => rt.id === surat.id_pengguna)
+          ).length || 0
+          
+          // Calculate per RT stats
+          const ketuaRTWithStats = ketuaRTList.map((rt: PerangkatDesa) => ({
+            ...rt,
+            jumlahSurat: suratData.surat_pbb?.filter((surat: SuratPBB) => surat.id_pengguna === rt.id).length || 0
+          }))
+          
+          setKetuaRT(ketuaRTWithStats)
+          setKetuaRTStats({ totalSuratByRT })
+        }
+      }
+      
+      setHasDataFetched(true)
+    } catch (err) {
+      console.error("Error loading data:", err)
+    }
+  }
+
+  // Fetch data only on first load
+  useEffect(() => {
+    if (dusunId && !hasDataFetched) {
+      loadData()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dusunId, hasDataFetched])
 
   useEffect(() => {
     setSuratForm((prev) => ({
@@ -396,6 +376,14 @@ export function DashboardKepalaDusun() {
       if (response.ok) {
         setSelectedSurat({ ...selectedSurat, status_pembayaran: newStatus as SuratPBB["status_pembayaran"] })
         setEditForm({ ...editForm, status_pembayaran: newStatus as SuratPBB["status_pembayaran"] })
+        
+        Swal.fire({
+          title: "Berhasil!",
+          text: "Status pembayaran berhasil diperbarui",
+          icon: "success",
+          timer: 2000,
+          showConfirmButton: false,
+        })
       } else {
         try {
           const error = await response.json()
@@ -512,7 +500,7 @@ export function DashboardKepalaDusun() {
               </h6>
             </div>
           </div>
-          <DaftarKetuaRT ketuaRT={ketuaRT} searchTerm={searchKetuaRT} onSearchChange={setSearchKetuaRT} onEdit={handleEditKetuaRT} showDeleteButton={false} />
+          <DaftarKetuaRT ketuaRT={ketuaRT} searchTerm={searchKetuaRT} onSearchChange={setSearchKetuaRT} onEdit={handleEditKetuaRT} showDeleteButton={false} onRefresh={loadData} />
         </>
       )}
 
@@ -545,6 +533,7 @@ export function DashboardKepalaDusun() {
                 searchTerm={searchSuratPBB}
                 onSearchChange={setSearchSuratPBB}
                 onSuratClick={(surat) => handleSuratClick(surat)}
+                onRefresh={loadData}
               />
             </>
           ) : (

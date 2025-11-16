@@ -1,5 +1,6 @@
 import { SuratPBB } from "../../types"
 import { formatStatusPembayaran, getStatusPembayaranColor } from "../../utils/formatters"
+import { useState } from "react"
 
 interface TabelSuratPBBProps {
   suratPBB: SuratPBB[]
@@ -7,9 +8,11 @@ interface TabelSuratPBBProps {
   onSearchChange: (value: string) => void
   onSuratClick: (surat: SuratPBB) => void
   showDusunColumn?: boolean
+  onRefresh?: () => void
 }
 
-export function TabelSuratPBB({ suratPBB, searchTerm, onSearchChange, onSuratClick, showDusunColumn = false }: TabelSuratPBBProps) {
+export function TabelSuratPBB({ suratPBB, searchTerm, onSearchChange, onSuratClick, showDusunColumn = false, onRefresh }: TabelSuratPBBProps) {
+  const [isRefreshing, setIsRefreshing] = useState(false)
   const filteredSuratPBB = suratPBB.filter((surat) => {
     const searchLower = searchTerm.toLowerCase()
     return (
@@ -24,10 +27,51 @@ export function TabelSuratPBB({ suratPBB, searchTerm, onSearchChange, onSuratCli
 
   return (
     <>
-      <div className="mb-3">
-        <input type="text" className="form-control" placeholder="Cari surat PBB..." value={searchTerm} onChange={(e) => onSearchChange(e.target.value)} />
+      <div className="card mb-2">
+        <div className="card-body p-3">
+          <div className="row align-items-center g-2">
+            <div className="col-md-10">
+              <div className="input-group">
+                <span className="input-group-text" style={{ width: "40px" }}>
+                  <i className="bi bi-search"></i>
+                </span>
+                <input
+                  type="text"
+                  className="form-control"
+                  style={{ height: "50px" }}
+                  placeholder="Cari surat PBB..."
+                  value={searchTerm}
+                  onChange={(e) => onSearchChange(e.target.value)}
+                />
+              </div>
+            </div>
+            {onRefresh && (
+              <div className="col-md-2">
+                <button
+                  className="btn btn-outline-secondary"
+                  style={{ width: "100%", height: "50px" }}
+                  onClick={async () => {
+                    setIsRefreshing(true)
+                    await onRefresh()
+                    setTimeout(() => setIsRefreshing(false), 500)
+                  }}
+                  disabled={isRefreshing}
+                >
+                  <i className={`bi bi-arrow-clockwise ${isRefreshing ? "spin" : ""}`}></i>
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
-      {filteredSuratPBB.length === 0 ? (
+      {isRefreshing ? (
+        <div className="text-center py-5">
+          <div className="spinner-border text-primary" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+          <p className="mt-3 text-muted">Memuat data surat PBB...</p>
+        </div>
+      ) : filteredSuratPBB.length === 0 ? (
         <div className="card">
           <div className="card-body text-center py-5">
             <i className="bi bi-box-seam" style={{ fontSize: "3rem", color: "#ccc" }}></i>

@@ -1,3 +1,5 @@
+import { useState } from "react"
+
 interface FilterSectionProps {
   statusFilter: string
   onStatusFilterChange: (value: string) => void
@@ -8,6 +10,7 @@ interface FilterSectionProps {
 }
 
 export function FilterSection({ statusFilter, onStatusFilterChange, onRefresh, searchTerm = "", onSearchChange, showStatusFilter = true }: FilterSectionProps) {
+  const [isRefreshing, setIsRefreshing] = useState(false)
   if (!showStatusFilter) {
     return (
       <div className="card mb-2">
@@ -29,8 +32,17 @@ export function FilterSection({ statusFilter, onStatusFilterChange, onRefresh, s
               </div>
             </div>
             <div className="col-md-2">
-              <button className="btn btn-outline-secondary" style={{ width: "100%", height: "50px" }} onClick={onRefresh}>
-                <i className="bi bi-arrow-clockwise"></i>
+              <button
+                className="btn btn-outline-secondary"
+                style={{ width: "100%", height: "50px" }}
+                onClick={async () => {
+                  setIsRefreshing(true)
+                  await onRefresh()
+                  setTimeout(() => setIsRefreshing(false), 500)
+                }}
+                disabled={isRefreshing}
+              >
+                <i className={`bi bi-arrow-clockwise ${isRefreshing ? "spin" : ""}`}></i>
               </button>
             </div>
           </div>
@@ -72,8 +84,17 @@ export function FilterSection({ statusFilter, onStatusFilterChange, onRefresh, s
             </div>
           </div>
           <div className="col-md-2">
-            <button className="btn btn-outline-secondary" style={{ width: "100%", height: "50px" }} onClick={onRefresh}>
-              <i className="bi bi-arrow-clockwise"></i>
+            <button
+              className="btn btn-outline-secondary"
+              style={{ width: "100%", height: "50px" }}
+              onClick={async () => {
+                setIsRefreshing(true)
+                await onRefresh()
+                setTimeout(() => setIsRefreshing(false), 500)
+              }}
+              disabled={isRefreshing}
+            >
+              <i className={`bi bi-arrow-clockwise ${isRefreshing ? "spin" : ""}`}></i>
             </button>
           </div>
         </div>

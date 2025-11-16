@@ -35,7 +35,7 @@ export function AduanTable({ aduan, loading, onViewDetail, role, currentPage, it
         <div className="spinner-border text-primary" role="status">
           <span className="visually-hidden">Loading...</span>
         </div>
-        {role === "masyarakat" && <p className="mt-3 text-muted">Memuat data aduan...</p>}
+        <p className="mt-3 text-muted">Memuat data aduan...</p>
       </div>
     )
   }

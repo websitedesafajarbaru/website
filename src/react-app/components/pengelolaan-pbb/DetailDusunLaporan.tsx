@@ -28,6 +28,7 @@ export function DetailDusunLaporan({ dusunId, onBack }: DetailDusunLaporanProps)
   const [selectedSurat, setSelectedSurat] = useState<SuratPBB | null>(null)
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
   const filteredSuratPBB =
     statistik?.surat_pbb.filter((surat) => {
@@ -42,40 +43,42 @@ export function DetailDusunLaporan({ dusunId, onBack }: DetailDusunLaporanProps)
       )
     }) || []
 
-  useEffect(() => {
-    const fetchStatistik = async () => {
-      if (!dusunId) return
-      try {
-        setLoading(true)
-        const response = await fetch(`/api/statistik/dusun/${dusunId}`, {
-          credentials: "include",
-        })
-        const data = await response.json()
-        if (response.ok) {
-          setStatistik(data)
-        } else {
-          Swal.fire({
-            icon: "error",
-            title: "Gagal!",
-            text: "Gagal mengambil data dusun",
-            timer: 3000,
-            showConfirmButton: false,
-          })
-        }
-      } catch (err) {
-        console.error(err)
+  const fetchStatistik = async () => {
+    if (!dusunId) return
+    try {
+      setLoading(true)
+      const response = await fetch(`/api/statistik/dusun/${dusunId}`, {
+        credentials: "include",
+      })
+      const data = await response.json()
+      if (response.ok) {
+        setStatistik(data)
+      } else {
         Swal.fire({
           icon: "error",
-          title: "Terjadi Kesalahan!",
-          text: "Terjadi kesalahan saat mengambil data dusun",
+          title: "Gagal!",
+          text: "Gagal mengambil data dusun",
           timer: 3000,
           showConfirmButton: false,
         })
-      } finally {
-        setLoading(false)
       }
+    } catch (err) {
+      console.error(err)
+      Swal.fire({
+        icon: "error",
+        title: "Terjadi Kesalahan!",
+        text: "Terjadi kesalahan saat mengambil data dusun",
+        timer: 3000,
+        showConfirmButton: false,
+      })
+    } finally {
+      setLoading(false)
     }
+  }
+
+  useEffect(() => {
     fetchStatistik()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dusunId])
 
   const handleSuratClick = (surat: SuratPBB) => {
@@ -212,10 +215,49 @@ export function DetailDusunLaporan({ dusunId, onBack }: DetailDusunLaporanProps)
               )}
             </div>
           </div>
-          <div className="mb-3">
-            <input type="text" className="form-control" placeholder="Cari surat PBB..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+          <div className="card mb-2">
+            <div className="card-body p-3">
+              <div className="row align-items-center g-2">
+                <div className="col-md-10">
+                  <div className="input-group">
+                    <span className="input-group-text" style={{ width: "40px" }}>
+                      <i className="bi bi-search"></i>
+                    </span>
+                    <input
+                      type="text"
+                      className="form-control"
+                      style={{ height: "50px" }}
+                      placeholder="Cari surat PBB..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <div className="col-md-2">
+                  <button
+                    className="btn btn-outline-secondary"
+                    style={{ width: "100%", height: "50px" }}
+                    onClick={async () => {
+                      setIsRefreshing(true)
+                      await fetchStatistik()
+                      setTimeout(() => setIsRefreshing(false), 500)
+                    }}
+                    disabled={isRefreshing}
+                  >
+                    <i className={`bi bi-arrow-clockwise ${isRefreshing ? "spin" : ""}`}></i>
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
-          {filteredSuratPBB.length === 0 ? (
+          {isRefreshing ? (
+            <div className="text-center py-5">
+              <div className="spinner-border text-primary" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+              <p className="mt-3 text-muted">Memuat data surat PBB...</p>
+            </div>
+          ) : filteredSuratPBB.length === 0 ? (
             <div className="p-4 text-center text-muted">
               <i className="bi bi-box text-muted mb-3" style={{ fontSize: "4rem" }}></i>
               <p className="mt-2 mb-0">{searchTerm ? "Tidak ada surat PBB yang cocok dengan pencarian" : "Belum ada surat PBB yang terdaftar"}</p>

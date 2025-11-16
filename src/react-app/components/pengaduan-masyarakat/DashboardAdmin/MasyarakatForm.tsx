@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import { Masyarakat } from "../../../types"
 
 interface MasyarakatFormProps {
-  masyarakat?: Masyarakat | null
+  masyarakat: Masyarakat
   onSubmit: (data: MasyarakatFormData) => void
   onCancel: () => void
   loading: boolean
@@ -29,15 +29,13 @@ export function MasyarakatForm({ masyarakat, onSubmit, onCancel, loading, onTogg
   const [errors, setErrors] = useState<Partial<MasyarakatFormData>>({})
 
   useEffect(() => {
-    if (masyarakat) {
-      setFormData({
-        nama_lengkap: masyarakat.nama_lengkap,
-        username: masyarakat.username,
-        nomor_telepon: masyarakat.nomor_telepon,
-        alamat_rumah: masyarakat.alamat_rumah,
-        password: "",
-      })
-    }
+    setFormData({
+      nama_lengkap: masyarakat.nama_lengkap,
+      username: masyarakat.username,
+      nomor_telepon: masyarakat.nomor_telepon,
+      alamat_rumah: masyarakat.alamat_rumah,
+      password: "",
+    })
   }, [masyarakat])
 
   const validateForm = (): boolean => {
@@ -57,10 +55,6 @@ export function MasyarakatForm({ masyarakat, onSubmit, onCancel, loading, onTogg
 
     if (!formData.alamat_rumah.trim()) {
       newErrors.alamat_rumah = "Alamat rumah harus diisi"
-    }
-
-    if (!masyarakat && !formData.password?.trim()) {
-      newErrors.password = "Password harus diisi"
     }
 
     setErrors(newErrors)
@@ -146,7 +140,7 @@ export function MasyarakatForm({ masyarakat, onSubmit, onCancel, loading, onTogg
 
         <div className="col-12">
           <label htmlFor="password" className="form-label">
-            Password {masyarakat ? "(Kosongkan jika tidak ingin mengubah)" : "*"}
+            Password (Kosongkan jika tidak ingin mengubah)
           </label>
           <input
             type="password"
@@ -154,14 +148,14 @@ export function MasyarakatForm({ masyarakat, onSubmit, onCancel, loading, onTogg
             id="password"
             value={formData.password}
             onChange={(e) => handleChange("password", e.target.value)}
-            placeholder={masyarakat ? "Masukkan password baru" : "Masukkan password"}
+            placeholder="Masukkan password baru"
           />
           {errors.password && <div className="invalid-feedback">{errors.password}</div>}
         </div>
       </div>
 
       <div className="d-flex justify-content-end gap-2 mt-4">
-        {masyarakat && onToggleBan && (
+        {onToggleBan && (
           <button
             type="button"
             className={`btn ${masyarakat.status === "active" ? "btn-outline-warning" : "btn-outline-success"}`}
@@ -186,12 +180,10 @@ export function MasyarakatForm({ masyarakat, onSubmit, onCancel, loading, onTogg
           {loading ? (
             <>
               <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-              {masyarakat ? "Menyimpan..." : "Membuat..."}
+              Menyimpan...
             </>
-          ) : masyarakat ? (
-            "Simpan Perubahan"
           ) : (
-            "Tambah Masyarakat"
+            "Simpan Perubahan"
           )}
         </button>
       </div>

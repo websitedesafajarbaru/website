@@ -63,6 +63,14 @@ export function DashboardAdminPBB() {
   const [dusunTokens, setDusunTokens] = useState<{ tokenKepalaDusun: string; tokenKetuaRT: string } | null>(null)
   const [perangkatDesa, setPerangkatDesa] = useState<PerangkatDesa[]>([])
   const [selectedDusunId, setSelectedDusunId] = useState<string | null>(null)
+  const [isRefreshingDusun, setIsRefreshingDusun] = useState(false)
+  const [isRefreshingStatistik, setIsRefreshingStatistik] = useState(false)
+  const [isRefreshingPerangkat, setIsRefreshingPerangkat] = useState(false)
+  
+  // Cache flags to prevent unnecessary fetches
+  const [hasDusunFetched, setHasDusunFetched] = useState(false)
+  const [hasSuratFetched, setHasSuratFetched] = useState(false)
+  const [hasLaporanFetched, setHasLaporanFetched] = useState(false)
 
   const filteredDusun = dusun.filter((d) => {
     const searchLower = searchDusun.toLowerCase()
@@ -213,6 +221,7 @@ export function DashboardAdminPBB() {
       if (response.ok) {
         const data = await response.json()
         setDusun(data)
+        setHasDusunFetched(true)
       }
     } catch (error) {
       console.error("Error fetching dusun:", error)
@@ -230,6 +239,7 @@ export function DashboardAdminPBB() {
         if (data.active_year) {
           setActiveYear(data.active_year)
         }
+        setHasSuratFetched(true)
       }
     } catch (error) {
       console.error("Error fetching surat PBB:", error)
@@ -244,6 +254,7 @@ export function DashboardAdminPBB() {
       if (response.ok) {
         const data = await response.json()
         setLaporan(data)
+        setHasLaporanFetched(true)
       }
     } catch (error) {
       console.error("Error fetching laporan:", error)
@@ -264,11 +275,12 @@ export function DashboardAdminPBB() {
     setSuratForm(prev => ({ ...prev, tahun_pajak: activeYear.toString() }))
   }, [activeYear])
 
+  // Fetch data only on first visit to each tab
   useEffect(() => {
-    if (activeTab === "dusun") fetchDusun()
-    if (activeTab === "surat") fetchSuratPBB()
-    if (activeTab === "laporan") fetchLaporan()
-  }, [activeTab, fetchDusun, fetchSuratPBB, fetchLaporan])
+    if (activeTab === "dusun" && !hasDusunFetched) fetchDusun()
+    if (activeTab === "surat" && !hasSuratFetched) fetchSuratPBB()
+    if (activeTab === "laporan" && !hasLaporanFetched) fetchLaporan()
+  }, [activeTab, fetchDusun, fetchSuratPBB, fetchLaporan, hasDusunFetched, hasSuratFetched, hasLaporanFetched])
 
   const openDusunDetail = async (dusunId: number) => {
     try {
@@ -669,6 +681,14 @@ export function DashboardAdminPBB() {
       if (response.ok) {
         setSelectedSurat({ ...selectedSurat, status_pembayaran: newStatus as SuratPBB["status_pembayaran"] })
         setEditForm({ ...editForm, status_pembayaran: newStatus as SuratPBB["status_pembayaran"] })
+        
+        Swal.fire({
+          title: "Berhasil!",
+          text: "Status pembayaran berhasil diperbarui",
+          icon: "success",
+          timer: 2000,
+          showConfirmButton: false,
+        })
       } else {
         Swal.fire({
           title: "Error",
@@ -855,10 +875,49 @@ export function DashboardAdminPBB() {
               </button>
             </div>
           </div>
-          <div className="mb-3">
-            <input type="text" className="form-control" placeholder="Cari dusun..." value={searchDusun} onChange={(e) => setSearchDusun(e.target.value)} />
+          <div className="card mb-2">
+            <div className="card-body p-3">
+              <div className="row align-items-center g-2">
+                <div className="col-md-10">
+                  <div className="input-group">
+                    <span className="input-group-text" style={{ width: "40px" }}>
+                      <i className="bi bi-search"></i>
+                    </span>
+                    <input
+                      type="text"
+                      className="form-control"
+                      style={{ height: "50px" }}
+                      placeholder="Cari dusun..."
+                      value={searchDusun}
+                      onChange={(e) => setSearchDusun(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <div className="col-md-2">
+                  <button
+                    className="btn btn-outline-secondary"
+                    style={{ width: "100%", height: "50px" }}
+                    onClick={async () => {
+                      setIsRefreshingDusun(true)
+                      await fetchDusun()
+                      setTimeout(() => setIsRefreshingDusun(false), 500)
+                    }}
+                    disabled={isRefreshingDusun}
+                  >
+                    <i className={`bi bi-arrow-clockwise ${isRefreshingDusun ? "spin" : ""}`}></i>
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
-          {filteredDusun.length === 0 ? (
+          {isRefreshingDusun ? (
+            <div className="text-center py-5">
+              <div className="spinner-border text-primary" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+              <p className="mt-3 text-muted">Memuat data dusun...</p>
+            </div>
+          ) : filteredDusun.length === 0 ? (
             <div className="card">
               <div className="card-body text-center py-5">
                 <i className="bi bi-box text-muted" style={{ fontSize: "4rem" }}></i>
@@ -953,7 +1012,7 @@ export function DashboardAdminPBB() {
                   </div>
                 </div>
               </div>
-              <TabelSuratPBB suratPBB={suratPBB} searchTerm={searchSuratPBB} onSearchChange={setSearchSuratPBB} onSuratClick={setSelectedSurat} showDusunColumn={true} />
+              <TabelSuratPBB suratPBB={suratPBB} searchTerm={searchSuratPBB} onSearchChange={setSearchSuratPBB} onSuratClick={setSelectedSurat} showDusunColumn={true} onRefresh={fetchSuratPBB} />
             </>
           ) : (
             <DetailSuratPBB
@@ -1087,10 +1146,49 @@ export function DashboardAdminPBB() {
               </h6>
             </div>
           </div>
-          <div className="mb-3">
-            <input type="text" className="form-control" placeholder="Cari statistik dusun..." value={searchStatistik} onChange={(e) => setSearchStatistik(e.target.value)} />
+          <div className="card mb-2">
+            <div className="card-body p-3">
+              <div className="row align-items-center g-2">
+                <div className="col-md-10">
+                  <div className="input-group">
+                    <span className="input-group-text" style={{ width: "40px" }}>
+                      <i className="bi bi-search"></i>
+                    </span>
+                    <input
+                      type="text"
+                      className="form-control"
+                      style={{ height: "50px" }}
+                      placeholder="Cari statistik dusun..."
+                      value={searchStatistik}
+                      onChange={(e) => setSearchStatistik(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <div className="col-md-2">
+                  <button
+                    className="btn btn-outline-secondary"
+                    style={{ width: "100%", height: "50px" }}
+                    onClick={async () => {
+                      setIsRefreshingStatistik(true)
+                      await fetchLaporan()
+                      setTimeout(() => setIsRefreshingStatistik(false), 500)
+                    }}
+                    disabled={isRefreshingStatistik}
+                  >
+                    <i className={`bi bi-arrow-clockwise ${isRefreshingStatistik ? "spin" : ""}`}></i>
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
-          {filteredStatistik.length === 0 ? (
+          {isRefreshingStatistik ? (
+            <div className="text-center py-5">
+              <div className="spinner-border text-primary" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+              <p className="mt-3 text-muted">Memuat data statistik...</p>
+            </div>
+          ) : filteredStatistik.length === 0 ? (
             <div className="card">
               <div className="card-body text-center py-5">
                 <i className="bi bi-inbox text-muted" style={{ fontSize: "4rem" }}></i>
@@ -1438,27 +1536,63 @@ export function DashboardAdminPBB() {
                   </div>
                 </div>
                 <>
-                  <div className="mb-3">
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Cari perangkat desa..."
-                      value={searchPerangkat}
-                      onChange={(e) => setSearchPerangkat(e.target.value)}
-                    />
+                  <div className="card mb-2">
+                    <div className="card-body p-3">
+                      <div className="row align-items-center g-2">
+                        <div className="col-md-10">
+                          <div className="input-group">
+                            <span className="input-group-text" style={{ width: "40px" }}>
+                              <i className="bi bi-search"></i>
+                            </span>
+                            <input
+                              type="text"
+                              className="form-control"
+                              style={{ height: "50px" }}
+                              placeholder="Cari perangkat desa..."
+                              value={searchPerangkat}
+                              onChange={(e) => setSearchPerangkat(e.target.value)}
+                            />
+                          </div>
+                        </div>
+                        <div className="col-md-2">
+                          <button
+                            className="btn btn-outline-secondary"
+                            style={{ width: "100%", height: "50px" }}
+                            onClick={async () => {
+                              if (selectedDusun) {
+                                setIsRefreshingPerangkat(true)
+                                await openDusunDetail(selectedDusun.id)
+                                setTimeout(() => setIsRefreshingPerangkat(false), 500)
+                              }
+                            }}
+                            disabled={isRefreshingPerangkat}
+                          >
+                            <i className={`bi bi-arrow-clockwise ${isRefreshingPerangkat ? "spin" : ""}`}></i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div className="table-container mx-auto" style={{ maxHeight: "500px", overflowY: "auto", maxWidth: "100%" }}>
-                    <table className="table table-hover">
-                      <thead className="table-light" style={{ position: "sticky", top: 0, zIndex: 1 }}>
-                        <tr>
-                          <th>Nama Lengkap</th>
-                          <th>Username</th>
-                          <th>Jabatan</th>
-                          <th>Aksi</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {filteredPerangkat.map((perangkat: PerangkatDesa) => (
+                  {isRefreshingPerangkat ? (
+                    <div className="text-center py-5">
+                      <div className="spinner-border text-primary" role="status">
+                        <span className="visually-hidden">Loading...</span>
+                      </div>
+                      <p className="mt-3 text-muted">Memuat data perangkat desa...</p>
+                    </div>
+                  ) : (
+                    <div className="table-container mx-auto" style={{ maxHeight: "500px", overflowY: "auto", maxWidth: "100%" }}>
+                      <table className="table table-hover">
+                        <thead className="table-light" style={{ position: "sticky", top: 0, zIndex: 1 }}>
+                          <tr>
+                            <th>Nama Lengkap</th>
+                            <th>Username</th>
+                            <th>Jabatan</th>
+                            <th>Aksi</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {filteredPerangkat.map((perangkat: PerangkatDesa) => (
                           <tr key={perangkat.id}>
                             <td>{perangkat.nama_lengkap}</td>
                             <td>{perangkat.username}</td>
@@ -1503,6 +1637,7 @@ export function DashboardAdminPBB() {
                       </tbody>
                     </table>
                   </div>
+                  )}
                 </>
               </div>
             </div>

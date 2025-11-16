@@ -44,6 +44,9 @@ export function DashboardKetuaRT() {
     status_pembayaran: "menunggu_dicek_oleh_admin",
     dusun_id: dusunId?.toString() || "",
   })
+  
+  // Cache flag to prevent unnecessary fetches
+  const [hasStatistikFetched, setHasStatistikFetched] = useState(false)
 
   const fetchActiveYear = useCallback(async () => {
     try {
@@ -82,26 +85,31 @@ export function DashboardKetuaRT() {
     loadDusunInfo()
   }, [user, fetchActiveYear])
 
-  useEffect(() => {
-    const loadStatistik = async () => {
-      if (!dusunId) return
+  const loadStatistik = async () => {
+    if (!dusunId) return
 
-      try {
-        const response = await fetch(`/api/statistik/dusun/${dusunId}`, {
-          credentials: "include",
-        })
-        const data = await response.json()
-        if (response.ok) {
-          setStatistik(data)
-          setSuratPBB(data.surat_pbb || [])
-        }
-      } catch (err) {
-        console.error("Error loading statistik:", err)
+    try {
+      const response = await fetch(`/api/statistik/dusun/${dusunId}`, {
+        credentials: "include",
+      })
+      const data = await response.json()
+      if (response.ok) {
+        setStatistik(data)
+        setSuratPBB(data.surat_pbb || [])
+        setHasStatistikFetched(true)
       }
+    } catch (err) {
+      console.error("Error loading statistik:", err)
     }
+  }
 
-    loadStatistik()
-  }, [dusunId])
+  // Fetch data only on first load
+  useEffect(() => {
+    if (dusunId && !hasStatistikFetched) {
+      loadStatistik()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dusunId, hasStatistikFetched])
 
   useEffect(() => {
     setSuratForm((prev) => ({
@@ -204,6 +212,14 @@ export function DashboardKetuaRT() {
       if (response.ok) {
         setSelectedSurat({ ...selectedSurat, status_pembayaran: newStatus as SuratPBB["status_pembayaran"] })
         setEditForm({ ...editForm, status_pembayaran: newStatus as SuratPBB["status_pembayaran"] })
+
+        Swal.fire({
+          title: "Berhasil!",
+          text: "Status pembayaran berhasil diperbarui",
+          icon: "success",
+          timer: 2000,
+          showConfirmButton: false,
+        })
 
         // Reload statistik after status change
         if (dusunId) {
@@ -344,7 +360,7 @@ export function DashboardKetuaRT() {
               </button>
             </div>
           </div>
-          <TabelSuratPBB suratPBB={suratPBB} searchTerm={searchTerm} onSearchChange={setSearchTerm} onSuratClick={handleSuratClick} />
+          <TabelSuratPBB suratPBB={suratPBB} searchTerm={searchTerm} onSearchChange={setSearchTerm} onSuratClick={handleSuratClick} onRefresh={loadStatistik} />
         </>
       ) : showForm ? (
         <FormTambahSuratPBB

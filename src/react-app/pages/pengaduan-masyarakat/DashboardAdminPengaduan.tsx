@@ -24,6 +24,10 @@ export function DashboardAdminPengaduan() {
   const [currentPage, setCurrentPage] = useState(1)
   const [currentPageMasyarakat, setCurrentPageMasyarakat] = useState(1)
   const itemsPerPage = 100
+  
+  // Cache flags to prevent unnecessary fetches
+  const [hasAduanFetched, setHasAduanFetched] = useState(false)
+  const [hasMasyarakatFetched, setHasMasyarakatFetched] = useState(false)
 
   const fetchAduan = useCallback(async () => {
     try {
@@ -31,6 +35,7 @@ export function DashboardAdminPengaduan() {
       const url = statusFilter ? `/api/aduan?status=${statusFilter}` : "/api/aduan"
       const result = await apiRequest<Aduan[]>(url)
       setAduan(result)
+      setHasAduanFetched(true)
     } catch (err) {
       console.error(err)
     } finally {
@@ -43,6 +48,7 @@ export function DashboardAdminPengaduan() {
       setLoadingMasyarakat(true)
       const result = await apiRequest<Masyarakat[]>("/api/masyarakat")
       setMasyarakat(result)
+      setHasMasyarakatFetched(true)
     } catch (err) {
       console.error(err)
     } finally {
@@ -50,15 +56,19 @@ export function DashboardAdminPengaduan() {
     }
   }, [apiRequest])
 
+  // Initial fetch for aduan (only once)
   useEffect(() => {
-    fetchAduan()
-  }, [fetchAduan])
+    if (!hasAduanFetched) {
+      fetchAduan()
+    }
+  }, [fetchAduan, hasAduanFetched])
 
+  // Fetch masyarakat only on first visit to the tab
   useEffect(() => {
-    if (activeTab === "masyarakat" || activeTab === "masyarakat-form") {
+    if ((activeTab === "masyarakat" || activeTab === "masyarakat-form") && !hasMasyarakatFetched) {
       fetchMasyarakat()
     }
-  }, [activeTab, fetchMasyarakat])
+  }, [activeTab, fetchMasyarakat, hasMasyarakatFetched])
 
   useEffect(() => {
     setCurrentPage(1)
@@ -129,11 +139,6 @@ export function DashboardAdminPengaduan() {
     }
   }
 
-  const handleCreateMasyarakat = () => {
-    setSelectedMasyarakat(null)
-    setActiveTab("masyarakat-form")
-  }
-
   const handleEditMasyarakat = (masyarakat: Masyarakat) => {
     setSelectedMasyarakat(masyarakat)
     setActiveTab("masyarakat-form")
@@ -198,21 +203,9 @@ export function DashboardAdminPengaduan() {
           timer: 2000,
           showConfirmButton: false,
         })
-      } else {
-        await apiRequest("/api/masyarakat", {
-          method: "POST",
-          body: JSON.stringify(data),
-        })
-        Swal.fire({
-          icon: "success",
-          title: "Berhasil!",
-          text: "Masyarakat berhasil ditambahkan",
-          timer: 2000,
-          showConfirmButton: false,
-        })
+        setActiveTab("masyarakat")
+        fetchMasyarakat()
       }
-      setActiveTab("masyarakat")
-      fetchMasyarakat()
     } catch (err: unknown) {
       console.error(err)
       const errorMessage = err instanceof Error ? err.message : "Terjadi kesalahan"
@@ -321,11 +314,8 @@ export function DashboardAdminPengaduan() {
       {activeTab === "masyarakat" && (
         <div key="masyarakat">
           <div className="card mb-3">
-            <div className="card-header d-flex justify-content-between align-items-center">
+            <div className="card-header">
               <h6 className="mb-0">Daftar Masyarakat</h6>
-              <button className="btn btn-sm btn-primary" onClick={handleCreateMasyarakat}>
-                <i className="bi bi-plus-circle me-1"></i>Tambah Masyarakat
-              </button>
             </div>
           </div>
 
@@ -353,10 +343,10 @@ export function DashboardAdminPengaduan() {
         </div>
       )}
 
-      {activeTab === "masyarakat-form" && (
+      {activeTab === "masyarakat-form" && selectedMasyarakat && (
         <div key="masyarakat-form" className="card">
           <div className="card-header d-flex justify-content-between align-items-center">
-            <h6 className="mb-0">{selectedMasyarakat ? "Edit Masyarakat" : "Tambah Masyarakat Baru"}</h6>
+            <h6 className="mb-0">Edit Masyarakat</h6>
             <button className="btn btn-sm btn-secondary" onClick={() => setActiveTab("masyarakat")}>
               <i className="bi bi-arrow-left me-1"></i>Kembali ke Daftar
             </button>
