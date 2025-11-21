@@ -1,7 +1,31 @@
-import { Link } from "react-router-dom"
+import { Link, Navigate } from "react-router-dom"
+import { useAuth } from "../contexts/AuthContext"
 import logo from "../assets/logo.png"
 
 export function LandingPage() {
+  const { isAuthenticated, user } = useAuth()
+
+  if (isAuthenticated && user) {
+    let dashboardPath = "/"
+    switch (user.roles) {
+      case "masyarakat":
+        dashboardPath = "/pengaduan-masyarakat/dashboard-masyarakat"
+        break
+      case "admin":
+        dashboardPath = "/pengaduan-masyarakat/dashboard-admin"
+        break
+      case "kepala_dusun":
+        dashboardPath = "/pengelolaan-pbb/dashboard-kepala-dusun"
+        break
+      case "ketua_rt":
+        dashboardPath = "/pengelolaan-pbb/dashboard-ketua-rt"
+        break
+      default:
+        dashboardPath = "/"
+    }
+    return <Navigate to={dashboardPath} replace />
+  }
+
   return (
     <div>
       {/* Hero Section */}

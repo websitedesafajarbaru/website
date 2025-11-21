@@ -23,11 +23,13 @@ export function Navbar() {
         </button>
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav ms-auto align-items-lg-center">
-            <li className="nav-item">
-              <Link className="nav-link" to="/">
-                Beranda
-              </Link>
-            </li>
+            {!isAuthenticated && (
+              <li className="nav-item">
+                <Link className="nav-link" to="/">
+                  Beranda
+                </Link>
+              </li>
+            )}
             <li className="nav-item">
               <Link className="nav-link" to="/cek-pembayaran">
                 Cek Pembayaran
