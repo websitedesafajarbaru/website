@@ -36,7 +36,7 @@ export function DashboardAdminPBB() {
     luas_bangunan: "",
     tahun_pajak: "2025",
     jumlah_pajak_terhutang: "",
-    status_pembayaran: "menunggu_dicek_oleh_admin",
+    status_pembayaran: "belum_bayar",
   })
 
   const [selectedSurat, setSelectedSurat] = useState<SuratPBB | null>(null)
@@ -403,7 +403,7 @@ export function DashboardAdminPBB() {
           luas_bangunan: "",
           tahun_pajak: activeYear.toString(),
           jumlah_pajak_terhutang: "",
-          status_pembayaran: "menunggu_dicek_oleh_admin",
+          status_pembayaran: "belum_bayar",
         })
         fetchSuratPBB()
         Swal.fire({

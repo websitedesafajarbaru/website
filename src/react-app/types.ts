@@ -64,7 +64,7 @@ export interface SuratPBB {
   luas_bangunan: number
   jumlah_pajak_terhutang: number
   tahun_pajak: number
-  status_pembayaran: "menunggu_dicek_oleh_admin" | "bayar_sendiri_di_bank" | "sudah_bayar" | "pindah_rumah" | "tidak_diketahui"
+  status_pembayaran: "belum_bayar" | "bayar_sendiri_di_bank" | "sudah_bayar" | "sudah_lunas" | "pindah_rumah" | "tidak_diketahui"
   id_dusun: number
   id_pengguna: string
   waktu_dibuat: string

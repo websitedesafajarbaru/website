@@ -25,15 +25,17 @@ export function FormTambahSuratPBB({ suratForm, onFormChange, onSubmit, onCancel
   // Define status options based on user role
   const statusOptions = isPerangkatDesa
     ? [
-        { value: "menunggu_dicek_oleh_admin", label: "Menunggu Dicek Oleh Admin" },
+        { value: "belum_bayar", label: "Belum Bayar" },
         { value: "bayar_sendiri_di_bank", label: "Bayar Sendiri di Bank" },
+        { value: "sudah_bayar", label: "Sudah Bayar" },
         { value: "pindah_rumah", label: "Pindah Rumah" },
         { value: "tidak_diketahui", label: "Tidak Diketahui" },
       ]
     : [
-        { value: "menunggu_dicek_oleh_admin", label: "Menunggu Dicek Oleh Admin" },
+        { value: "belum_bayar", label: "Belum Bayar" },
         { value: "bayar_sendiri_di_bank", label: "Bayar Sendiri di Bank" },
         { value: "sudah_bayar", label: "Sudah Bayar" },
+        { value: "sudah_lunas", label: "Sudah Lunas" },
         { value: "pindah_rumah", label: "Pindah Rumah" },
         { value: "tidak_diketahui", label: "Tidak Diketahui" },
       ]

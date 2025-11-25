@@ -43,10 +43,10 @@ suratPBBRoutes.post("/", async (c) => {
       const perangkat = await c.env.DB.prepare("SELECT jabatan FROM perangkat_desa WHERE id = ?").bind(user.userId).first()
       
       if (perangkat?.jabatan === "kepala_dusun" || perangkat?.jabatan === "ketua_rt") {
-        const allowedStatuses = ["menunggu_dicek_oleh_admin", "bayar_sendiri_di_bank", "pindah_rumah", "tidak_diketahui"]
+        const allowedStatuses = ["belum_bayar", "bayar_sendiri_di_bank", "sudah_bayar", "pindah_rumah", "tidak_diketahui"]
         if (!allowedStatuses.includes(status_pembayaran)) {
           return c.json({ 
-            error: "Sebagai perangkat desa, Anda hanya dapat membuat surat PBB dengan status: Menunggu Dicek Oleh Admin, Bayar Sendiri di Bank, Pindah Rumah, atau Tidak Diketahui" 
+            error: "Sebagai perangkat desa, Anda hanya dapat membuat surat PBB dengan status: Belum Bayar, Bayar Sendiri di Bank, Sudah Bayar, Pindah Rumah, atau Tidak Diketahui" 
           }, 400)
         }
       }
@@ -224,10 +224,10 @@ suratPBBRoutes.put("/:id", async (c) => {
         const perangkat = await c.env.DB.prepare("SELECT jabatan FROM perangkat_desa WHERE id = ?").bind(user.userId).first()
         
         if (perangkat?.jabatan === "kepala_dusun" || perangkat?.jabatan === "ketua_rt") {
-          const allowedStatuses = ["menunggu_dicek_oleh_admin", "bayar_sendiri_di_bank", "pindah_rumah", "tidak_diketahui"]
+          const allowedStatuses = ["belum_bayar", "bayar_sendiri_di_bank", "sudah_bayar", "pindah_rumah", "tidak_diketahui"]
           if (!allowedStatuses.includes(updates.status_pembayaran)) {
             return c.json({ 
-              error: "Sebagai perangkat desa, Anda hanya dapat mengubah status pembayaran ke: Menunggu Dicek Oleh Admin, Bayar Sendiri di Bank, Pindah Rumah, atau Tidak Diketahui" 
+              error: "Sebagai perangkat desa, Anda hanya dapat mengubah status pembayaran ke: Belum Bayar, Bayar Sendiri di Bank, Sudah Bayar, Pindah Rumah, atau Tidak Diketahui" 
             }, 403)
           }
         }

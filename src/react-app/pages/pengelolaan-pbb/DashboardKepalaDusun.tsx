@@ -64,7 +64,7 @@ export function DashboardKepalaDusun() {
     luas_bangunan: "",
     jumlah_pajak_terhutang: "",
     tahun_pajak: "2025",
-    status_pembayaran: "menunggu_dicek_oleh_admin",
+    status_pembayaran: "belum_bayar",
     dusun_id: dusunId?.toString() || "",
   })
   const [ketuaRTStats, setKetuaRTStats] = useState<{ totalSuratByRT: number }>({ totalSuratByRT: 0 })
@@ -320,7 +320,7 @@ export function DashboardKepalaDusun() {
           luas_bangunan: "",
           jumlah_pajak_terhutang: "",
           tahun_pajak: "2025",
-          status_pembayaran: "menunggu_dicek_oleh_admin",
+          status_pembayaran: "belum_bayar",
           dusun_id: dusunId?.toString() || "",
         })
 
