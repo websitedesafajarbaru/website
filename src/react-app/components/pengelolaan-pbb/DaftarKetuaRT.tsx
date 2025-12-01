@@ -3,7 +3,6 @@ import { useState } from "react"
 interface PerangkatDesa {
   id: string
   nama_lengkap: string
-  username: string
   jabatan: string
   nama_dusun?: string
   jumlahSurat?: number
@@ -35,7 +34,7 @@ export function DaftarKetuaRT({ ketuaRT, searchTerm, onSearchChange, onEdit, onD
   
   const filteredKetuaRT = ketuaRT.filter((k) => {
     const searchLower = searchTerm.toLowerCase()
-    return k.nama_lengkap.toLowerCase().includes(searchLower) || k.username.toLowerCase().includes(searchLower) || k.jabatan.toLowerCase().includes(searchLower)
+    return k.nama_lengkap.toLowerCase().includes(searchLower) || k.jabatan.toLowerCase().includes(searchLower)
   })
 
   return (
@@ -98,7 +97,6 @@ export function DaftarKetuaRT({ ketuaRT, searchTerm, onSearchChange, onEdit, onD
             <thead className="table-light" style={{ position: "sticky", top: 0, zIndex: 1 }}>
               <tr>
                 <th>Nama Lengkap</th>
-                <th>Username</th>
                 <th>Jabatan</th>
                 <th>Jumlah Surat Diinput</th>
                 <th>Aksi</th>
@@ -108,7 +106,6 @@ export function DaftarKetuaRT({ ketuaRT, searchTerm, onSearchChange, onEdit, onD
               {filteredKetuaRT.map((k) => (
                 <tr key={k.id}>
                   <td>{k.nama_lengkap}</td>
-                  <td>{k.username}</td>
                   <td>
                     <span className="badge bg-warning">{formatJabatan(k.jabatan)}</span>
                   </td>

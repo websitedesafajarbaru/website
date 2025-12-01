@@ -5,7 +5,6 @@ import Swal from "sweetalert2"
 interface ProfileData {
   id: string
   nama_lengkap: string
-  username: string
   roles: string
   alamat_rumah?: string
   nomor_telepon?: string
@@ -13,7 +12,6 @@ interface ProfileData {
 
 interface UpdateProfileData {
   nama_lengkap: string
-  username: string
   password?: string
   alamat_rumah?: string
   nomor_telepon?: string
@@ -26,7 +24,6 @@ export function Settings() {
   const [saving, setSaving] = useState(false)
   const [formData, setFormData] = useState({
     nama_lengkap: "",
-    username: "",
     password: "",
     confirmPassword: "",
     alamat_rumah: "",
@@ -40,7 +37,6 @@ export function Settings() {
       setProfile(data)
       setFormData({
         nama_lengkap: data.nama_lengkap,
-        username: data.username,
         password: "",
         confirmPassword: "",
         alamat_rumah: data.alamat_rumah || "",
@@ -72,7 +68,6 @@ export function Settings() {
       setSaving(true)
       const updateData: UpdateProfileData = {
         nama_lengkap: formData.nama_lengkap,
-        username: formData.username,
       }
       if (formData.password) {
         updateData.password = formData.password
@@ -95,7 +90,7 @@ export function Settings() {
         timer: 2000,
         showConfirmButton: false,
       })
-      updateUser({ ...user!, nama_lengkap: formData.nama_lengkap, username: formData.username })
+      updateUser({ ...user!, nama_lengkap: formData.nama_lengkap })
       fetchProfile()
     } catch (error) {
       console.error("Error updating profile:", error)
@@ -131,10 +126,7 @@ export function Settings() {
                   <label className="form-label">Nama Lengkap</label>
                   <input type="text" className="form-control" value={formData.nama_lengkap} onChange={(e) => setFormData({ ...formData, nama_lengkap: e.target.value })} required />
                 </div>
-                <div className="mb-3">
-                  <label className="form-label">Username</label>
-                  <input type="text" className="form-control" value={formData.username} onChange={(e) => setFormData({ ...formData, username: e.target.value })} required />
-                </div>
+
                 <div className="mb-3">
                   <label className="form-label">Password Baru (kosongkan jika tidak ingin mengubah)</label>
                   <input type="password" className="form-control" value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} />

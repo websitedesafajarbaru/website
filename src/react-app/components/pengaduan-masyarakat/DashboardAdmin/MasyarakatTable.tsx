@@ -42,11 +42,10 @@ export function MasyarakatTable({ masyarakat, loading, onEdit, onToggleBan, curr
       <table className="table table-hover">
         <thead className="table-light" style={{ position: "sticky", top: 0, zIndex: 1 }}>
           <tr>
-            <th style={{ width: "18%" }}>Nama Lengkap</th>
-            <th style={{ width: "13%" }}>Username</th>
+            <th style={{ width: "15%" }}>Nama Lengkap</th>
             <th style={{ width: "20%" }}>Alamat Rumah</th>
-            <th style={{ width: "13%" }}>No. Telepon</th>
-            <th style={{ width: "12%" }}>Status</th>
+            <th style={{ width: "15%" }}>Nomor Telepon</th>
+            <th style={{ width: "10%" }}>Status</th>
             <th style={{ width: "12%" }}>Tanggal Dibuat</th>
             <th style={{ width: "12%" }}>Aksi</th>
           </tr>
@@ -55,7 +54,6 @@ export function MasyarakatTable({ masyarakat, loading, onEdit, onToggleBan, curr
           {paginatedMasyarakat.map((item) => (
             <tr key={item.id}>
               <td>{item.nama_lengkap}</td>
-              <td>{item.username}</td>
               <td>{item.alamat_rumah}</td>
               <td>{item.nomor_telepon}</td>
               <td>

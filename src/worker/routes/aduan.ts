@@ -89,8 +89,8 @@ aduanRoutes.get("/", authMiddleware, async (c) => {
   try {
     const user = c.get("user") as JWTPayload
 
-    if (user.roles !== "admin") {
-      return c.json({ error: "Hanya admin yang dapat mengakses" }, 403)
+    if (!["admin", "kepala_dusun", "ketua_rt"].includes(user.roles)) {
+      return c.json({ error: "Hanya admin, kepala dusun, dan ketua RT yang dapat mengakses" }, 403)
     }
 
     const status = c.req.query("status")
@@ -116,8 +116,8 @@ aduanRoutes.put("/:id/status", authMiddleware, async (c) => {
   try {
     const user = c.get("user") as JWTPayload
 
-    if (user.roles !== "admin") {
-      return c.json({ error: "Hanya admin yang dapat mengubah status" }, 403)
+    if (!["admin", "kepala_dusun", "ketua_rt"].includes(user.roles)) {
+      return c.json({ error: "Hanya admin, kepala dusun, dan ketua RT yang dapat mengubah status" }, 403)
     }
 
     const aduanId = c.req.param("id")

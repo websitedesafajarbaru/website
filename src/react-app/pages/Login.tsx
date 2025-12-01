@@ -8,7 +8,7 @@ export function Login() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [formData, setFormData] = useState({
-    username: "",
+    nama_lengkap: "",
     password: "",
   })
 
@@ -68,8 +68,8 @@ export function Login() {
 
             <form onSubmit={handleSubmit}>
               <div className="mb-3">
-                <label className="form-label">Username</label>
-                <input type="text" className="form-control" name="username" value={formData.username} onChange={handleChange} required />
+                <label className="form-label">Nama Lengkap</label>
+                <input type="text" className="form-control" name="nama_lengkap" value={formData.nama_lengkap} onChange={handleChange} required />
               </div>
 
               <div className="mb-3">

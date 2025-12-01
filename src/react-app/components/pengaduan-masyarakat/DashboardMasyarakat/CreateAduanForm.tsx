@@ -90,15 +90,28 @@ export function CreateAduanForm({ formData, setFormData, onSubmit, onCancel }: C
                   "bold italic forecolor | alignleft aligncenter " +
                   "alignright alignjustify | bullist numlist outdent indent | " +
                   "removeformat | image | help",
-                content_style: "body { font-family:Helvetica,Arial,sans-serif; font-size:14px } .tox .tox-statusbar__branding { display: none !important; }",
+                content_style: "body { font-family:Helvetica,Arial,sans-serif; font-size:14px } .tox .tox-statusbar__branding { display: none !important; } img { max-width: 200px; height: auto; }",
                 image_advtab: false,
                 image_title: true,
+                image_dimensions: false,
+                automatic_uploads: true,
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 setup: (editor: any) => {
                   // Hide any setup dialogs or promotions
                   editor.on("init", () => {
                     const branding = editor.getContainer().querySelector(".tox-statusbar__branding")
                     if (branding) branding.style.display = "none"
+                  })
+                  
+                  // Limit image width to 200px on paste/insert
+                  editor.on("NodeChange", (e: any) => {
+                    if (e.element.nodeName === "IMG") {
+                      const img = e.element
+                      if (!img.style.maxWidth || parseInt(img.style.maxWidth) > 200) {
+                        img.style.maxWidth = "200px"
+                        img.style.height = "auto"
+                      }
+                    }
                   })
                 },
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any

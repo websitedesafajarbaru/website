@@ -8,7 +8,7 @@ export function LoginPBB() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [formData, setFormData] = useState({
-    username: "",
+    nama_lengkap: "",
     password: "",
   })
 
@@ -59,8 +59,8 @@ export function LoginPBB() {
 
             <form onSubmit={handleSubmit}>
               <div className="mb-3">
-                <label className="form-label">Username</label>
-                <input type="text" className="form-control" value={formData.username} onChange={(e) => setFormData({ ...formData, username: e.target.value })} required />
+                <label className="form-label">Nama Lengkap</label>
+                <input type="text" className="form-control" value={formData.nama_lengkap} onChange={(e) => setFormData({ ...formData, nama_lengkap: e.target.value })} required />
               </div>
 
               <div className="mb-3">

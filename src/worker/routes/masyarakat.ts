@@ -15,7 +15,7 @@ masyarakatRoutes.get("/", authMiddleware, async (c) => {
     }
 
     const masyarakat = await c.env.DB.prepare(
-      "SELECT p.id, p.nama_lengkap, p.username, p.roles, p.waktu_dibuat, p.waktu_diperbarui, m.alamat_rumah, m.nomor_telepon, m.status FROM pengguna p JOIN masyarakat m ON p.id = m.id ORDER BY p.waktu_dibuat DESC"
+      "SELECT p.id, p.nama_lengkap, p.roles, p.waktu_dibuat, p.waktu_diperbarui, m.alamat_rumah, m.nomor_telepon, m.status FROM pengguna p JOIN masyarakat m ON p.id = m.id ORDER BY p.waktu_dibuat DESC"
     ).all()
 
     return c.json(masyarakat.results)
@@ -33,26 +33,25 @@ masyarakatRoutes.post("/", authMiddleware, async (c) => {
       return c.json({ error: "Hanya admin yang dapat membuat masyarakat" }, 403)
     }
 
-    const { nama_lengkap, username, nomor_telepon, alamat_rumah, password } = await c.req.json()
+    const { nama_lengkap, nomor_telepon, alamat_rumah, password } = await c.req.json()
 
-    if (!nama_lengkap || !username || !nomor_telepon || !alamat_rumah || !password) {
+    if (!nama_lengkap || !nomor_telepon || !alamat_rumah || !password) {
       return c.json({ error: "Semua field harus diisi" }, 400)
     }
 
-    const existingUser = await c.env.DB.prepare("SELECT id FROM pengguna WHERE username = ?").bind(username).first()
+    const existingUser = await c.env.DB.prepare("SELECT id FROM pengguna WHERE LOWER(nama_lengkap) = ?").bind(nama_lengkap.toLowerCase()).first()
 
     if (existingUser) {
-      return c.json({ error: "Username sudah digunakan" }, 400)
+      return c.json({ error: "Nama lengkap sudah digunakan" }, 400)
     }
 
     const userId = generateId()
     const hashedPassword = await hashPassword(password)
 
     await c.env.DB.batch([
-      c.env.DB.prepare("INSERT INTO pengguna (id, nama_lengkap, username, password, roles) VALUES (?, ?, ?, ?, ?)").bind(
+      c.env.DB.prepare("INSERT INTO pengguna (id, nama_lengkap, password, roles) VALUES (?, ?, ?, ?)").bind(
         userId,
         nama_lengkap,
-        username,
         hashedPassword,
         "masyarakat"
       ),
@@ -81,16 +80,16 @@ masyarakatRoutes.put("/:id", authMiddleware, async (c) => {
     }
 
     const masyarakatId = c.req.param("id")
-    const { nama_lengkap, username, nomor_telepon, alamat_rumah, password } = await c.req.json()
+    const { nama_lengkap, nomor_telepon, alamat_rumah, password } = await c.req.json()
 
-    if (!nama_lengkap || !username || !nomor_telepon || !alamat_rumah) {
-      return c.json({ error: "Nama lengkap, username, nomor telepon, dan alamat rumah harus diisi" }, 400)
+    if (!nama_lengkap || !nomor_telepon || !alamat_rumah) {
+      return c.json({ error: "Nama lengkap, nomor telepon, dan alamat rumah harus diisi" }, 400)
     }
 
-    const existingUser = await c.env.DB.prepare("SELECT id FROM pengguna WHERE username = ? AND id != ?").bind(username, masyarakatId).first()
+    const existingUser = await c.env.DB.prepare("SELECT id FROM pengguna WHERE LOWER(nama_lengkap) = ? AND id != ?").bind(nama_lengkap.toLowerCase(), masyarakatId).first()
 
     if (existingUser) {
-      return c.json({ error: "Username sudah digunakan" }, 400)
+      return c.json({ error: "Nama lengkap sudah digunakan" }, 400)
     }
 
     const updates = []
@@ -98,9 +97,6 @@ masyarakatRoutes.put("/:id", authMiddleware, async (c) => {
 
     updates.push("nama_lengkap = ?")
     values.push(nama_lengkap)
-
-    updates.push("username = ?")
-    values.push(username)
 
     if (password) {
       const hashedPassword = await hashPassword(password)

@@ -5,6 +5,7 @@ import { StatistikCards } from "../../components/pengelolaan-pbb/StatistikCards"
 import { FormTambahSuratPBB } from "../../components/pengelolaan-pbb/FormTambahSuratPBB"
 import { TabelSuratPBB } from "../../components/pengelolaan-pbb/TabelSuratPBB"
 import { DetailSuratPBB } from "../../components/pengelolaan-pbb/DetailSuratPBB"
+import Swal from "sweetalert2"
 
 interface DusunStatistik {
   dusun: {
@@ -22,7 +23,7 @@ interface DusunStatistik {
 }
 
 export function DashboardKetuaRT() {
-  const { user } = useAuth()
+  const { user, apiRequest } = useAuth()
   const [suratPBB, setSuratPBB] = useState<SuratPBB[]>([])
   const [activeYear, setActiveYear] = useState<number>(new Date().getFullYear())
   const [dusunId, setDusunId] = useState<number | null>(null)
@@ -30,6 +31,7 @@ export function DashboardKetuaRT() {
   const [showForm, setShowForm] = useState(false)
   const [selectedSurat, setSelectedSurat] = useState<SuratPBB | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
+  const [filterStatusSurat, setFilterStatusSurat] = useState("semua")
   const [isEditing, setIsEditing] = useState(false)
   const [editForm, setEditForm] = useState<Partial<SuratPBB>>({})
   const [suratForm, setSuratForm] = useState({
@@ -206,7 +208,10 @@ export function DashboardKetuaRT() {
           "Content-Type": "application/json",
         },
         credentials: "include",
-        body: JSON.stringify({ status_pembayaran: newStatus }),
+        body: JSON.stringify({ 
+          status_pembayaran: newStatus,
+          tahun_pajak: selectedSurat.tahun_pajak || activeYear
+        }),
       })
 
       if (response.ok) {
@@ -335,59 +340,62 @@ export function DashboardKetuaRT() {
         </div>
       </div>
 
-      {statistik && (
-        <StatistikCards
-          data={{
-            totalPajakTerhutang: statistik.total_pajak_terhutang,
-            totalPajakDibayar: statistik.total_pajak_dibayar,
-            totalSurat: statistik.total_surat,
-            totalSuratDibayar: statistik.total_surat_dibayar,
-            totalSuratBelumBayar: statistik.total_surat_belum_bayar,
-            persentasePembayaran: statistik.persentase_pembayaran,
-          }}
-        />
-      )}
+      <>
+        {statistik && (
+          <StatistikCards
+            data={{
+              totalPajakTerhutang: statistik.total_pajak_terhutang,
+              totalPajakDibayar: statistik.total_pajak_dibayar,
+              totalSurat: statistik.total_surat,
+              totalSuratDibayar: statistik.total_surat_dibayar,
+              totalSuratBelumBayar: statistik.total_surat_belum_bayar,
+              persentasePembayaran: statistik.persentase_pembayaran,
+            }}
+          />
+        )}
 
-      {!showForm && !selectedSurat ? (
-        <>
-          <div className="card mb-3">
-            <div className="card-header d-flex justify-content-between align-items-center">
-              <h6 className="mb-0">
-                <i className="bi bi-file-text me-2"></i>Daftar Surat PBB
-              </h6>
-              <button className="btn btn-sm btn-primary" onClick={() => setShowForm(true)}>
-                <i className="bi bi-plus-circle me-1"></i>Tambah Surat PBB
-              </button>
+        {!showForm && !selectedSurat ? (
+          <>
+            <div className="card mb-3">
+              <div className="card-header d-flex justify-content-between align-items-center">
+                <h6 className="mb-0">
+                  <i className="bi bi-file-text me-2"></i>Daftar Surat PBB
+                </h6>
+                <button className="btn btn-sm btn-primary" onClick={() => setShowForm(true)}>
+                  <i className="bi bi-plus-circle me-1"></i>Tambah Surat PBB
+                </button>
+              </div>
             </div>
-          </div>
-          <TabelSuratPBB suratPBB={suratPBB} searchTerm={searchTerm} onSearchChange={setSearchTerm} onSuratClick={handleSuratClick} onRefresh={loadStatistik} />
-        </>
-      ) : showForm ? (
-        <FormTambahSuratPBB
-          suratForm={suratForm}
-          onFormChange={(field, value) => setSuratForm({ ...suratForm, [field]: value })}
-          onSubmit={handleCreateSurat}
-          onCancel={() => setShowForm(false)}
-          isPerangkatDesa={true}
-        />
-      ) : selectedSurat ? (
-        <DetailSuratPBB
-          surat={selectedSurat}
-          isEditing={isEditing}
-          editForm={editForm}
-          onEditFormChange={handleEditFormChange}
-          onSaveEdit={handleSaveEdit}
-          onCancelEdit={handleCancelEdit}
-          onStatusChange={handleStatusChange}
-          onBack={() => setSelectedSurat(null)}
-          onStartEdit={() => {
-            setIsEditing(true)
-            setEditForm(selectedSurat)
-          }}
-          showAdminActions={user?.roles === "admin" || user?.roles === "kepala_dusun" || user?.roles === "ketua_rt"}
-          isPerangkatDesa={user?.roles === "kepala_dusun" || user?.roles === "ketua_rt"}
-        />
-      ) : null}
+            <TabelSuratPBB suratPBB={suratPBB} searchTerm={searchTerm} onSearchChange={setSearchTerm} onSuratClick={handleSuratClick} onRefresh={loadStatistik} filterStatus={filterStatusSurat} onFilterStatusChange={setFilterStatusSurat} />
+          </>
+        ) : showForm ? (
+          <FormTambahSuratPBB
+            suratForm={suratForm}
+            onFormChange={(field, value) => setSuratForm({ ...suratForm, [field]: value })}
+            onSubmit={handleCreateSurat}
+            onCancel={() => setShowForm(false)}
+            isPerangkatDesa={true}
+          />
+        ) : selectedSurat ? (
+          <DetailSuratPBB
+            surat={selectedSurat}
+            isEditing={isEditing}
+            editForm={editForm}
+            onEditFormChange={handleEditFormChange}
+            onSaveEdit={handleSaveEdit}
+            onCancelEdit={handleCancelEdit}
+            onStatusChange={handleStatusChange}
+            onBack={() => setSelectedSurat(null)}
+            onStartEdit={() => {
+              setIsEditing(true)
+              setEditForm(selectedSurat)
+            }}
+            showAdminActions={user?.roles === "admin" || user?.roles === "kepala_dusun" || user?.roles === "ketua_rt"}
+            isPerangkatDesa={user?.roles === "kepala_dusun" || user?.roles === "ketua_rt"}
+          />
+        ) : null}
+      </>
+
     </div>
   )
 }

@@ -13,6 +13,7 @@ interface DetailSuratPBBProps {
   onStartEdit: () => void
   showAdminActions?: boolean
   isPerangkatDesa?: boolean
+  dusunOptions?: { id: number; nama_dusun: string }[]
 }
 
 export function DetailSuratPBB({
@@ -28,6 +29,7 @@ export function DetailSuratPBB({
   onStartEdit,
   showAdminActions = false,
   isPerangkatDesa = false,
+  dusunOptions = [],
 }: DetailSuratPBBProps) {
   // Define status options based on user role
   const statusOptions = isPerangkatDesa
@@ -109,6 +111,23 @@ export function DetailSuratPBB({
               <div>{surat.tahun_pajak}</div>
             )}
           </div>
+          {isEditing && !isPerangkatDesa && dusunOptions.length > 0 && (
+            <div className="col-12 col-md-6">
+              <label className="form-label text-muted small mb-1">Dusun</label>
+              <select
+                className="form-select"
+                value={editForm.id_dusun || surat.id_dusun || ""}
+                onChange={(e) => onEditFormChange("id_dusun", Number(e.target.value))}
+              >
+                <option value="">Pilih Dusun</option>
+                {dusunOptions.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.nama_dusun}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
           <div className="col-12 col-md-6">
             <label className="form-label text-muted small mb-1">Nama Wajib Pajak</label>
             {isEditing ? (

@@ -3,7 +3,6 @@ import React from "react"
 interface FormTambahKetuaRTProps {
   form: {
     nama_lengkap: string
-    username: string
     password: string
   }
   onFormChange: (field: string, value: string) => void
@@ -29,12 +28,6 @@ export function FormTambahKetuaRT({ form, onFormChange, onSubmit, onCancel }: Fo
                 Nama Lengkap <span className="text-danger">*</span>
               </label>
               <input type="text" className="form-control" value={form.nama_lengkap} onChange={(e) => onFormChange("nama_lengkap", e.target.value)} required />
-            </div>
-            <div className="col-md-6">
-              <label className="form-label">
-                Username <span className="text-danger">*</span>
-              </label>
-              <input type="text" className="form-control" value={form.username} onChange={(e) => onFormChange("username", e.target.value)} required />
             </div>
             <div className="col-md-6">
               <label className="form-label">

@@ -228,7 +228,6 @@ export function DashboardAdminPengaduan() {
   const filteredMasyarakat = masyarakat.filter(
     (item) =>
       item.nama_lengkap.toLowerCase().includes(searchTermMasyarakat.toLowerCase()) ||
-      item.username.toLowerCase().includes(searchTermMasyarakat.toLowerCase()) ||
       item.alamat_rumah.toLowerCase().includes(searchTermMasyarakat.toLowerCase()) ||
       item.nomor_telepon.toLowerCase().includes(searchTermMasyarakat.toLowerCase())
   )

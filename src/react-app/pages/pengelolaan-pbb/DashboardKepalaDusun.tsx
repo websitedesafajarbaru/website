@@ -6,6 +6,7 @@ import { FormTambahSuratPBB } from "../../components/pengelolaan-pbb/FormTambahS
 import { TabelSuratPBB } from "../../components/pengelolaan-pbb/TabelSuratPBB"
 import { DetailSuratPBB } from "../../components/pengelolaan-pbb/DetailSuratPBB"
 import { DaftarKetuaRT } from "../../components/pengelolaan-pbb/DaftarKetuaRT"
+import Swal from "sweetalert2"
 
 interface DusunStatistik {
   dusun: {
@@ -25,7 +26,6 @@ interface DusunStatistik {
 interface PerangkatDesa {
   id: string
   nama_lengkap: string
-  username: string
   jabatan: string
   nama_dusun?: string
   jumlahSurat?: number
@@ -37,7 +37,7 @@ interface DusunInfo {
 }
 
 export function DashboardKepalaDusun() {
-  const { user } = useAuth()
+  const { user, apiRequest } = useAuth()
   const [activeTab, setActiveTab] = useState<"ketua-rt" | "laporan" | "tambah-surat-pbb" | "edit-ketua-rt">("laporan")
   const [ketuaRT, setKetuaRT] = useState<PerangkatDesa[]>([])
   const [dusunInfo, setDusunInfo] = useState<DusunInfo | null>(null)
@@ -47,12 +47,12 @@ export function DashboardKepalaDusun() {
   const [selectedSurat, setSelectedSurat] = useState<SuratPBB | null>(null)
   const [searchKetuaRT, setSearchKetuaRT] = useState("")
   const [searchSuratPBB, setSearchSuratPBB] = useState("")
+  const [filterStatusSurat, setFilterStatusSurat] = useState("semua")
   const [isEditing, setIsEditing] = useState(false)
   const [editForm, setEditForm] = useState<Partial<SuratPBB>>({})
   const [selectedKetuaRTForEdit, setSelectedKetuaRTForEdit] = useState<PerangkatDesa | null>(null)
   const [editKetuaRTForm, setEditKetuaRTForm] = useState({
     nama_lengkap: "",
-    username: "",
     password: "",
   })
   const [suratForm, setSuratForm] = useState({
@@ -68,6 +68,7 @@ export function DashboardKepalaDusun() {
     dusun_id: dusunId?.toString() || "",
   })
   const [ketuaRTStats, setKetuaRTStats] = useState<{ totalSuratByRT: number }>({ totalSuratByRT: 0 })
+  const [tokenKetuaRT, setTokenKetuaRT] = useState<string | null>(null)
   
   // Cache flag to prevent unnecessary fetches
   const [hasDataFetched, setHasDataFetched] = useState(false)
@@ -161,6 +162,17 @@ export function DashboardKepalaDusun() {
           setKetuaRTStats({ totalSuratByRT })
         }
       }
+
+      // Load token ketua RT
+      const tokenResponse = await fetch("/api/dusun/my/tokens", {
+        credentials: "include",
+      })
+      const tokenData = await tokenResponse.json()
+      if (tokenResponse.ok) {
+        setTokenKetuaRT(tokenData.tokenKetuaRT)
+      } else {
+        console.error("Failed to fetch token:", tokenData)
+      }
       
       setHasDataFetched(true)
     } catch (err) {
@@ -191,7 +203,6 @@ export function DashboardKepalaDusun() {
     setSelectedKetuaRTForEdit(ketua)
     setEditKetuaRTForm({
       nama_lengkap: ketua.nama_lengkap,
-      username: ketua.username,
       password: "",
     })
     setActiveTab("edit-ketua-rt")
@@ -204,13 +215,11 @@ export function DashboardKepalaDusun() {
     try {
       const updateData: {
         nama_lengkap: string
-        username: string
         jabatan: string
         id_dusun: number
         password?: string
       } = {
         nama_lengkap: editKetuaRTForm.nama_lengkap,
-        username: editKetuaRTForm.username,
         jabatan: "ketua_rt",
         id_dusun: dusunId!,
       }
@@ -232,7 +241,6 @@ export function DashboardKepalaDusun() {
         setSelectedKetuaRTForEdit(null)
         setEditKetuaRTForm({
           nama_lengkap: "",
-          username: "",
           password: "",
         })
         setActiveTab("ketua-rt")
@@ -370,7 +378,10 @@ export function DashboardKepalaDusun() {
           "Content-Type": "application/json",
         },
         credentials: "include",
-        body: JSON.stringify({ status_pembayaran: newStatus }),
+        body: JSON.stringify({ 
+          status_pembayaran: newStatus,
+          tahun_pajak: selectedSurat.tahun_pajak || activeYear
+        }),
       })
 
       if (response.ok) {
@@ -496,6 +507,48 @@ export function DashboardKepalaDusun() {
           <div className="card mb-3">
             <div className="card-header d-flex justify-content-between align-items-center">
               <h6 className="mb-0">
+                <i className="bi bi-key me-2"></i>Token Pendaftaran Ketua RT
+              </h6>
+            </div>
+            <div className="card-body">
+              <div className="row">
+                <div className="col-md-8">
+                  <label className="form-label">Token untuk Pendaftaran Ketua RT di {dusunInfo?.nama_dusun || "Dusun Ini"}</label>
+                  <div className="input-group">
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={tokenKetuaRT || "Memuat..."}
+                      readOnly
+                    />
+                    <button
+                      className="btn btn-outline-secondary"
+                      type="button"
+                      onClick={() => {
+                        if (tokenKetuaRT) {
+                          navigator.clipboard.writeText(tokenKetuaRT)
+                          Swal.fire({
+                            title: "Berhasil!",
+                            text: "Token berhasil disalin ke clipboard",
+                            icon: "success",
+                            timer: 2000,
+                            showConfirmButton: false,
+                          })
+                        }
+                      }}
+                      disabled={!tokenKetuaRT}
+                    >
+                      <i className="bi bi-clipboard"></i>
+                    </button>
+                  </div>
+                  <small className="text-muted">Berikan token ini kepada calon ketua RT untuk mendaftar ke dusun ini</small>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="card mb-3">
+            <div className="card-header d-flex justify-content-between align-items-center">
+              <h6 className="mb-0">
                 <i className="bi bi-people me-2"></i>Daftar Ketua RT di {dusunInfo?.nama_dusun || "Dusun Ini"}
               </h6>
             </div>
@@ -534,6 +587,8 @@ export function DashboardKepalaDusun() {
                 onSearchChange={setSearchSuratPBB}
                 onSuratClick={(surat) => handleSuratClick(surat)}
                 onRefresh={loadData}
+                filterStatus={filterStatusSurat}
+                onFilterStatusChange={setFilterStatusSurat}
               />
             </>
           ) : (
@@ -591,18 +646,7 @@ export function DashboardKepalaDusun() {
                     required
                   />
                 </div>
-                <div className="col-md-12">
-                  <label className="form-label">
-                    Username <span className="text-danger">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={editKetuaRTForm.username}
-                    onChange={(e) => setEditKetuaRTForm({ ...editKetuaRTForm, username: e.target.value })}
-                    required
-                  />
-                </div>
+
                 <div className="col-md-12">
                   <label className="form-label">Password Baru (kosongkan jika tidak ingin mengubah)</label>
                   <input

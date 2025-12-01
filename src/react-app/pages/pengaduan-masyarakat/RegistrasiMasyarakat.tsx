@@ -7,7 +7,6 @@ export function RegistrasiMasyarakat() {
   const [error, setError] = useState("")
   const [formData, setFormData] = useState({
     nama_lengkap: "",
-    username: "",
     nomor_telepon: "",
     alamat_rumah: "",
     password: "",
@@ -69,11 +68,6 @@ export function RegistrasiMasyarakat() {
               <div className="mb-3">
                 <label className="form-label">Nama Lengkap</label>
                 <input type="text" className="form-control" name="nama_lengkap" value={formData.nama_lengkap} onChange={handleChange} required />
-              </div>
-
-              <div className="mb-3">
-                <label className="form-label">Username</label>
-                <input type="text" className="form-control" name="username" value={formData.username} onChange={handleChange} required />
               </div>
 
               <div className="mb-3">

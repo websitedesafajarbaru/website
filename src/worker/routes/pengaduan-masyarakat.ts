@@ -6,27 +6,26 @@ const pengaduanMasyarakatRoutes = new Hono<{ Bindings: Env }>()
 
 pengaduanMasyarakatRoutes.post("/registrasi", async (c) => {
   try {
-    const { nama_lengkap, username, nomor_telepon, alamat_rumah, password } = await c.req.json()
+    const { nama_lengkap, nomor_telepon, alamat_rumah, password } = await c.req.json()
 
-    if (!nama_lengkap || !username || !nomor_telepon || !alamat_rumah || !password) {
+    if (!nama_lengkap || !nomor_telepon || !alamat_rumah || !password) {
       return c.json({ error: "Semua field harus diisi" }, 400)
     }
 
-    const lowerUsername = username.toLowerCase()
-    const existingUser = await c.env.DB.prepare("SELECT id FROM pengguna WHERE LOWER(username) = ?").bind(lowerUsername).first()
+    const lowerNamaLengkap = nama_lengkap.toLowerCase()
+    const existingUser = await c.env.DB.prepare("SELECT id FROM pengguna WHERE LOWER(nama_lengkap) = ?").bind(lowerNamaLengkap).first()
 
     if (existingUser) {
-      return c.json({ error: "Username sudah digunakan" }, 400)
+      return c.json({ error: "Nama lengkap sudah digunakan" }, 400)
     }
 
     const userId = generateId()
     const hashedPassword = await hashPassword(password)
 
     await c.env.DB.batch([
-      c.env.DB.prepare("INSERT INTO pengguna (id, nama_lengkap, username, password, roles) VALUES (?, ?, ?, ?, ?)").bind(
+      c.env.DB.prepare("INSERT INTO pengguna (id, nama_lengkap, password, roles) VALUES (?, ?, ?, ?)").bind(
         userId,
         nama_lengkap,
-        lowerUsername,
         hashedPassword,
         "masyarakat"
       ),

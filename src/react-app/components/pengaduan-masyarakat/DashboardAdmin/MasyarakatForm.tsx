@@ -11,7 +11,6 @@ interface MasyarakatFormProps {
 
 export interface MasyarakatFormData {
   nama_lengkap: string
-  username: string
   nomor_telepon: string
   alamat_rumah: string
   password?: string
@@ -20,7 +19,6 @@ export interface MasyarakatFormData {
 export function MasyarakatForm({ masyarakat, onSubmit, onCancel, loading, onToggleBan }: MasyarakatFormProps) {
   const [formData, setFormData] = useState<MasyarakatFormData>({
     nama_lengkap: "",
-    username: "",
     nomor_telepon: "",
     alamat_rumah: "",
     password: "",
@@ -31,7 +29,6 @@ export function MasyarakatForm({ masyarakat, onSubmit, onCancel, loading, onTogg
   useEffect(() => {
     setFormData({
       nama_lengkap: masyarakat.nama_lengkap,
-      username: masyarakat.username,
       nomor_telepon: masyarakat.nomor_telepon,
       alamat_rumah: masyarakat.alamat_rumah,
       password: "",
@@ -43,10 +40,6 @@ export function MasyarakatForm({ masyarakat, onSubmit, onCancel, loading, onTogg
 
     if (!formData.nama_lengkap.trim()) {
       newErrors.nama_lengkap = "Nama lengkap harus diisi"
-    }
-
-    if (!formData.username.trim()) {
-      newErrors.username = "Username harus diisi"
     }
 
     if (!formData.nomor_telepon.trim()) {
@@ -91,21 +84,6 @@ export function MasyarakatForm({ masyarakat, onSubmit, onCancel, loading, onTogg
             placeholder="Masukkan nama lengkap"
           />
           {errors.nama_lengkap && <div className="invalid-feedback">{errors.nama_lengkap}</div>}
-        </div>
-
-        <div className="col-md-6">
-          <label htmlFor="username" className="form-label">
-            Username *
-          </label>
-          <input
-            type="text"
-            className={`form-control ${errors.username ? "is-invalid" : ""}`}
-            id="username"
-            value={formData.username}
-            onChange={(e) => handleChange("username", e.target.value)}
-            placeholder="Masukkan username"
-          />
-          {errors.username && <div className="invalid-feedback">{errors.username}</div>}
         </div>
 
         <div className="col-md-6">

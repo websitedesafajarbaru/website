@@ -8,22 +8,22 @@ const authRoutes = new Hono<{ Bindings: Env; Variables: Variables }>()
 
 authRoutes.post("/login", async (c) => {
   try {
-    const { username, password } = await c.req.json()
+    const { nama_lengkap, password } = await c.req.json()
 
-    if (!username || !password) {
-      return c.json({ error: "Username dan password harus diisi" }, 400)
+    if (!nama_lengkap || !password) {
+      return c.json({ error: "Nama lengkap dan password harus diisi" }, 400)
     }
 
-    const user = await c.env.DB.prepare("SELECT id, nama_lengkap, username, password, roles FROM pengguna WHERE LOWER(username) = ?").bind(username.toLowerCase()).first()
+    const user = await c.env.DB.prepare("SELECT id, nama_lengkap, password, roles FROM pengguna WHERE LOWER(nama_lengkap) = ?").bind(nama_lengkap.toLowerCase()).first()
 
     if (!user) {
-      return c.json({ error: "Username atau password salah" }, 401)
+      return c.json({ error: "Nama lengkap atau password salah" }, 401)
     }
 
     const isValidPassword = await verifyPassword(password, user.password as string)
 
     if (!isValidPassword) {
-      return c.json({ error: "Username atau password salah" }, 401)
+      return c.json({ error: "Nama lengkap atau password salah" }, 401)
     }
 
     if (user.roles === "masyarakat") {
@@ -69,7 +69,6 @@ authRoutes.post("/login", async (c) => {
       user: {
         id: user.id,
         nama_lengkap: user.nama_lengkap,
-        username: user.username,
         roles: user.roles,
       },
     })
@@ -126,15 +125,15 @@ authRoutes.post("/logout", async (c) => {
 authRoutes.put("/profile", authMiddleware, async (c) => {
   try {
     const user = c.get("user") as JWTPayload
-    const { nama_lengkap, username, password, alamat_rumah, nomor_telepon } = await c.req.json()
+    const { nama_lengkap, password, alamat_rumah, nomor_telepon } = await c.req.json()
 
-    if (!nama_lengkap || !username) {
-      return c.json({ error: "Nama lengkap dan username harus diisi" }, 400)
+    if (!nama_lengkap) {
+      return c.json({ error: "Nama lengkap harus diisi" }, 400)
     }
 
-    const existingUser = await c.env.DB.prepare("SELECT id FROM pengguna WHERE LOWER(username) = ? AND id != ?").bind(username.toLowerCase(), user.userId).first()
+    const existingUser = await c.env.DB.prepare("SELECT id FROM pengguna WHERE LOWER(nama_lengkap) = ? AND id != ?").bind(nama_lengkap.toLowerCase(), user.userId).first()
     if (existingUser) {
-      return c.json({ error: "Username sudah digunakan" }, 400)
+      return c.json({ error: "Nama lengkap sudah digunakan" }, 400)
     }
 
     const updates = []
@@ -142,9 +141,6 @@ authRoutes.put("/profile", authMiddleware, async (c) => {
 
     updates.push("nama_lengkap = ?")
     values.push(nama_lengkap)
-
-    updates.push("username = ?")
-    values.push(username.toLowerCase())
 
     if (password) {
       const hashedPassword = await hashPassword(password)
@@ -179,7 +175,7 @@ authRoutes.get("/profile", authMiddleware, async (c) => {
   try {
     const user = c.get("user") as JWTPayload
 
-    const pengguna = await c.env.DB.prepare("SELECT id, nama_lengkap, username, roles FROM pengguna WHERE id = ?").bind(user.userId).first()
+    const pengguna = await c.env.DB.prepare("SELECT id, nama_lengkap, roles FROM pengguna WHERE id = ?").bind(user.userId).first()
     if (!pengguna) {
       return c.json({ error: "Pengguna tidak ditemukan" }, 404)
     }

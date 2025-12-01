@@ -10,9 +10,9 @@ perangkatDesaRoutes.use("/*", authMiddleware)
 perangkatDesaRoutes.post("/", async (c) => {
   try {
     const user = c.get("user") as JWTPayload
-    const { nama_lengkap, username, password, jabatan, id_dusun } = await c.req.json()
+    const { nama_lengkap, password, jabatan, id_dusun } = await c.req.json()
 
-    if (!nama_lengkap || !username || !password || !jabatan || !id_dusun) {
+    if (!nama_lengkap || !password || !jabatan || !id_dusun) {
       return c.json({ error: "Semua field harus diisi" }, 400)
     }
 
@@ -31,9 +31,9 @@ perangkatDesaRoutes.post("/", async (c) => {
       }
     }
 
-    const existingUser = await c.env.DB.prepare("SELECT id FROM pengguna WHERE LOWER(username) = ?").bind(username.toLowerCase()).first()
+    const existingUser = await c.env.DB.prepare("SELECT id FROM pengguna WHERE LOWER(nama_lengkap) = ?").bind(nama_lengkap.toLowerCase()).first()
     if (existingUser) {
-      return c.json({ error: "Username sudah digunakan" }, 400)
+      return c.json({ error: "Nama lengkap sudah digunakan" }, 400)
     }
 
     const existingDusun = await c.env.DB.prepare("SELECT id FROM dusun WHERE id = ?").bind(id_dusun).first()
@@ -56,10 +56,10 @@ perangkatDesaRoutes.post("/", async (c) => {
     const newId = crypto.randomUUID()
 
     await c.env.DB.prepare(
-      `INSERT INTO pengguna (id, nama_lengkap, username, password, roles, waktu_dibuat, waktu_diperbarui)
-       VALUES (?, ?, ?, ?, ?, datetime("now"), datetime("now"))`
+      `INSERT INTO pengguna (id, nama_lengkap, password, roles, waktu_dibuat, waktu_diperbarui)
+       VALUES (?, ?, ?, ?, datetime("now"), datetime("now"))`
     )
-      .bind(newId, nama_lengkap, username.toLowerCase(), hashedPassword, jabatan)
+      .bind(newId, nama_lengkap, hashedPassword, jabatan)
       .run()
 
     await c.env.DB.prepare(
@@ -81,7 +81,7 @@ perangkatDesaRoutes.get("/", async (c) => {
     const dusunId = c.req.query("dusun_id")
 
     let query = `
-      SELECT pd.*, p.nama_lengkap, p.username, d.nama_dusun
+      SELECT pd.*, p.nama_lengkap, d.nama_dusun
       FROM perangkat_desa pd
       INNER JOIN pengguna p ON pd.id = p.id
       LEFT JOIN dusun d ON pd.id_dusun = d.id
@@ -116,7 +116,7 @@ perangkatDesaRoutes.get("/:id", async (c) => {
 
     const result = await c.env.DB.prepare(
       `
-      SELECT pd.*, p.nama_lengkap, p.username, d.nama_dusun
+      SELECT pd.*, p.nama_lengkap, d.nama_dusun
       FROM perangkat_desa pd
       INNER JOIN pengguna p ON pd.id = p.id
       LEFT JOIN dusun d ON pd.id_dusun = d.id
@@ -147,7 +147,7 @@ perangkatDesaRoutes.put("/:id", async (c) => {
   try {
     const user = c.get("user") as JWTPayload
     const id = c.req.param("id")
-    const { nama_lengkap, username, password, id_dusun, jabatan } = await c.req.json()
+    const { nama_lengkap, password, id_dusun, jabatan } = await c.req.json()
 
     if (user.roles !== "admin") {
       if (user.roles === "kepala_dusun") {
@@ -182,16 +182,6 @@ perangkatDesaRoutes.put("/:id", async (c) => {
     if (nama_lengkap) {
       penggunaQuery += ", nama_lengkap = ?"
       penggunaParams.push(nama_lengkap)
-    }
-
-    if (username) {
-      const lowerUsername = username.toLowerCase()
-      const existingUser = await c.env.DB.prepare("SELECT id FROM pengguna WHERE LOWER(username) = ? AND id != ?").bind(lowerUsername, id).first()
-      if (existingUser) {
-        return c.json({ error: "Username sudah digunakan" }, 400)
-      }
-      penggunaQuery += ", username = ?"
-      penggunaParams.push(lowerUsername)
     }
 
     if (password) {

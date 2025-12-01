@@ -7,11 +7,11 @@ import { FormTambahSuratPBB } from "../../components/pengelolaan-pbb/FormTambahS
 import * as XLSX from "xlsx"
 import jsPDF from "jspdf"
 import autoTable from "jspdf-autotable"
+import Swal from "sweetalert2"
 
 interface PerangkatDesa {
   id: string
   nama_lengkap: string
-  username: string
   jabatan: string
   id_dusun?: number
   nama_dusun?: string
@@ -50,7 +50,6 @@ export function DashboardAdminPBB() {
   const [selectedPerangkat, setSelectedPerangkat] = useState<PerangkatDesa | null>(null)
   const [perangkatForm, setPerangkatForm] = useState({
     nama_lengkap: "",
-    username: "",
     password: "",
     id_dusun: "",
     jabatan: "",
@@ -60,6 +59,7 @@ export function DashboardAdminPBB() {
   const [searchSuratPBB, setSearchSuratPBB] = useState("")
   const [searchStatistik, setSearchStatistik] = useState("")
   const [searchPerangkat, setSearchPerangkat] = useState("")
+  const [filterStatusSurat, setFilterStatusSurat] = useState("semua")
   const [dusunTokens, setDusunTokens] = useState<{ tokenKepalaDusun: string; tokenKetuaRT: string } | null>(null)
   const [perangkatDesa, setPerangkatDesa] = useState<PerangkatDesa[]>([])
   const [selectedDusunId, setSelectedDusunId] = useState<string | null>(null)
@@ -93,73 +93,177 @@ export function DashboardAdminPBB() {
 
   const filteredPerangkat: PerangkatDesa[] = perangkatDesa.filter((p) => {
     const searchLower = searchPerangkat.toLowerCase()
-    return p.nama_lengkap.toLowerCase().includes(searchLower) || p.username.toLowerCase().includes(searchLower) || p.jabatan.toLowerCase().includes(searchLower)
+    return p.nama_lengkap.toLowerCase().includes(searchLower) || p.jabatan.toLowerCase().includes(searchLower)
   })
 
+  // Helper function to get filtered surat PBB based on search and status filter
+  const getFilteredSuratPBB = () => {
+    return suratPBB.filter((surat) => {
+      const searchLower = searchSuratPBB.toLowerCase()
+      const matchesSearch = (
+        surat.nomor_objek_pajak.toLowerCase().includes(searchLower) ||
+        surat.nama_wajib_pajak.toLowerCase().includes(searchLower) ||
+        (surat.alamat_objek_pajak || "").toLowerCase().includes(searchLower) ||
+        (surat.tahun_pajak?.toString() || "").includes(searchLower) ||
+        (surat.jumlah_pajak_terhutang?.toString() || "").includes(searchLower)
+      )
+      
+      const matchesStatus = filterStatusSurat === "semua" || surat.status_pembayaran === filterStatusSurat
+      
+      return matchesSearch && matchesStatus
+    })
+  }
+
   const exportToExcel = () => {
-    const worksheet = XLSX.utils.json_to_sheet(
-      suratPBB.map((s) => ({
-        NOP: s.nomor_objek_pajak,
-        "Nama Wajib Pajak": s.nama_wajib_pajak,
-        "Alamat Wajib Pajak": s.alamat_wajib_pajak,
-        "Alamat Objek Pajak": s.alamat_objek_pajak,
-        "Luas Tanah": `${s.luas_tanah} m²`,
-        "Luas Bangunan": `${s.luas_bangunan} m²`,
-        "Tahun Pajak": s.tahun_pajak,
-        "Jumlah Pajak Terhutang": `Rp ${Number(s.jumlah_pajak_terhutang).toLocaleString("id-ID")}`,
-        "Status Pembayaran": s.status_pembayaran.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()),
-        "Waktu Dibuat": s.waktu_dibuat,
-        "Waktu Diperbarui": s.waktu_diperbarui,
-        "ID Dusun": s.id_dusun,
-        "Nama Dusun": s.nama_dusun,
-      }))
-    )
+    const filteredData = getFilteredSuratPBB()
+    
+    // Create workbook
     const workbook = XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Surat PBB")
-    XLSX.writeFile(workbook, "surat_pbb.xlsx")
+    
+    // Create header info
+    const headerInfo = [
+      ["LAPORAN DATA SURAT PBB"],
+      ["Sistem Pengelolaan Pajak Bumi dan Bangunan"],
+      [""],
+      [`Tanggal Export: ${new Date().toLocaleDateString("id-ID", { year: "numeric", month: "long", day: "numeric" })}`],
+      [`Tahun Pajak: ${activeYear}`],
+      [`Total Data: ${filteredData.length} surat`],
+      [`Filter Status: ${filterStatusSurat === "semua" ? "Semua Status" : filterStatusSurat === "belum_bayar" ? "Belum Bayar" : "Sudah Bayar"}`],
+      [""],
+    ]
+    
+    // Create data rows
+    const dataRows = filteredData.map((s) => ({
+      "Nomor Objek Pajak": s.nomor_objek_pajak,
+      "Nama Wajib Pajak": s.nama_wajib_pajak,
+      "Alamat Wajib Pajak": s.alamat_wajib_pajak,
+      "Alamat Objek Pajak": s.alamat_objek_pajak,
+      "Luas Tanah (m²)": s.luas_tanah,
+      "Luas Bangunan (m²)": s.luas_bangunan,
+      "Tahun Pajak": s.tahun_pajak,
+      "Jumlah Pajak (Rp)": Number(s.jumlah_pajak_terhutang),
+      "Status Pembayaran": s.status_pembayaran.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()),
+      "Dusun": s.nama_dusun,
+      "Perangkat Desa": s.nama_perangkat || "-",
+      "Waktu Dibuat": new Date(s.waktu_dibuat).toLocaleString("id-ID"),
+    }))
+    
+    // Create worksheet with header
+    const worksheet = XLSX.utils.aoa_to_sheet(headerInfo)
+    
+    // Append data
+    XLSX.utils.sheet_add_json(worksheet, dataRows, { origin: -1 })
+    
+    // Set column widths
+    const colWidths = [
+      { wch: 20 }, // NOP
+      { wch: 25 }, // Nama Wajib Pajak
+      { wch: 30 }, // Alamat Wajib Pajak
+      { wch: 30 }, // Alamat Objek Pajak
+      { wch: 15 }, // Luas Tanah
+      { wch: 15 }, // Luas Bangunan
+      { wch: 12 }, // Tahun Pajak
+      { wch: 18 }, // Jumlah Pajak
+      { wch: 18 }, // Status
+      { wch: 20 }, // Dusun
+      { wch: 25 }, // Perangkat Desa
+      { wch: 20 }, // Waktu Dibuat
+    ]
+    worksheet['!cols'] = colWidths
+    
+    // Add worksheet to workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Data Surat PBB")
+    
+    // Generate filename with timestamp
+    const timestamp = new Date().toISOString().slice(0, 10)
+    const statusText = filterStatusSurat === "semua" ? "semua" : filterStatusSurat
+    XLSX.writeFile(workbook, `Laporan_Surat_PBB_${statusText}_${timestamp}.xlsx`)
   }
 
   const exportToPDF = () => {
-    const doc = new jsPDF()
-    doc.text("Daftar Surat PBB", 14, 10)
+    const filteredData = getFilteredSuratPBB()
+    const doc = new jsPDF('landscape')
+    
+    // Add header
+    doc.setFontSize(16)
+    doc.setFont('helvetica', 'bold')
+    doc.text("LAPORAN DATA SURAT PBB", doc.internal.pageSize.getWidth() / 2, 15, { align: 'center' })
+    
+    doc.setFontSize(10)
+    doc.setFont('helvetica', 'normal')
+    doc.text("Sistem Pengelolaan Pajak Bumi dan Bangunan", doc.internal.pageSize.getWidth() / 2, 22, { align: 'center' })
+    
+    // Add info
+    doc.setFontSize(9)
+    const currentDate = new Date().toLocaleDateString("id-ID", { year: "numeric", month: "long", day: "numeric" })
+    doc.text(`Tanggal Export: ${currentDate}`, 14, 32)
+    doc.text(`Tahun Pajak: ${activeYear}`, 14, 37)
+    doc.text(`Total Data: ${filteredData.length} surat`, 14, 42)
+    
+    const statusText = filterStatusSurat === "semua" ? "Semua Status" : filterStatusSurat === "belum_bayar" ? "Belum Bayar" : "Sudah Bayar"
+    doc.text(`Filter Status: ${statusText}`, 14, 47)
+    
+    // Add separator line
+    doc.setLineWidth(0.5)
+    doc.line(14, 50, doc.internal.pageSize.getWidth() - 14, 50)
 
     const tableColumn = [
       "NOP",
       "Nama Wajib Pajak",
-      "Alamat Wajib Pajak",
       "Alamat Objek Pajak",
       "Luas Tanah",
       "Luas Bangunan",
       "Jumlah Pajak",
-      "Tahun Pajak",
       "Status",
       "Dusun",
-      "Pengguna",
     ]
 
-    const tableRows = suratPBB.map((s) => [
+    const tableRows = filteredData.map((s) => [
       s.nomor_objek_pajak,
       s.nama_wajib_pajak,
-      s.alamat_wajib_pajak,
       s.alamat_objek_pajak,
       `${s.luas_tanah} m²`,
       `${s.luas_bangunan} m²`,
       `Rp ${Number(s.jumlah_pajak_terhutang).toLocaleString("id-ID")}`,
-      s.tahun_pajak,
       s.status_pembayaran.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()),
-      s.nama_dusun || "",
-      s.nama_perangkat || "",
+      s.nama_dusun || "-",
     ])
 
     autoTable(doc, {
       head: [tableColumn],
       body: tableRows,
-      startY: 20,
-      styles: { fontSize: 8 },
-      headStyles: { fillColor: [41, 128, 185] },
+      startY: 55,
+      styles: { 
+        fontSize: 8,
+        cellPadding: 2,
+      },
+      headStyles: { 
+        fillColor: [41, 128, 185],
+        fontStyle: 'bold',
+        halign: 'center',
+      },
+      alternateRowStyles: {
+        fillColor: [245, 245, 245]
+      },
+      margin: { left: 14, right: 14 },
     })
+    
+    // Add footer with page number
+    const pageCount = doc.internal.pages.length - 1
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i)
+      doc.setFontSize(8)
+      doc.text(
+        `Halaman ${i} dari ${pageCount}`,
+        doc.internal.pageSize.getWidth() / 2,
+        doc.internal.pageSize.getHeight() - 10,
+        { align: 'center' }
+      )
+    }
 
-    doc.save("surat_pbb.pdf")
+    const timestamp = new Date().toISOString().slice(0, 10)
+    const statusFileName = filterStatusSurat === "semua" ? "semua" : filterStatusSurat
+    doc.save(`Laporan_Surat_PBB_${statusFileName}_${timestamp}.pdf`)
   }
 
   const fetchActiveYear = useCallback(async () => {
@@ -278,7 +382,10 @@ export function DashboardAdminPBB() {
   // Fetch data only on first visit to each tab
   useEffect(() => {
     if (activeTab === "dusun" && !hasDusunFetched) fetchDusun()
-    if (activeTab === "surat" && !hasSuratFetched) fetchSuratPBB()
+    if (activeTab === "surat" && !hasSuratFetched) {
+      fetchSuratPBB()
+      if (!hasDusunFetched) fetchDusun() // Fetch dusun juga untuk dropdown edit
+    }
     if (activeTab === "laporan" && !hasLaporanFetched) fetchLaporan()
   }, [activeTab, fetchDusun, fetchSuratPBB, fetchLaporan, hasDusunFetched, hasSuratFetched, hasLaporanFetched])
 
@@ -318,7 +425,6 @@ export function DashboardAdminPBB() {
     setSelectedPerangkat(perangkat)
     setPerangkatForm({
       nama_lengkap: perangkat.nama_lengkap,
-      username: perangkat.username,
       password: "",
       id_dusun: perangkat.id_dusun?.toString() || "",
       jabatan: perangkat.jabatan,
@@ -442,13 +548,11 @@ export function DashboardAdminPBB() {
     try {
       const updateData: {
         nama_lengkap: string
-        username: string
         jabatan: string
         id_dusun: number
         password?: string
       } = {
         nama_lengkap: perangkatForm.nama_lengkap,
-        username: perangkatForm.username,
         jabatan: perangkatForm.jabatan,
         id_dusun: Number(perangkatForm.id_dusun),
       }
@@ -712,6 +816,9 @@ export function DashboardAdminPBB() {
 
   const handleEditFormChange = (field: string, value: string | number) => {
     setEditForm({ ...editForm, [field]: value })
+    if (field === "id_dusun") {
+      setSelectedSurat({ ...selectedSurat!, id_dusun: value as number })
+    }
   }
 
   const handleSaveEdit = async () => {
@@ -730,6 +837,7 @@ export function DashboardAdminPBB() {
       if (response.ok) {
         setSelectedSurat(editForm as SuratPBB)
         setIsEditing(false)
+        fetchSuratPBB() // Refresh list untuk update nama dusun jika pindah dusun
         Swal.fire({
           title: "Berhasil!",
           text: "Surat PBB berhasil diperbarui",
@@ -973,23 +1081,34 @@ export function DashboardAdminPBB() {
                     <button
                       className="btn btn-sm btn-success"
                       onClick={async () => {
-                        if (suratPBB.length === 0) {
+                        const filteredData = getFilteredSuratPBB()
+                        if (filteredData.length === 0) {
                           await Swal.fire({
                             title: "Tidak Dapat Export",
-                            text: "Tidak ada data surat PBB yang dapat diexport.",
-                            icon: "error",
+                            text: "Tidak ada data surat PBB yang dapat diexport. Silakan sesuaikan filter atau pencarian Anda.",
+                            icon: "warning",
                             confirmButtonText: "OK",
                           })
                           return
                         }
+                        
+                        const statusText = filterStatusSurat === "semua" ? "Semua Status" : filterStatusSurat === "belum_bayar" ? "Belum Bayar" : "Sudah Bayar"
                         const result = await Swal.fire({
                           title: "Pilih Format Export",
-                          text: "Pilih format file untuk export data Surat PBB",
+                          html: `
+                            <p>Pilih format file untuk export data Surat PBB</p>
+                            <div class="text-start mt-3" style="background: #f8f9fa; padding: 12px; border-radius: 6px; font-size: 0.9em;">
+                              <p class="mb-1"><strong>Data yang akan diexport:</strong></p>
+                              <p class="mb-1">• Total: <strong>${filteredData.length}</strong> surat</p>
+                              <p class="mb-1">• Status: <strong>${statusText}</strong></p>
+                              <p class="mb-0">• Tahun: <strong>${activeYear}</strong></p>
+                            </div>
+                          `,
                           icon: "question",
                           showCancelButton: true,
                           showCloseButton: true,
-                          confirmButtonText: "Excel",
-                          cancelButtonText: "PDF",
+                          confirmButtonText: '<i class="bi bi-file-earmark-excel me-1"></i> Excel',
+                          cancelButtonText: '<i class="bi bi-file-earmark-pdf me-1"></i> PDF',
                           confirmButtonColor: "#28a745",
                           cancelButtonColor: "#dc3545",
                           reverseButtons: true,
@@ -997,8 +1116,22 @@ export function DashboardAdminPBB() {
 
                         if (result.isConfirmed) {
                           exportToExcel()
+                          Swal.fire({
+                            title: "Berhasil!",
+                            text: `File Excel dengan ${filteredData.length} data berhasil didownload!`,
+                            icon: "success",
+                            timer: 3000,
+                            showConfirmButton: false,
+                          })
                         } else if (result.dismiss === "cancel") {
                           exportToPDF()
+                          Swal.fire({
+                            title: "Berhasil!",
+                            text: `File PDF dengan ${filteredData.length} data berhasil didownload!`,
+                            icon: "success",
+                            timer: 3000,
+                            showConfirmButton: false,
+                          })
                         }
                       }}
                     >
@@ -1012,7 +1145,7 @@ export function DashboardAdminPBB() {
                   </div>
                 </div>
               </div>
-              <TabelSuratPBB suratPBB={suratPBB} searchTerm={searchSuratPBB} onSearchChange={setSearchSuratPBB} onSuratClick={setSelectedSurat} showDusunColumn={true} onRefresh={fetchSuratPBB} />
+              <TabelSuratPBB suratPBB={suratPBB} searchTerm={searchSuratPBB} onSearchChange={setSearchSuratPBB} onSuratClick={setSelectedSurat} showDusunColumn={true} onRefresh={fetchSuratPBB} filterStatus={filterStatusSurat} onFilterStatusChange={setFilterStatusSurat} />
             </>
           ) : (
             <DetailSuratPBB
@@ -1031,6 +1164,7 @@ export function DashboardAdminPBB() {
               }}
               showAdminActions={true}
               isPerangkatDesa={false}
+              dusunOptions={dusun}
             />
           )}
         </>
@@ -1586,7 +1720,6 @@ export function DashboardAdminPBB() {
                         <thead className="table-light" style={{ position: "sticky", top: 0, zIndex: 1 }}>
                           <tr>
                             <th>Nama Lengkap</th>
-                            <th>Username</th>
                             <th>Jabatan</th>
                             <th>Aksi</th>
                           </tr>
@@ -1595,7 +1728,6 @@ export function DashboardAdminPBB() {
                           {filteredPerangkat.map((perangkat: PerangkatDesa) => (
                           <tr key={perangkat.id}>
                             <td>{perangkat.nama_lengkap}</td>
-                            <td>{perangkat.username}</td>
                             <td>
                               <span className={`badge bg-${perangkat.jabatan === "kepala_dusun" ? "success" : "warning"}`}>
                                 {perangkat.jabatan === "kepala_dusun" ? "Kepala Dusun" : "Ketua RT"}
@@ -1666,18 +1798,6 @@ export function DashboardAdminPBB() {
                     className="form-control"
                     value={perangkatForm.nama_lengkap}
                     onChange={(e) => setPerangkatForm({ ...perangkatForm, nama_lengkap: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="col-md-6">
-                  <label className="form-label">
-                    Username <span className="text-danger">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={perangkatForm.username}
-                    onChange={(e) => setPerangkatForm({ ...perangkatForm, username: e.target.value })}
                     required
                   />
                 </div>

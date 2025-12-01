@@ -4,7 +4,6 @@ import { apiRequest, ApiError } from "../utils/api"
 interface User {
   id: string
   nama_lengkap: string
-  username: string
   roles: string
 }
 
@@ -31,7 +30,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const checkAuth = async () => {
     try {
-      const profile = await apiRequest<{ id: string; nama_lengkap: string; username: string; roles: string }>("/api/auth/profile")
+      const profile = await apiRequest<{ id: string; nama_lengkap: string; roles: string }>("/api/auth/profile")
       setUser(profile)
     } catch (error) {
       console.error("Check auth error:", error)

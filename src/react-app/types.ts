@@ -32,7 +32,6 @@ export interface Tanggapan {
 export interface Masyarakat {
   id: string
   nama_lengkap: string
-  username: string
   roles: string
   alamat_rumah: string
   nomor_telepon: string
@@ -62,14 +61,31 @@ export interface SuratPBB {
   alamat_objek_pajak: string
   luas_tanah: number
   luas_bangunan: number
-  jumlah_pajak_terhutang: number
-  tahun_pajak: number
-  status_pembayaran: "belum_bayar" | "bayar_sendiri_di_bank" | "sudah_bayar" | "sudah_lunas" | "pindah_rumah" | "tidak_diketahui"
   id_dusun: number
+  waktu_dibuat: string
+  waktu_diperbarui: string
+  // Fields from surat_pbb_tahun (join)
+  surat_tahun_id?: string
+  jumlah_pajak_terhutang?: number
+  tahun_pajak?: number
+  status_pembayaran?: "belum_bayar" | "bayar_sendiri_di_bank" | "sudah_bayar" | "sudah_lunas" | "pindah_rumah" | "tidak_diketahui"
+  tahun_waktu_dibuat?: string
+  tahun_waktu_diperbarui?: string
+  nama_dusun?: string
+  nama_perangkat?: string
+  // For detailed view with all years
+  tahun_data?: SuratPBBTahun[]
+}
+
+export interface SuratPBBTahun {
+  id: string
+  id_surat_pbb: string
+  tahun_pajak: number
+  jumlah_pajak_terhutang: number
+  status_pembayaran: "belum_bayar" | "bayar_sendiri_di_bank" | "sudah_bayar" | "sudah_lunas" | "pindah_rumah" | "tidak_diketahui"
   id_pengguna: string
   waktu_dibuat: string
   waktu_diperbarui: string
-  nama_dusun?: string
   nama_perangkat?: string
 }
 

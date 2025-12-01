@@ -8,6 +8,7 @@ import { CekPembayaran } from "./pages/CekPembayaran"
 import { RegistrasiMasyarakat } from "./pages/pengaduan-masyarakat/RegistrasiMasyarakat"
 import { DashboardMasyarakat } from "./pages/pengaduan-masyarakat/DashboardMasyarakat"
 import { DashboardAdminPengaduan } from "./pages/pengaduan-masyarakat/DashboardAdminPengaduan"
+import { DashboardPerangkatDesaPengaduan } from "./pages/pengaduan-masyarakat/DashboardPerangkatDesaPengaduan"
 import { RegistrasiPerangkatDesa } from "./pages/pengelolaan-pbb/RegistrasiPerangkatDesa"
 import { DashboardAdminPBB } from "./pages/pengelolaan-pbb/DashboardAdminPBB"
 import { DashboardKepalaDusun } from "./pages/pengelolaan-pbb/DashboardKepalaDusun"
@@ -38,6 +39,14 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={["admin"]}>
                   <DashboardAdminPengaduan />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/pengaduan-masyarakat/dashboard-perangkat-desa"
+              element={
+                <ProtectedRoute allowedRoles={["kepala_dusun", "ketua_rt"]}>
+                  <DashboardPerangkatDesaPengaduan />
                 </ProtectedRoute>
               }
             />

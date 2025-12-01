@@ -81,23 +81,57 @@ suratPBBRoutes.post("/", async (c) => {
       }
     }
 
-    const suratId = generateId()
+    // Check if surat_pbb already exists for this nomor_objek_pajak
+    let suratPBB = await c.env.DB.prepare("SELECT id FROM surat_pbb WHERE nomor_objek_pajak = ?")
+      .bind(nomor_objek_pajak)
+      .first()
 
+    let suratPBBId: string
+
+    if (suratPBB) {
+      // Surat PBB already exists, use existing ID
+      suratPBBId = suratPBB.id as string
+    } else {
+      // Create new surat_pbb master record
+      suratPBBId = generateId()
+      await c.env.DB.prepare(
+        "INSERT INTO surat_pbb (id, nomor_objek_pajak, nama_wajib_pajak, alamat_wajib_pajak, alamat_objek_pajak, luas_tanah, luas_bangunan, id_dusun) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+      )
+        .bind(
+          suratPBBId,
+          nomor_objek_pajak,
+          nama_wajib_pajak,
+          alamat_wajib_pajak,
+          alamat_objek_pajak,
+          luas_tanah,
+          luas_bangunan,
+          id_dusun
+        )
+        .run()
+    }
+
+    // Check if surat_pbb_tahun already exists for this year
+    const existingTahun = await c.env.DB.prepare(
+      "SELECT id FROM surat_pbb_tahun WHERE id_surat_pbb = ? AND tahun_pajak = ?"
+    )
+      .bind(suratPBBId, tahun_pajak)
+      .first()
+
+    if (existingTahun) {
+      return c.json({ error: `Surat PBB untuk tahun ${tahun_pajak} sudah ada` }, 400)
+    }
+
+    // Create surat_pbb_tahun record
+    const suratPBBTahunId = generateId()
     await c.env.DB.prepare(
-      "INSERT INTO surat_pbb (id, nomor_objek_pajak, nama_wajib_pajak, alamat_wajib_pajak, alamat_objek_pajak, luas_tanah, luas_bangunan, jumlah_pajak_terhutang, tahun_pajak, status_pembayaran, id_dusun, id_pengguna) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+      "INSERT INTO surat_pbb_tahun (id, id_surat_pbb, tahun_pajak, jumlah_pajak_terhutang, status_pembayaran, id_pengguna) VALUES (?, ?, ?, ?, ?, ?)"
     )
       .bind(
-        suratId,
-        nomor_objek_pajak,
-        nama_wajib_pajak,
-        alamat_wajib_pajak,
-        alamat_objek_pajak,
-        luas_tanah,
-        luas_bangunan,
-        jumlah_pajak_terhutang,
+        suratPBBTahunId,
+        suratPBBId,
         tahun_pajak,
+        jumlah_pajak_terhutang,
         status_pembayaran,
-        id_dusun,
         idPengguna
       )
       .run()
@@ -105,7 +139,8 @@ suratPBBRoutes.post("/", async (c) => {
     return c.json(
       {
         message: "Surat PBB berhasil ditambahkan",
-        suratId,
+        suratId: suratPBBId,
+        suratTahunId: suratPBBTahunId,
       },
       201
     )
@@ -125,7 +160,7 @@ suratPBBRoutes.get("/", async (c) => {
     const currentYear = activeYear ? parseInt(activeYear) : new Date().getFullYear()
 
     let query =
-      "SELECT s.*, d.nama_dusun, p.nama_lengkap as nama_perangkat FROM surat_pbb s JOIN dusun d ON s.id_dusun = d.id JOIN pengguna p ON s.id_pengguna = p.id WHERE s.tahun_pajak = ?"
+      "SELECT s.*, st.id as surat_tahun_id, st.tahun_pajak, st.jumlah_pajak_terhutang, st.status_pembayaran, st.waktu_dibuat as tahun_waktu_dibuat, st.waktu_diperbarui as tahun_waktu_diperbarui, d.nama_dusun, p.nama_lengkap as nama_perangkat FROM surat_pbb s JOIN surat_pbb_tahun st ON s.id = st.id_surat_pbb JOIN dusun d ON s.id_dusun = d.id JOIN pengguna p ON st.id_pengguna = p.id WHERE st.tahun_pajak = ?"
     const params: (string | number)[] = [currentYear]
 
     if (user.roles !== "admin") {
@@ -154,11 +189,11 @@ suratPBBRoutes.get("/", async (c) => {
     }
 
     if (status_pembayaran) {
-      query += " AND s.status_pembayaran = ?"
+      query += " AND st.status_pembayaran = ?"
       params.push(status_pembayaran)
     }
 
-    query += " ORDER BY s.waktu_dibuat DESC"
+    query += " ORDER BY st.waktu_dibuat DESC"
 
     const result = await c.env.DB.prepare(query)
       .bind(...params)
@@ -179,7 +214,7 @@ suratPBBRoutes.get("/:id", async (c) => {
     const suratId = c.req.param("id")
 
     const surat = await c.env.DB.prepare(
-      "SELECT s.*, d.nama_dusun, p.nama_lengkap as nama_perangkat FROM surat_pbb s JOIN dusun d ON s.id_dusun = d.id JOIN pengguna p ON s.id_pengguna = p.id WHERE s.id = ?"
+      "SELECT s.*, st.id as surat_tahun_id, st.tahun_pajak, st.jumlah_pajak_terhutang, st.status_pembayaran, st.waktu_dibuat as tahun_waktu_dibuat, st.waktu_diperbarui as tahun_waktu_diperbarui, d.nama_dusun, p.nama_lengkap as nama_perangkat FROM surat_pbb s LEFT JOIN surat_pbb_tahun st ON s.id = st.id_surat_pbb JOIN dusun d ON s.id_dusun = d.id LEFT JOIN pengguna p ON st.id_pengguna = p.id WHERE s.id = ?"
     )
       .bind(suratId)
       .first()
@@ -188,7 +223,17 @@ suratPBBRoutes.get("/:id", async (c) => {
       return c.json({ error: "Surat PBB tidak ditemukan" }, 404)
     }
 
-    return c.json(surat)
+    // Get all years for this surat
+    const allYears = await c.env.DB.prepare(
+      "SELECT st.*, p.nama_lengkap as nama_perangkat FROM surat_pbb_tahun st JOIN pengguna p ON st.id_pengguna = p.id WHERE st.id_surat_pbb = ? ORDER BY st.tahun_pajak DESC"
+    )
+      .bind(suratId)
+      .all()
+
+    return c.json({
+      ...surat,
+      tahun_data: allYears.results,
+    })
   } catch (error) {
     console.error(error)
     return c.json({ error: "Terjadi kesalahan server" }, 500)
@@ -201,61 +246,98 @@ suratPBBRoutes.put("/:id", async (c) => {
     const suratId = c.req.param("id")
     const updates = await c.req.json()
 
-    const originalSurat = await c.env.DB.prepare("SELECT status_pembayaran FROM surat_pbb WHERE id = ?").bind(suratId).first()
+    // Determine if this is updating the master surat or a specific year
+    if (updates.tahun_pajak && (updates.status_pembayaran !== undefined || updates.jumlah_pajak_terhutang !== undefined)) {
+      // Update surat_pbb_tahun
+      const originalSurat = await c.env.DB.prepare(
+        "SELECT status_pembayaran FROM surat_pbb_tahun WHERE id_surat_pbb = ? AND tahun_pajak = ?"
+      )
+        .bind(suratId, updates.tahun_pajak)
+        .first()
 
-    const allowedFields = [
-      "nomor_objek_pajak",
-      "nama_wajib_pajak",
-      "alamat_wajib_pajak",
-      "alamat_objek_pajak",
-      "luas_tanah",
-      "luas_bangunan",
-      "jumlah_pajak_terhutang",
-      "tahun_pajak",
-      "status_pembayaran",
-    ]
+      if (!originalSurat) {
+        return c.json({ error: "Data tahun tidak ditemukan" }, 404)
+      }
 
-    const updateFields: string[] = []
-    const params: (string | number)[] = []
-
-    if (updates.status_pembayaran !== undefined && updates.status_pembayaran !== originalSurat?.status_pembayaran) {
-      // Check user role and restrict status options for perangkat desa
-      if (user.roles !== "admin") {
-        const perangkat = await c.env.DB.prepare("SELECT jabatan FROM perangkat_desa WHERE id = ?").bind(user.userId).first()
-        
-        if (perangkat?.jabatan === "kepala_dusun" || perangkat?.jabatan === "ketua_rt") {
-          const allowedStatuses = ["belum_bayar", "bayar_sendiri_di_bank", "sudah_bayar", "pindah_rumah", "tidak_diketahui"]
-          if (!allowedStatuses.includes(updates.status_pembayaran)) {
-            return c.json({ 
-              error: "Sebagai perangkat desa, Anda hanya dapat mengubah status pembayaran ke: Belum Bayar, Bayar Sendiri di Bank, Sudah Bayar, Pindah Rumah, atau Tidak Diketahui" 
-            }, 403)
+      if (updates.status_pembayaran !== undefined && updates.status_pembayaran !== originalSurat?.status_pembayaran) {
+        // Check user role and restrict status options for perangkat desa
+        if (user.roles !== "admin") {
+          const perangkat = await c.env.DB.prepare("SELECT jabatan FROM perangkat_desa WHERE id = ?").bind(user.userId).first()
+          
+          if (perangkat?.jabatan === "kepala_dusun" || perangkat?.jabatan === "ketua_rt") {
+            const allowedStatuses = ["belum_bayar", "bayar_sendiri_di_bank", "sudah_bayar", "pindah_rumah", "tidak_diketahui"]
+            if (!allowedStatuses.includes(updates.status_pembayaran)) {
+              return c.json({ 
+                error: "Sebagai perangkat desa, Anda hanya dapat mengubah status pembayaran ke: Belum Bayar, Bayar Sendiri di Bank, Sudah Bayar, Pindah Rumah, atau Tidak Diketahui" 
+              }, 403)
+            }
           }
         }
       }
-    }
 
-    for (const [key, value] of Object.entries(updates)) {
-      if (allowedFields.includes(key)) {
-        updateFields.push(`${key} = ?`)
-        params.push(value as string | number)
+      const allowedFields = ["jumlah_pajak_terhutang", "status_pembayaran"]
+      const updateFields: string[] = []
+      const params: (string | number)[] = []
+
+      for (const [key, value] of Object.entries(updates)) {
+        if (allowedFields.includes(key)) {
+          updateFields.push(`${key} = ?`)
+          params.push(value as string | number)
+        }
       }
+
+      if (updateFields.length === 0) {
+        return c.json({ error: "Tidak ada field yang valid untuk diperbarui" }, 400)
+      }
+
+      updateFields.push('waktu_diperbarui = datetime("now")')
+      updateFields.push("id_pengguna = ?")
+      params.push(user.userId)
+      params.push(suratId)
+      params.push(updates.tahun_pajak)
+
+      const query = `UPDATE surat_pbb_tahun SET ${updateFields.join(", ")} WHERE id_surat_pbb = ? AND tahun_pajak = ?`
+      await c.env.DB.prepare(query)
+        .bind(...params)
+        .run()
+
+      return c.json({ message: "Status PBB berhasil diperbarui" })
+    } else {
+      // Update master surat_pbb
+      const allowedFields = [
+        "nomor_objek_pajak",
+        "nama_wajib_pajak",
+        "alamat_wajib_pajak",
+        "alamat_objek_pajak",
+        "luas_tanah",
+        "luas_bangunan",
+        "id_dusun",
+      ]
+
+      const updateFields: string[] = []
+      const params: (string | number)[] = []
+
+      for (const [key, value] of Object.entries(updates)) {
+        if (allowedFields.includes(key)) {
+          updateFields.push(`${key} = ?`)
+          params.push(value as string | number)
+        }
+      }
+
+      if (updateFields.length === 0) {
+        return c.json({ error: "Tidak ada field yang valid untuk diperbarui" }, 400)
+      }
+
+      updateFields.push('waktu_diperbarui = datetime("now")')
+      params.push(suratId)
+
+      const query = `UPDATE surat_pbb SET ${updateFields.join(", ")} WHERE id = ?`
+      await c.env.DB.prepare(query)
+        .bind(...params)
+        .run()
+
+      return c.json({ message: "Surat PBB berhasil diperbarui" })
     }
-
-    if (updateFields.length === 0) {
-      return c.json({ error: "Tidak ada field yang valid untuk diperbarui" }, 400)
-    }
-
-    updateFields.push('waktu_diperbarui = datetime("now")')
-    updateFields.push("id_pengguna = ?")
-    params.push(user.userId)
-    params.push(suratId)
-
-    const query = `UPDATE surat_pbb SET ${updateFields.join(", ")} WHERE id = ?`
-    await c.env.DB.prepare(query)
-      .bind(...params)
-      .run()
-
-    return c.json({ message: "Surat PBB berhasil diperbarui" })
   } catch (error) {
     console.error(error)
     return c.json({ error: "Terjadi kesalahan server" }, 500)
