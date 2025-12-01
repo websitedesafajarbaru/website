@@ -30,7 +30,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const checkAuth = async () => {
     try {
-      const profile = await apiRequest<{ id: string; nama_lengkap: string; roles: string }>("/api/auth/profile")
+      const profile = await apiRequest<{ id: string; nama_lengkap: string; roles: string }>(
+        "/api/auth/profile",
+        {},
+        undefined,
+        true // Skip alert on initial auth check
+      )
       setUser(profile)
     } catch (error) {
       console.error("Check auth error:", error)

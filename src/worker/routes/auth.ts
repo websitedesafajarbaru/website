@@ -35,14 +35,14 @@ authRoutes.post("/login", async (c) => {
 
     // Buat session ID unik
     const sessionId = crypto.randomUUID()
-    const expiresAt = Date.now() + 30 * 24 * 60 * 60 * 1000 // 30 hari dalam milliseconds
+    const expiresAt = Date.now() + 7 * 24 * 60 * 60 * 1000 // 7 hari dalam milliseconds
 
     // Simpan session ke KV dengan TTL
     await c.env.KV.put(`session:${sessionId}`, JSON.stringify({
       userId: user.id,
       expiresAt
     }), {
-      expirationTtl: 30 * 24 * 60 * 60 // 30 hari dalam detik
+      expirationTtl: 7 * 24 * 60 * 60 // 7 hari dalam detik
     })
 
     // Simpan mapping user ke sessions untuk cleanup saat user dihapus
@@ -52,7 +52,7 @@ authRoutes.post("/login", async (c) => {
     sessionList.push(sessionId)
 
     await c.env.KV.put(userSessionsKey, JSON.stringify(sessionList), {
-      expirationTtl: 30 * 24 * 60 * 60 // 30 hari dalam detik
+      expirationTtl: 7 * 24 * 60 * 60 // 7 hari dalam detik
     })
 
     // Set cookie
@@ -60,7 +60,7 @@ authRoutes.post("/login", async (c) => {
       httpOnly: true,
       secure: c.req.url.startsWith("https://"), // Hanya secure di production
       sameSite: "lax", // Lebih permissive untuk development
-      maxAge: 30 * 24 * 60 * 60, // 30 hari dalam detik
+      maxAge: 7 * 24 * 60 * 60, // 7 hari dalam detik
       path: "/",
     })
 
@@ -95,7 +95,7 @@ authRoutes.post("/logout", async (c) => {
           const sessionList = JSON.parse(existingSessions).filter((id: string) => id !== sessionId)
           if (sessionList.length > 0) {
             await c.env.KV.put(userSessionsKey, JSON.stringify(sessionList), {
-              expirationTtl: 30 * 24 * 60 * 60
+              expirationTtl: 7 * 24 * 60 * 60
             })
           } else {
             await c.env.KV.delete(userSessionsKey)

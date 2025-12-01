@@ -16,7 +16,7 @@ export class ApiError extends Error {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare const Swal: any
 
-export async function apiRequest<T = unknown>(url: string, options: RequestInit = {}, logout?: () => void): Promise<T> {
+export async function apiRequest<T = unknown>(url: string, options: RequestInit = {}, logout?: () => void, skipSessionExpiredAlert?: boolean): Promise<T> {
   const headers = new Headers({
     "Content-Type": "application/json",
     ...(options.headers as Record<string, string>),
@@ -32,15 +32,17 @@ export async function apiRequest<T = unknown>(url: string, options: RequestInit 
     })
 
     if (response.status === 401) {
-      await Swal.fire({
-        icon: "warning",
-        title: "Sesi Berakhir",
-        text: "Sesi Anda telah berakhir. Silakan login kembali.",
-        timer: 3000,
-        showConfirmButton: false,
-        showCloseButton: true,
-        allowOutsideClick: false,
-      })
+      if (!skipSessionExpiredAlert) {
+        await Swal.fire({
+          icon: "warning",
+          title: "Sesi Berakhir",
+          text: "Sesi Anda telah berakhir. Silakan login kembali.",
+          timer: 3000,
+          showConfirmButton: false,
+          showCloseButton: true,
+          allowOutsideClick: false,
+        })
+      }
       if (logout) {
         logout()
       }
@@ -62,29 +64,31 @@ export async function apiRequest<T = unknown>(url: string, options: RequestInit 
 }
 
 export const api = {
-  get: <T = unknown>(url: string, logout?: () => void) => apiRequest<T>(url, { method: "GET" }, logout),
+  get: <T = unknown>(url: string, logout?: () => void, skipSessionExpiredAlert?: boolean) => apiRequest<T>(url, { method: "GET" }, logout, skipSessionExpiredAlert),
 
-  post: <T = unknown>(url: string, data?: unknown, logout?: () => void) =>
+  post: <T = unknown>(url: string, data?: unknown, logout?: () => void, skipSessionExpiredAlert?: boolean) =>
     apiRequest<T>(
       url,
       {
         method: "POST",
         body: data ? JSON.stringify(data) : undefined,
       },
-      logout
+      logout,
+      skipSessionExpiredAlert
     ),
 
-  put: <T = unknown>(url: string, data?: unknown, logout?: () => void) =>
+  put: <T = unknown>(url: string, data?: unknown, logout?: () => void, skipSessionExpiredAlert?: boolean) =>
     apiRequest<T>(
       url,
       {
         method: "PUT",
         body: data ? JSON.stringify(data) : undefined,
       },
-      logout
+      logout,
+      skipSessionExpiredAlert
     ),
 
-  delete: <T = unknown>(url: string, logout?: () => void) => apiRequest<T>(url, { method: "DELETE" }, logout),
+  delete: <T = unknown>(url: string, logout?: () => void, skipSessionExpiredAlert?: boolean) => apiRequest<T>(url, { method: "DELETE" }, logout, skipSessionExpiredAlert),
 }
 
 const API_BASE_URL = "/api"
