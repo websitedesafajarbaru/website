@@ -73,6 +73,7 @@ export interface SuratPBB {
   tahun_waktu_diperbarui?: string
   nama_dusun?: string
   nama_perangkat?: string
+  id_pengguna?: string
   // For detailed view with all years
   tahun_data?: SuratPBBTahun[]
 }

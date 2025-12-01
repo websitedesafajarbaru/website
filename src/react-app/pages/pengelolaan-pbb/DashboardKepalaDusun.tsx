@@ -37,7 +37,7 @@ interface DusunInfo {
 }
 
 export function DashboardKepalaDusun() {
-  const { user, apiRequest } = useAuth()
+  const { user } = useAuth()
   const [activeTab, setActiveTab] = useState<"ketua-rt" | "laporan" | "tambah-surat-pbb" | "edit-ketua-rt">("laporan")
   const [ketuaRT, setKetuaRT] = useState<PerangkatDesa[]>([])
   const [dusunInfo, setDusunInfo] = useState<DusunInfo | null>(null)

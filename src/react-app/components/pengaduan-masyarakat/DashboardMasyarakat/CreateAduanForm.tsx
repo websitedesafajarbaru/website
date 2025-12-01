@@ -104,9 +104,9 @@ export function CreateAduanForm({ formData, setFormData, onSubmit, onCancel }: C
                   })
                   
                   // Limit image width to 200px on paste/insert
-                  editor.on("NodeChange", (e: any) => {
+                  editor.on("NodeChange", (e: { element: HTMLElement }) => {
                     if (e.element.nodeName === "IMG") {
-                      const img = e.element
+                      const img = e.element as HTMLImageElement
                       if (!img.style.maxWidth || parseInt(img.style.maxWidth) > 200) {
                         img.style.maxWidth = "200px"
                         img.style.height = "auto"

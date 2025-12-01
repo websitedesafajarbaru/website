@@ -142,7 +142,7 @@ export function DashboardAdminPBB() {
       "Luas Bangunan (m²)": s.luas_bangunan,
       "Tahun Pajak": s.tahun_pajak,
       "Jumlah Pajak (Rp)": Number(s.jumlah_pajak_terhutang),
-      "Status Pembayaran": s.status_pembayaran.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()),
+      "Status Pembayaran": (s.status_pembayaran || "belum_bayar").replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()),
       "Dusun": s.nama_dusun,
       "Perangkat Desa": s.nama_perangkat || "-",
       "Waktu Dibuat": new Date(s.waktu_dibuat).toLocaleString("id-ID"),
@@ -225,7 +225,7 @@ export function DashboardAdminPBB() {
       `${s.luas_tanah} m²`,
       `${s.luas_bangunan} m²`,
       `Rp ${Number(s.jumlah_pajak_terhutang).toLocaleString("id-ID")}`,
-      s.status_pembayaran.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()),
+      (s.status_pembayaran || "belum_bayar").replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()),
       s.nama_dusun || "-",
     ])
 

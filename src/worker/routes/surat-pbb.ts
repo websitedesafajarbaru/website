@@ -82,7 +82,7 @@ suratPBBRoutes.post("/", async (c) => {
     }
 
     // Check if surat_pbb already exists for this nomor_objek_pajak
-    let suratPBB = await c.env.DB.prepare("SELECT id FROM surat_pbb WHERE nomor_objek_pajak = ?")
+    const suratPBB = await c.env.DB.prepare("SELECT id FROM surat_pbb WHERE nomor_objek_pajak = ?")
       .bind(nomor_objek_pajak)
       .first()
 

@@ -38,9 +38,9 @@ export function DetailDusunLaporan({ dusunId, onBack }: DetailDusunLaporanProps)
         surat.nomor_objek_pajak.toLowerCase().includes(searchLower) ||
         surat.nama_wajib_pajak.toLowerCase().includes(searchLower) ||
         (surat.alamat_objek_pajak || "").toLowerCase().includes(searchLower) ||
-        surat.tahun_pajak.toString().includes(searchLower) ||
-        surat.jumlah_pajak_terhutang.toString().includes(searchLower) ||
-        formatStatusPembayaran(surat.status_pembayaran).toLowerCase().includes(searchLower)
+        (surat.tahun_pajak?.toString() || "").includes(searchLower) ||
+        (surat.jumlah_pajak_terhutang?.toString() || "").includes(searchLower) ||
+        formatStatusPembayaran(surat.status_pembayaran || "belum_bayar").toLowerCase().includes(searchLower)
       )
     }) || []
 
@@ -288,7 +288,7 @@ export function DetailDusunLaporan({ dusunId, onBack }: DetailDusunLaporanProps)
                       <td>{surat.tahun_pajak}</td>
                       <td>Rp {Number(surat.jumlah_pajak_terhutang).toLocaleString("id-ID")}</td>
                       <td>
-                        <span className={`badge bg-${getStatusPembayaranColor(surat.status_pembayaran)}`}>{formatStatusPembayaran(surat.status_pembayaran)}</span>
+                        <span className={`badge bg-${getStatusPembayaranColor(surat.status_pembayaran || "belum_bayar")}`}>{formatStatusPembayaran(surat.status_pembayaran || "belum_bayar")}</span>
                       </td>
                       <td>
                         <button className="btn btn-sm btn-outline-primary" onClick={() => handleSuratClick(surat)}>
@@ -331,7 +331,7 @@ export function DetailDusunLaporan({ dusunId, onBack }: DetailDusunLaporanProps)
               <div className="col-md-6">
                 <label className="form-label text-muted small mb-1">Status Pembayaran</label>
                 <div>
-                  <span className={`badge bg-${getStatusPembayaranColor(selectedSurat.status_pembayaran)}`}>{formatStatusPembayaran(selectedSurat.status_pembayaran)}</span>
+                  <span className={`badge bg-${getStatusPembayaranColor(selectedSurat.status_pembayaran || "belum_bayar")}`}>{formatStatusPembayaran(selectedSurat.status_pembayaran || "belum_bayar")}</span>
                 </div>
               </div>
               <div className="col-12">

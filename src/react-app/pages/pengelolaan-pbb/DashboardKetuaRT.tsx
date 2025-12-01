@@ -23,7 +23,7 @@ interface DusunStatistik {
 }
 
 export function DashboardKetuaRT() {
-  const { user, apiRequest } = useAuth()
+  const { user } = useAuth()
   const [suratPBB, setSuratPBB] = useState<SuratPBB[]>([])
   const [activeYear, setActiveYear] = useState<number>(new Date().getFullYear())
   const [dusunId, setDusunId] = useState<number | null>(null)
