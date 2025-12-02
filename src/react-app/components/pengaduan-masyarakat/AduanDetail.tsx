@@ -137,25 +137,17 @@ export function AduanDetail({ aduan, isAdmin = false, tanggapan, setTanggapan, o
                   <div className={`card border-left-${t.roles === "masyarakat" ? "info" : "primary"}`}>
                     <div className="card-body p-3">
                       <div className="d-flex flex-column flex-sm-row justify-content-between align-items-start mb-2 gap-2">
-                        <div className="d-flex align-items-center flex-grow-1" style={{ minWidth: 0 }}>
-                          <div
-                            className={`bg-${t.roles === "masyarakat" ? "info" : "primary"} text-white rounded-circle d-flex align-items-center justify-content-center me-2 flex-shrink-0`}
-                            style={{ width: "32px", height: "32px", fontSize: "14px" }}
-                          >
-                            {t.nama_lengkap.charAt(0).toUpperCase()}
-                          </div>
-                          <div className="flex-grow-1" style={{ minWidth: 0 }}>
-                            <strong className="d-block text-break">{t.nama_lengkap}</strong>
-                            <small className="text-muted d-block">
-                              <i className="bi bi-clock me-1"></i>
-                              <span className="text-break">{formatToWIB(t.waktu_dibuat)}</span>
-                              {t.roles && (
-                                <span className={`badge ms-2 bg-${t.roles === "masyarakat" ? "info" : "success"} text-white`}>
-                                  {t.roles === "masyarakat" ? "Masyarakat" : "Admin"}
-                                </span>
-                              )}
-                            </small>
-                          </div>
+                        <div className="flex-grow-1" style={{ minWidth: 0 }}>
+                          <strong className="d-block text-break">{t.nama_lengkap}</strong>
+                          <small className="text-muted d-block">
+                            <i className="bi bi-clock me-1"></i>
+                            <span className="text-break">{formatToWIB(t.waktu_dibuat)}</span>
+                            {t.roles && (
+                              <span className={`badge ms-2 bg-${t.roles === "masyarakat" ? "info" : "success"} text-white`}>
+                                {t.roles === "masyarakat" ? "Masyarakat" : "Admin"}
+                              </span>
+                            )}
+                          </small>
                         </div>
                         <span className={`badge bg-${t.roles === "masyarakat" ? "info" : "success"} flex-shrink-0`}>Tanggapan #{index + 1}</span>
                       </div>

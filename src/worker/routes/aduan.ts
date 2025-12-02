@@ -151,13 +151,13 @@ aduanRoutes.post("/:id/tanggapan", authMiddleware, async (c) => {
       return c.json({ error: "Aduan tidak ditemukan" }, 404)
     }
 
-    if (user.roles !== "admin" && aduan.id_masyarakat !== user.userId) {
+    if (!([\"admin\", \"kepala_dusun\", \"ketua_rt\"].includes(user.roles)) && aduan.id_masyarakat !== user.userId) {
       return c.json({ error: "Tidak memiliki akses untuk memberikan tanggapan" }, 403)
     }
 
     const tanggapanId = generateId()
 
-    const perangkatDesa = user.roles === "admin" ? await c.env.DB.prepare("SELECT id FROM perangkat_desa WHERE id = ?").bind(user.userId).first() : null
+    const perangkatDesa = ["admin", "kepala_dusun", "ketua_rt"].includes(user.roles) ? await c.env.DB.prepare("SELECT id FROM perangkat_desa WHERE id = ?").bind(user.userId).first() : null
 
     await c.env.DB.prepare("INSERT INTO tanggapan_aduan (id, isi_tanggapan, id_aduan, id_perangkat_desa, id_pengguna) VALUES (?, ?, ?, ?, ?)")
       .bind(tanggapanId, isi_tanggapan, aduanId, perangkatDesa?.id || null, user.userId)
