@@ -75,7 +75,7 @@ aduanRoutes.get("/:id", authMiddleware, async (c) => {
     }
 
     const tanggapan = await c.env.DB.prepare(
-      "SELECT t.*, p.nama_lengkap, p.roles FROM tanggapan_aduan t JOIN pengguna p ON t.id_pengguna = p.id WHERE t.id_aduan = ? ORDER BY t.waktu_dibuat DESC"
+      "SELECT t.*, p.nama_lengkap, p.roles, pd.jabatan, d.nama_dusun FROM tanggapan_aduan t JOIN pengguna p ON t.id_pengguna = p.id LEFT JOIN perangkat_desa pd ON t.id_perangkat_desa = pd.id LEFT JOIN dusun d ON pd.id_dusun = d.id WHERE t.id_aduan = ? ORDER BY t.waktu_dibuat DESC"
     )
       .bind(aduanId)
       .all()

@@ -132,7 +132,7 @@ export function AduanDetail({ aduan, isAdmin = false, tanggapan, setTanggapan, o
               {isAdmin ? `Riwayat Tanggapan (${sortedTanggapan.length})` : `Tanggapan dari Perangkat Desa (${sortedTanggapan.length})`}
             </h6>
             <div className="timeline">
-              {sortedTanggapan.map((t: { id: string; nama_lengkap: string; waktu_dibuat: string; isi_tanggapan: string; roles?: string }, index: number) => (
+              {sortedTanggapan.map((t: { id: string; nama_lengkap: string; waktu_dibuat: string; isi_tanggapan: string; roles?: string; jabatan?: string; nama_dusun?: string }) => (
                 <div key={t.id} className="mb-3">
                   <div className={`card border-left-${t.roles === "masyarakat" ? "info" : "primary"}`}>
                     <div className="card-body p-3">
@@ -144,12 +144,18 @@ export function AduanDetail({ aduan, isAdmin = false, tanggapan, setTanggapan, o
                             <span className="text-break">{formatToWIB(t.waktu_dibuat)}</span>
                             {t.roles && (
                               <span className={`badge ms-2 bg-${t.roles === "masyarakat" ? "info" : "success"} text-white`}>
-                                {t.roles === "masyarakat" ? "Masyarakat" : "Admin"}
+                                {t.roles === "masyarakat" 
+                                  ? "Masyarakat" 
+                                  : isAdmin 
+                                    ? "Admin" 
+                                    : t.jabatan && t.nama_dusun
+                                      ? `${t.jabatan === "kepala_dusun" ? "Kepala Dusun" : "Ketua RT"} - ${t.nama_dusun}`
+                                      : "Perangkat Desa"
+                                }
                               </span>
                             )}
                           </small>
                         </div>
-                        <span className={`badge bg-${t.roles === "masyarakat" ? "info" : "success"} flex-shrink-0`}>Tanggapan #{index + 1}</span>
                       </div>
                       <div className="mb-0 mt-2 overflow-auto" style={{ lineHeight: "1.8", wordBreak: "break-word" }} dangerouslySetInnerHTML={{ __html: t.isi_tanggapan }} />
                     </div>
