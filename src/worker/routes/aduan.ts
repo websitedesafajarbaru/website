@@ -156,7 +156,7 @@ aduanRoutes.post("/:id/tanggapan", authMiddleware, async (c) => {
       return c.json({ error: "Aduan tidak ditemukan" }, 404)
     }
 
-    if (!([\"admin\", \"kepala_dusun\", \"ketua_rt\"].includes(user.roles)) && aduan.id_masyarakat !== user.userId) {
+    if (!(["admin", "kepala_dusun", "ketua_rt"].includes(user.roles)) && aduan.id_masyarakat !== user.userId) {
       return c.json({ error: "Tidak memiliki akses untuk memberikan tanggapan" }, 403)
     }
 
