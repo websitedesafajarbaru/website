@@ -366,9 +366,8 @@ export function DashboardAdminPBB() {
   }, [])
 
   useEffect(() => {
-    const currentYear = new Date().getFullYear()
     const years = []
-    for (let year = currentYear - 5; year <= currentYear + 2; year++) {
+    for (let year = 2025; year <= 2050; year++) {
       years.push(year)
     }
     setAvailableYears(years)
