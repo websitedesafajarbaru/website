@@ -5,6 +5,7 @@ import { DashboardHeader } from "../../components/pengaduan-masyarakat/Dashboard
 import { AduanDetail } from "../../components/pengaduan-masyarakat/AduanDetail"
 import { AduanTable } from "../../components/pengaduan-masyarakat/AduanTable"
 import { FilterSection } from "../../components/pengaduan-masyarakat/DashboardAdmin"
+import { apiRequest } from "../../utils/api"
 
 declare global {
   interface Window {
@@ -40,17 +41,8 @@ export function DashboardMasyarakat() {
   const fetchAduan = async () => {
     try {
       setLoading(true)
-      const token = localStorage.getItem("token")
-      const response = await fetch("/api/aduan/saya", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        setAduan(data)
-      }
+      const data = await apiRequest<Aduan[]>("/api/aduan/saya")
+      setAduan(data)
     } catch (error) {
       console.error("Error:", error)
     } finally {
@@ -60,26 +52,14 @@ export function DashboardMasyarakat() {
 
   const fetchDetail = async (id: string) => {
     try {
-      const token = localStorage.getItem("token")
-      const response = await fetch(`/api/aduan/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      const data = await apiRequest<Aduan>(`/api/aduan/${id}`)
+      setSelectedAduan(data)
+      setTanggapan("")
+      setActiveTab("detail")
+      // Mark as read
+      await apiRequest(`/api/aduan/${id}/dibaca`, {
+        method: "POST",
       })
-
-      if (response.ok) {
-        const data = await response.json()
-        setSelectedAduan(data)
-        setTanggapan("")
-        setActiveTab("detail")
-        // Mark as read
-        await fetch(`/api/aduan/${id}/dibaca`, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-      }
     } catch (error) {
       console.error("Error:", error)
     }
@@ -88,36 +68,22 @@ export function DashboardMasyarakat() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
-      const token = localStorage.getItem("token")
-      const response = await fetch("/api/aduan", {
+      await apiRequest("/api/aduan", {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
         body: JSON.stringify({
           judul: formData.judul,
           isi: formData.isi_aduan,
           kategori: formData.kategori,
         }),
       })
-
-      if (response.ok) {
-        window.Swal.fire({
-          icon: "success",
-          title: "Berhasil",
-          text: "Pengaduan berhasil ditambahkan!",
-        })
-        setFormData({ judul: "", kategori: "", isi_aduan: "" })
-        setActiveTab("daftar")
-        fetchAduan()
-      } else {
-        window.Swal.fire({
-          icon: "error",
-          title: "Gagal",
-          text: "Pengaduan gagal ditambahkan!",
-        })
-      }
+      window.Swal.fire({
+        icon: "success",
+        title: "Berhasil",
+        text: "Pengaduan berhasil ditambahkan!",
+      })
+      setFormData({ judul: "", kategori: "", isi_aduan: "" })
+      setActiveTab("daftar")
+      fetchAduan()
     } catch (error) {
       console.error("Error:", error)
       window.Swal.fire({
@@ -141,31 +107,17 @@ export function DashboardMasyarakat() {
     if (!selectedAduan) return
 
     try {
-      const token = localStorage.getItem("token")
-      const response = await fetch(`/api/aduan/${selectedAduan.id}/tanggapan`, {
+      await apiRequest(`/api/aduan/${selectedAduan.id}/tanggapan`, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
         body: JSON.stringify({ isi_tanggapan: tanggapan }),
       })
-
-      if (response.ok) {
-        window.Swal.fire({
-          icon: "success",
-          title: "Berhasil!",
-          text: "Balasan berhasil dikirim",
-        })
-        setTanggapan("")
-        fetchDetail(selectedAduan.id)
-      } else {
-        window.Swal.fire({
-          icon: "error",
-          title: "Gagal!",
-          text: "Gagal mengirim balasan",
-        })
-      }
+      window.Swal.fire({
+        icon: "success",
+        title: "Berhasil!",
+        text: "Balasan berhasil dikirim",
+      })
+      setTanggapan("")
+      fetchDetail(selectedAduan.id)
     } catch (error) {
       console.error("Error:", error)
       window.Swal.fire({

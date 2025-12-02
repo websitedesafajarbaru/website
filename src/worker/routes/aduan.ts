@@ -65,7 +65,12 @@ aduanRoutes.get("/:id", authMiddleware, async (c) => {
       return c.json({ error: "Aduan tidak ditemukan" }, 404)
     }
 
-    if (!(["admin", "kepala_dusun", "ketua_rt"].includes(user.roles)) && aduan.id_masyarakat !== user.userId) {
+    // Allow admin, kepala_dusun, and ketua_rt to view any aduan
+    // Masyarakat can only view their own aduan
+    const isPerangkatDesa = ["admin", "kepala_dusun", "ketua_rt"].includes(user.roles)
+    const isAduanOwner = aduan.id_masyarakat === user.userId
+    
+    if (!isPerangkatDesa && !isAduanOwner) {
       return c.json({ error: "Tidak memiliki akses" }, 403)
     }
 
@@ -188,7 +193,13 @@ aduanRoutes.post("/:id/dibaca", authMiddleware, async (c) => {
       return c.json({ error: "Aduan tidak ditemukan" }, 404)
     }
 
-    if (!["admin", "kepala_dusun", "ketua_rt"].includes(user.roles) && aduan.id_masyarakat !== user.userId) {
+    // Allow admin, kepala_dusun, and ketua_rt to mark any aduan as read
+    // Masyarakat can only mark their own aduan as read
+    const isPerangkatDesa = ["admin", "kepala_dusun", "ketua_rt"].includes(user.roles)
+    const isAduanOwner = aduan.id_masyarakat === user.userId
+    
+    if (!isPerangkatDesa && !isAduanOwner) {
+      console.log("Access denied for user:", user.userId, "roles:", user.roles, "aduan owner:", aduan.id_masyarakat)
       return c.json({ error: "Tidak memiliki akses" }, 403)
     }
 
