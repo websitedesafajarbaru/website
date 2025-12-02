@@ -188,7 +188,7 @@ aduanRoutes.post("/:id/dibaca", authMiddleware, async (c) => {
       return c.json({ error: "Aduan tidak ditemukan" }, 404)
     }
 
-    if (user.roles !== "admin" && aduan.id_masyarakat !== user.userId) {
+    if (!["admin", "kepala_dusun", "ketua_rt"].includes(user.roles) && aduan.id_masyarakat !== user.userId) {
       return c.json({ error: "Tidak memiliki akses" }, 403)
     }
 
