@@ -38,7 +38,7 @@ interface DusunInfo {
 
 export function DashboardKepalaDusun() {
   const { user } = useAuth()
-  const [activeTab, setActiveTab] = useState<"ketua-rt" | "laporan" | "tambah-surat-pbb" | "edit-ketua-rt">("laporan")
+  const [activeTab, setActiveTab] = useState<"ketua-rt" | "laporan" | "tambah-surat-pbb" | "edit-ketua-rt" | "daftar-surat">("laporan")
   const [ketuaRT, setKetuaRT] = useState<PerangkatDesa[]>([])
   const [dusunInfo, setDusunInfo] = useState<DusunInfo | null>(null)
   const [dusunId, setDusunId] = useState<number | null>(null)
@@ -46,8 +46,6 @@ export function DashboardKepalaDusun() {
   const [activeYear, setActiveYear] = useState<number>(new Date().getFullYear())
   const [selectedSurat, setSelectedSurat] = useState<SuratPBB | null>(null)
   const [searchKetuaRT, setSearchKetuaRT] = useState("")
-  const [searchSuratPBB, setSearchSuratPBB] = useState("")
-  const [filterStatusSurat, setFilterStatusSurat] = useState("semua")
   const [isEditing, setIsEditing] = useState(false)
   const [editForm, setEditForm] = useState<Partial<SuratPBB>>({})
   const [selectedKetuaRTForEdit, setSelectedKetuaRTForEdit] = useState<PerangkatDesa | null>(null)
@@ -69,6 +67,8 @@ export function DashboardKepalaDusun() {
   })
   const [ketuaRTStats, setKetuaRTStats] = useState<{ totalSuratByRT: number }>({ totalSuratByRT: 0 })
   const [tokenKetuaRT, setTokenKetuaRT] = useState<string | null>(null)
+  const [searchSuratPBB, setSearchSuratPBB] = useState("")
+  const [filterStatusSurat, setFilterStatusSurat] = useState("semua")
   
   // Cache flag to prevent unnecessary fetches
   const [hasDataFetched, setHasDataFetched] = useState(false)

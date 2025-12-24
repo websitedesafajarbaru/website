@@ -51,88 +51,86 @@ export function FormTambahSuratPBB({ suratForm, onFormChange, onSubmit, onCancel
       </div>
       <div className="card-body">
         <form onSubmit={onSubmit}>
-          <div className="row g-3">
-            {showDusunField && (
-              <div className="col-md-6">
-                <label className="form-label">
-                  Dusun <span className="text-danger">*</span>
-                </label>
-                <select className="form-select" value={suratForm.dusun_id} onChange={(e) => onFormChange("dusun_id", e.target.value)} required>
-                  <option value="">Pilih Dusun</option>
-                  {dusunOptions.map((d) => (
-                    <option key={d.id} value={d.id}>
-                      {d.nama_dusun}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-            <div className="col-md-6">
+          {showDusunField && (
+            <div className="mb-3">
               <label className="form-label">
-                Nomor Objek Pajak <span className="text-danger">*</span>
+                Dusun <span className="text-danger">*</span>
               </label>
-              <input type="text" className="form-control" value={suratForm.nomor_objek_pajak} onChange={(e) => onFormChange("nomor_objek_pajak", e.target.value)} required />
-            </div>
-            <div className="col-md-6">
-              <label className="form-label">
-                Tahun Pajak <span className="text-danger">*</span>
-              </label>
-              <input type="number" className="form-control" value={suratForm.tahun_pajak} readOnly />
-            </div>
-            <div className="col-md-6">
-              <label className="form-label">
-                Nama Wajib Pajak <span className="text-danger">*</span>
-              </label>
-              <input type="text" className="form-control" value={suratForm.nama_wajib_pajak} onChange={(e) => onFormChange("nama_wajib_pajak", e.target.value)} required />
-            </div>
-            <div className="col-md-6">
-              <label className="form-label">
-                Status Pembayaran <span className="text-danger">*</span>
-              </label>
-              <select className="form-select" value={suratForm.status_pembayaran} onChange={(e) => onFormChange("status_pembayaran", e.target.value)} required>
-                {statusOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
+              <select className="form-select" value={suratForm.dusun_id} onChange={(e) => onFormChange("dusun_id", e.target.value)} required>
+                <option value="">Pilih Dusun</option>
+                {dusunOptions.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.nama_dusun}
                   </option>
                 ))}
               </select>
             </div>
-            <div className="col-12">
-              <label className="form-label">
-                Alamat Wajib Pajak <span className="text-danger">*</span>
-              </label>
-              <textarea className="form-control" rows={2} value={suratForm.alamat_wajib_pajak} onChange={(e) => onFormChange("alamat_wajib_pajak", e.target.value)} required />
-            </div>
-            <div className="col-12">
-              <label className="form-label">
-                Alamat Objek Pajak <span className="text-danger">*</span>
-              </label>
-              <textarea className="form-control" rows={2} value={suratForm.alamat_objek_pajak} onChange={(e) => onFormChange("alamat_objek_pajak", e.target.value)} required />
-            </div>
-            <div className="col-md-6">
-              <label className="form-label">
-                Luas Tanah (m²) <span className="text-danger">*</span>
-              </label>
-              <input type="number" className="form-control" value={suratForm.luas_tanah} onChange={(e) => onFormChange("luas_tanah", e.target.value)} required />
-            </div>
-            <div className="col-md-6">
-              <label className="form-label">
-                Luas Bangunan (m²) <span className="text-danger">*</span>
-              </label>
-              <input type="number" className="form-control" value={suratForm.luas_bangunan} onChange={(e) => onFormChange("luas_bangunan", e.target.value)} required />
-            </div>
-            <div className="col-md-6">
-              <label className="form-label">
-                Jumlah Pajak Terhutang <span className="text-danger">*</span>
-              </label>
-              <input
-                type="number"
-                className="form-control"
-                value={suratForm.jumlah_pajak_terhutang}
-                onChange={(e) => onFormChange("jumlah_pajak_terhutang", e.target.value)}
-                required
-              />
-            </div>
+          )}
+          <div className="mb-3">
+            <label className="form-label">
+              Nomor Objek Pajak <span className="text-danger">*</span>
+            </label>
+            <input type="text" className="form-control" value={suratForm.nomor_objek_pajak} onChange={(e) => onFormChange("nomor_objek_pajak", e.target.value)} required />
+          </div>
+          <div className="mb-3">
+            <label className="form-label">
+              Tahun Pajak <span className="text-danger">*</span>
+            </label>
+            <input type="number" className="form-control" value={suratForm.tahun_pajak} readOnly />
+          </div>
+          <div className="mb-3">
+            <label className="form-label">
+              Nama Wajib Pajak <span className="text-danger">*</span>
+            </label>
+            <input type="text" className="form-control" value={suratForm.nama_wajib_pajak} onChange={(e) => onFormChange("nama_wajib_pajak", e.target.value)} required />
+          </div>
+          <div className="mb-3">
+            <label className="form-label">
+              Status Pembayaran <span className="text-danger">*</span>
+            </label>
+            <select className="form-select" value={suratForm.status_pembayaran} onChange={(e) => onFormChange("status_pembayaran", e.target.value)} required>
+              {statusOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="mb-3">
+            <label className="form-label">
+              Alamat Wajib Pajak <span className="text-danger">*</span>
+            </label>
+            <textarea className="form-control" rows={2} value={suratForm.alamat_wajib_pajak} onChange={(e) => onFormChange("alamat_wajib_pajak", e.target.value)} required />
+          </div>
+          <div className="mb-3">
+            <label className="form-label">
+              Alamat Objek Pajak <span className="text-danger">*</span>
+            </label>
+            <textarea className="form-control" rows={2} value={suratForm.alamat_objek_pajak} onChange={(e) => onFormChange("alamat_objek_pajak", e.target.value)} required />
+          </div>
+          <div className="mb-3">
+            <label className="form-label">
+              Luas Tanah (m²) <span className="text-danger">*</span>
+            </label>
+            <input type="number" className="form-control" value={suratForm.luas_tanah} onChange={(e) => onFormChange("luas_tanah", e.target.value)} required />
+          </div>
+          <div className="mb-3">
+            <label className="form-label">
+              Luas Bangunan (m²) <span className="text-danger">*</span>
+            </label>
+            <input type="number" className="form-control" value={suratForm.luas_bangunan} onChange={(e) => onFormChange("luas_bangunan", e.target.value)} required />
+          </div>
+          <div className="mb-3">
+            <label className="form-label">
+              Jumlah Pajak Terhutang <span className="text-danger">*</span>
+            </label>
+            <input
+              type="number"
+              className="form-control"
+              value={suratForm.jumlah_pajak_terhutang}
+              onChange={(e) => onFormChange("jumlah_pajak_terhutang", e.target.value)}
+              required
+            />
           </div>
           <div className="d-flex gap-2 mt-4">
             <button type="submit" className="btn btn-primary">

@@ -22,19 +22,17 @@ export function FormTambahKetuaRT({ form, onFormChange, onSubmit, onCancel }: Fo
       </div>
       <div className="card-body">
         <form onSubmit={onSubmit}>
-          <div className="row g-3">
-            <div className="col-md-6">
-              <label className="form-label">
-                Nama Lengkap <span className="text-danger">*</span>
-              </label>
-              <input type="text" className="form-control" value={form.nama_lengkap} onChange={(e) => onFormChange("nama_lengkap", e.target.value)} required />
-            </div>
-            <div className="col-md-6">
-              <label className="form-label">
-                Password <span className="text-danger">*</span>
-              </label>
-              <input type="password" className="form-control" value={form.password} onChange={(e) => onFormChange("password", e.target.value)} required />
-            </div>
+          <div className="mb-3">
+            <label className="form-label">
+              Nama Lengkap <span className="text-danger">*</span>
+            </label>
+            <input type="text" className="form-control" value={form.nama_lengkap} onChange={(e) => onFormChange("nama_lengkap", e.target.value)} required />
+          </div>
+          <div className="mb-3">
+            <label className="form-label">
+              Password <span className="text-danger">*</span>
+            </label>
+            <input type="password" className="form-control" value={form.password} onChange={(e) => onFormChange("password", e.target.value)} required />
           </div>
           <div className="d-flex gap-2 mt-4">
             <button type="submit" className="btn btn-primary">

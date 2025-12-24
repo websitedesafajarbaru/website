@@ -132,20 +132,14 @@ export function DashboardAdminPBB() {
       [""],
     ]
     
-    // Create data rows
+    // Create data rows with simplified columns
     const dataRows = filteredData.map((s) => ({
-      "Nomor Objek Pajak": s.nomor_objek_pajak,
+      "NOP": s.nomor_objek_pajak,
       "Nama Wajib Pajak": s.nama_wajib_pajak,
       "Alamat Wajib Pajak": s.alamat_wajib_pajak,
-      "Alamat Objek Pajak": s.alamat_objek_pajak,
-      "Luas Tanah (m²)": s.luas_tanah,
-      "Luas Bangunan (m²)": s.luas_bangunan,
+      "Total Pajak Terhutang": Number(s.jumlah_pajak_terhutang),
       "Tahun Pajak": s.tahun_pajak,
-      "Jumlah Pajak (Rp)": Number(s.jumlah_pajak_terhutang),
       "Status Pembayaran": (s.status_pembayaran || "belum_bayar").replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()),
-      "Dusun": s.nama_dusun,
-      "Perangkat Desa": s.nama_perangkat || "-",
-      "Waktu Dibuat": new Date(s.waktu_dibuat).toLocaleString("id-ID"),
     }))
     
     // Create worksheet with header
@@ -154,20 +148,14 @@ export function DashboardAdminPBB() {
     // Append data
     XLSX.utils.sheet_add_json(worksheet, dataRows, { origin: -1 })
     
-    // Set column widths
+    // Set column widths for better readability
     const colWidths = [
-      { wch: 20 }, // NOP
-      { wch: 25 }, // Nama Wajib Pajak
-      { wch: 30 }, // Alamat Wajib Pajak
-      { wch: 30 }, // Alamat Objek Pajak
-      { wch: 15 }, // Luas Tanah
-      { wch: 15 }, // Luas Bangunan
+      { wch: 25 }, // NOP
+      { wch: 30 }, // Nama Wajib Pajak
+      { wch: 40 }, // Alamat Wajib Pajak
+      { wch: 20 }, // Total Pajak Terhutang
       { wch: 12 }, // Tahun Pajak
-      { wch: 18 }, // Jumlah Pajak
-      { wch: 18 }, // Status
-      { wch: 20 }, // Dusun
-      { wch: 25 }, // Perangkat Desa
-      { wch: 20 }, // Waktu Dibuat
+      { wch: 18 }, // Status Pembayaran
     ]
     worksheet['!cols'] = colWidths
     
@@ -210,23 +198,19 @@ export function DashboardAdminPBB() {
     const tableColumn = [
       "NOP",
       "Nama Wajib Pajak",
-      "Alamat Objek Pajak",
-      "Luas Tanah",
-      "Luas Bangunan",
-      "Jumlah Pajak",
-      "Status",
-      "Dusun",
+      "Alamat Wajib Pajak",
+      "Total Pajak Terhutang",
+      "Tahun Pajak",
+      "Status Pembayaran",
     ]
 
     const tableRows = filteredData.map((s) => [
-      s.nomor_objek_pajak,
-      s.nama_wajib_pajak,
-      s.alamat_objek_pajak,
-      `${s.luas_tanah} m²`,
-      `${s.luas_bangunan} m²`,
-      `Rp ${Number(s.jumlah_pajak_terhutang).toLocaleString("id-ID")}`,
+      s.nomor_objek_pajak || "",
+      s.nama_wajib_pajak || "",
+      s.alamat_wajib_pajak || "",
+      `Rp ${Number(s.jumlah_pajak_terhutang || 0).toLocaleString("id-ID")}`,
+      s.tahun_pajak || "",
       (s.status_pembayaran || "belum_bayar").replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()),
-      s.nama_dusun || "-",
     ])
 
     autoTable(doc, {
@@ -234,32 +218,33 @@ export function DashboardAdminPBB() {
       body: tableRows,
       startY: 55,
       styles: { 
-        fontSize: 8,
-        cellPadding: 2,
+        fontSize: 9,
+        cellPadding: 3,
       },
       headStyles: { 
         fillColor: [41, 128, 185],
         fontStyle: 'bold',
         halign: 'center',
+        fontSize: 10,
       },
       alternateRowStyles: {
         fillColor: [245, 245, 245]
       },
-      margin: { left: 14, right: 14 },
+      tableWidth: 'auto',
+      margin: { left: 10, right: 10 },
+      didDrawPage: function(data) {
+        // Add page number
+        doc.setFontSize(8)
+        const pageCount = doc.internal.pages.length - 1
+        const currentPage = data.pageNumber
+        doc.text(
+          `Halaman ${currentPage} dari ${pageCount}`,
+          doc.internal.pageSize.getWidth() / 2,
+          doc.internal.pageSize.getHeight() - 10,
+          { align: 'center' }
+        )
+      }
     })
-    
-    // Add footer with page number
-    const pageCount = doc.internal.pages.length - 1
-    for (let i = 1; i <= pageCount; i++) {
-      doc.setPage(i)
-      doc.setFontSize(8)
-      doc.text(
-        `Halaman ${i} dari ${pageCount}`,
-        doc.internal.pageSize.getWidth() / 2,
-        doc.internal.pageSize.getHeight() - 10,
-        { align: 'center' }
-      )
-    }
 
     const timestamp = new Date().toISOString().slice(0, 10)
     const statusFileName = filterStatusSurat === "semua" ? "semua" : filterStatusSurat
@@ -777,7 +762,10 @@ export function DashboardAdminPBB() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ status_pembayaran: newStatus }),
+        body: JSON.stringify({ 
+          status_pembayaran: newStatus,
+          tahun_pajak: selectedSurat.tahun_pajak 
+        }),
         credentials: "include",
       })
 
@@ -813,10 +801,53 @@ export function DashboardAdminPBB() {
     }
   }
 
-  const handleEditFormChange = (field: string, value: string | number) => {
+  const handleEditFormChange = async (field: string, value: string | number) => {
     setEditForm({ ...editForm, [field]: value })
     if (field === "id_dusun") {
       setSelectedSurat({ ...selectedSurat!, id_dusun: value as number })
+      // Auto-submit dusun change
+      try {
+        const response = await fetch(`/api/surat-pbb/${selectedSurat!.id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ id_dusun: value }),
+          credentials: "include",
+        })
+
+        if (response.ok) {
+          // Update selectedSurat with new dusun info
+          const dusunInfo = dusun.find(d => d.id === value)
+          setSelectedSurat({ 
+            ...selectedSurat!, 
+            id_dusun: value as number,
+            nama_dusun: dusunInfo?.nama_dusun
+          })
+          
+          Swal.fire({
+            title: "Berhasil!",
+            text: "Dusun surat PBB berhasil diperbarui",
+            icon: "success",
+            timer: 2000,
+            showConfirmButton: false,
+          })
+        } else {
+          const error = await response.json()
+          Swal.fire({
+            title: "Error",
+            text: error.error || "Gagal memperbarui dusun",
+            icon: "error",
+          })
+        }
+      } catch (error) {
+        console.error("Error updating dusun:", error)
+        Swal.fire({
+          title: "Error",
+          text: "Terjadi kesalahan saat memperbarui dusun",
+          icon: "error",
+        })
+      }
     }
   }
 
@@ -1187,7 +1218,7 @@ export function DashboardAdminPBB() {
                         <div className="flex-grow-1">
                           <div className="text-muted small mb-1">Total Pajak Terhutang</div>
                           <div className="h4 mb-0">
-                            Rp {laporan.statistik_per_dusun.reduce((sum, stat) => sum + (stat.total_pajak_terhutang || 0), 0).toLocaleString("id-ID")}
+                            Rp {laporan.total_pajak_terhutang_keseluruhan.toLocaleString("id-ID")}
                           </div>
                         </div>
                       </div>
@@ -1216,12 +1247,7 @@ export function DashboardAdminPBB() {
                         <div className="flex-grow-1">
                           <div className="text-muted small mb-1">Persentase Pembayaran</div>
                           <div className="h4 mb-0">
-                            {(() => {
-                              const totalSurat = laporan.statistik_per_dusun.reduce((sum, stat) => sum + (stat.total_surat || 0), 0)
-                              const totalSuratDibayar = laporan.statistik_per_dusun.reduce((sum, stat) => sum + (stat.total_surat_dibayar || 0), 0)
-                              const percentage = totalSurat > 0 ? (totalSuratDibayar / totalSurat) * 100 : 0
-                              return `${percentage.toFixed(1)}%`
-                            })()}
+                            {laporan.persentase_pembayaran_keseluruhan.toFixed(1)}%
                           </div>
                         </div>
                       </div>
@@ -1248,7 +1274,7 @@ export function DashboardAdminPBB() {
                       <div className="d-flex align-items-center">
                         <div className="flex-grow-1">
                           <div className="text-muted small mb-1">Surat Sudah Dibayar</div>
-                          <div className="h4 mb-0">{laporan.statistik_per_dusun.reduce((sum, stat) => sum + (stat.total_surat_dibayar || 0), 0)}</div>
+                          <div className="h4 mb-0">{laporan.total_surat_dibayar_keseluruhan}</div>
                         </div>
                       </div>
                     </div>
@@ -1261,7 +1287,7 @@ export function DashboardAdminPBB() {
                       <div className="d-flex align-items-center">
                         <div className="flex-grow-1">
                           <div className="text-muted small mb-1">Surat Belum Dibayar</div>
-                          <div className="h4 mb-0">{laporan.statistik_per_dusun.reduce((sum, stat) => sum + (stat.total_surat_belum_bayar || 0), 0)}</div>
+                          <div className="h4 mb-0">{laporan.total_surat_belum_bayar_keseluruhan}</div>
                         </div>
                       </div>
                     </div>
@@ -1787,51 +1813,49 @@ export function DashboardAdminPBB() {
           </div>
           <div className="card-body">
             <form onSubmit={updatePerangkatDesa}>
-              <div className="row g-3">
-                <div className="col-md-6">
-                  <label className="form-label">
-                    Nama Lengkap <span className="text-danger">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={perangkatForm.nama_lengkap}
-                    onChange={(e) => setPerangkatForm({ ...perangkatForm, nama_lengkap: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="col-md-6">
-                  <label className="form-label">Password Baru (kosongkan jika tidak ingin mengubah)</label>
-                  <input
-                    type="password"
-                    className="form-control"
-                    value={perangkatForm.password}
-                    onChange={(e) => setPerangkatForm({ ...perangkatForm, password: e.target.value })}
-                    placeholder="Masukkan password baru atau kosongkan"
-                  />
-                </div>
-                <div className="col-md-6">
-                  <label className="form-label">
-                    Jabatan <span className="text-danger">*</span>
-                  </label>
-                  <select className="form-select" value={perangkatForm.jabatan} onChange={(e) => setPerangkatForm({ ...perangkatForm, jabatan: e.target.value })} required>
-                    <option value="kepala_dusun">Kepala Dusun</option>
-                    <option value="ketua_rt">Ketua RT</option>
-                  </select>
-                </div>
-                <div className="col-12">
-                  <label className="form-label">
-                    Dusun <span className="text-danger">*</span>
-                  </label>
-                  <select className="form-select" value={perangkatForm.id_dusun} onChange={(e) => setPerangkatForm({ ...perangkatForm, id_dusun: e.target.value })} required>
-                    <option value="">Pilih Dusun</option>
-                    {dusun.map((d) => (
-                      <option key={d.id} value={d.id}>
-                        {d.nama_dusun}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+              <div className="mb-3">
+                <label className="form-label">
+                  Nama Lengkap <span className="text-danger">*</span>
+                </label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={perangkatForm.nama_lengkap}
+                  onChange={(e) => setPerangkatForm({ ...perangkatForm, nama_lengkap: e.target.value })}
+                  required
+                />
+              </div>
+              <div className="mb-3">
+                <label className="form-label">Password Baru (kosongkan jika tidak ingin mengubah)</label>
+                <input
+                  type="password"
+                  className="form-control"
+                  value={perangkatForm.password}
+                  onChange={(e) => setPerangkatForm({ ...perangkatForm, password: e.target.value })}
+                  placeholder="Masukkan password baru atau kosongkan"
+                />
+              </div>
+              <div className="mb-3">
+                <label className="form-label">
+                  Jabatan <span className="text-danger">*</span>
+                </label>
+                <select className="form-select" value={perangkatForm.jabatan} onChange={(e) => setPerangkatForm({ ...perangkatForm, jabatan: e.target.value })} required>
+                  <option value="kepala_dusun">Kepala Dusun</option>
+                  <option value="ketua_rt">Ketua RT</option>
+                </select>
+              </div>
+              <div className="mb-3">
+                <label className="form-label">
+                  Dusun <span className="text-danger">*</span>
+                </label>
+                <select className="form-select" value={perangkatForm.id_dusun} onChange={(e) => setPerangkatForm({ ...perangkatForm, id_dusun: e.target.value })} required>
+                  <option value="">Pilih Dusun</option>
+                  {dusun.map((d) => (
+                    <option key={d.id} value={d.id}>
+                      {d.nama_dusun}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className="d-flex gap-2 mt-4">
                 <button type="submit" className="btn btn-primary">

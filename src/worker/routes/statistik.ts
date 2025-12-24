@@ -59,13 +59,13 @@ statistikRoutes.get("/dusun/:id", async (c) => {
     }
 
     const totalPajakResult = await c.env.DB.prepare(
-      "SELECT COALESCE(SUM(st.jumlah_pajak_terhutang), 0) as total_pajak_terhutang FROM surat_pbb_tahun st JOIN surat_pbb s ON st.id_surat_pbb = s.id WHERE s.id_dusun = ? AND st.tahun_pajak = ?"
+      "SELECT COALESCE(SUM(jumlah_pajak_terhutang), 0) as total_pajak_terhutang FROM surat_pbb WHERE id_dusun = ?"
     )
-      .bind(dusunId, currentYear)
+      .bind(dusunId)
       .first()
 
     const pajakDibayarResult = await c.env.DB.prepare(
-      "SELECT COALESCE(SUM(st.jumlah_pajak_terhutang), 0) as total_pajak_dibayar FROM surat_pbb_tahun st JOIN surat_pbb s ON st.id_surat_pbb = s.id WHERE s.id_dusun = ? AND st.tahun_pajak = ? AND st.status_pembayaran IN ('bayar_sendiri_di_bank', 'sudah_bayar')"
+      "SELECT COALESCE(SUM(s.jumlah_pajak_terhutang), 0) as total_pajak_dibayar FROM surat_pbb_tahun st JOIN surat_pbb s ON st.id_surat_pbb = s.id WHERE s.id_dusun = ? AND st.tahun_pajak = ? AND st.status_pembayaran IN ('bayar_sendiri_di_bank', 'sudah_bayar')"
     )
       .bind(dusunId, currentYear)
       .first()
@@ -99,9 +99,9 @@ statistikRoutes.get("/dusun/:id", async (c) => {
     const persentasePembayaran = totalPajak > 0 ? (totalDibayar / totalPajak) * 100 : 0
 
     const suratPBBList = await c.env.DB.prepare(
-      "SELECT s.*, st.id as surat_tahun_id, st.tahun_pajak, st.jumlah_pajak_terhutang, st.status_pembayaran, st.waktu_dibuat as tahun_waktu_dibuat, st.waktu_diperbarui as tahun_waktu_diperbarui, d.nama_dusun, p.nama_lengkap as nama_perangkat FROM surat_pbb s JOIN surat_pbb_tahun st ON s.id = st.id_surat_pbb LEFT JOIN dusun d ON s.id_dusun = d.id LEFT JOIN pengguna p ON st.id_pengguna = p.id WHERE s.id_dusun = ? AND st.tahun_pajak = ? ORDER BY st.waktu_dibuat DESC"
+      `SELECT s.*, st.id as surat_tahun_id, COALESCE(st.tahun_pajak, ?) as tahun_pajak, s.jumlah_pajak_terhutang, COALESCE(st.status_pembayaran, 'belum_bayar') as status_pembayaran, st.waktu_dibuat as tahun_waktu_dibuat, st.waktu_diperbarui as tahun_waktu_diperbarui, d.nama_dusun, p.nama_lengkap as nama_perangkat FROM surat_pbb s LEFT JOIN surat_pbb_tahun st ON s.id = st.id_surat_pbb AND st.tahun_pajak = ? LEFT JOIN dusun d ON s.id_dusun = d.id LEFT JOIN pengguna p ON st.id_pengguna = p.id WHERE s.id_dusun = ? AND (st.id IS NOT NULL OR st.id IS NULL) ORDER BY s.waktu_dibuat DESC`
     )
-      .bind(dusunId, currentYear)
+      .bind(currentYear, currentYear, dusunId)
       .all()
 
     return c.json({
@@ -146,13 +146,13 @@ statistikRoutes.get("/laporan", async (c) => {
 
     for (const dusun of dusunList.results) {
       const totalPajakResult = await c.env.DB.prepare(
-        "SELECT COALESCE(SUM(st.jumlah_pajak_terhutang), 0) as total_pajak_terhutang FROM surat_pbb_tahun st JOIN surat_pbb s ON st.id_surat_pbb = s.id WHERE s.id_dusun = ? AND st.tahun_pajak = ?"
+        "SELECT COALESCE(SUM(s.jumlah_pajak_terhutang), 0) as total_pajak_terhutang FROM surat_pbb_tahun st JOIN surat_pbb s ON st.id_surat_pbb = s.id WHERE s.id_dusun = ? AND st.tahun_pajak = ?"
       )
         .bind(dusun.id, currentYear)
         .first()
 
       const pajakDibayarResult = await c.env.DB.prepare(
-        "SELECT COALESCE(SUM(st.jumlah_pajak_terhutang), 0) as total_pajak_dibayar FROM surat_pbb_tahun st JOIN surat_pbb s ON st.id_surat_pbb = s.id WHERE s.id_dusun = ? AND st.tahun_pajak = ? AND st.status_pembayaran IN ('bayar_sendiri_di_bank', 'sudah_bayar')"
+        "SELECT COALESCE(SUM(s.jumlah_pajak_terhutang), 0) as total_pajak_dibayar FROM surat_pbb_tahun st JOIN surat_pbb s ON st.id_surat_pbb = s.id WHERE s.id_dusun = ? AND st.tahun_pajak = ? AND st.status_pembayaran IN ('bayar_sendiri_di_bank', 'sudah_bayar')"
       )
         .bind(dusun.id, currentYear)
         .first()
@@ -194,12 +194,11 @@ statistikRoutes.get("/laporan", async (c) => {
       })
     }
 
-    const totalKeseluruhan = await c.env.DB.prepare("SELECT COALESCE(SUM(jumlah_pajak_terhutang), 0) as total_pajak_terhutang FROM surat_pbb_tahun WHERE tahun_pajak = ?")
-      .bind(currentYear)
+    const totalKeseluruhan = await c.env.DB.prepare("SELECT COALESCE(SUM(jumlah_pajak_terhutang), 0) as total_pajak_terhutang FROM surat_pbb")
       .first()
 
     const totalDibayarKeseluruhan = await c.env.DB.prepare(
-      "SELECT COALESCE(SUM(jumlah_pajak_terhutang), 0) as total_pajak_dibayar FROM surat_pbb_tahun WHERE tahun_pajak = ? AND status_pembayaran IN ('bayar_sendiri_di_bank', 'sudah_bayar')"
+      "SELECT COALESCE(SUM(s.jumlah_pajak_terhutang), 0) as total_pajak_dibayar FROM surat_pbb_tahun st JOIN surat_pbb s ON st.id_surat_pbb = s.id WHERE st.tahun_pajak = ? AND st.status_pembayaran IN ('bayar_sendiri_di_bank', 'sudah_bayar')"
     )
       .bind(currentYear)
       .first()

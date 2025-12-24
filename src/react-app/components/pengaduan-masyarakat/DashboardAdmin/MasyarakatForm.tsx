@@ -70,66 +70,64 @@ export function MasyarakatForm({ masyarakat, onSubmit, onCancel, loading, onTogg
 
   return (
     <form onSubmit={handleSubmit}>
-      <div className="row g-3">
-        <div className="col-md-6">
-          <label htmlFor="nama_lengkap" className="form-label">
-            Nama Lengkap *
-          </label>
-          <input
-            type="text"
-            className={`form-control ${errors.nama_lengkap ? "is-invalid" : ""}`}
-            id="nama_lengkap"
-            value={formData.nama_lengkap}
-            onChange={(e) => handleChange("nama_lengkap", e.target.value)}
-            placeholder="Masukkan nama lengkap"
-          />
-          {errors.nama_lengkap && <div className="invalid-feedback">{errors.nama_lengkap}</div>}
-        </div>
+      <div className="mb-3">
+        <label htmlFor="nama_lengkap" className="form-label">
+          Nama Lengkap *
+        </label>
+        <input
+          type="text"
+          className={`form-control ${errors.nama_lengkap ? "is-invalid" : ""}`}
+          id="nama_lengkap"
+          value={formData.nama_lengkap}
+          onChange={(e) => handleChange("nama_lengkap", e.target.value)}
+          placeholder="Masukkan nama lengkap"
+        />
+        {errors.nama_lengkap && <div className="invalid-feedback">{errors.nama_lengkap}</div>}
+      </div>
 
-        <div className="col-md-6">
-          <label htmlFor="nomor_telepon" className="form-label">
-            Nomor Telepon *
-          </label>
-          <input
-            type="tel"
-            className={`form-control ${errors.nomor_telepon ? "is-invalid" : ""}`}
-            id="nomor_telepon"
-            value={formData.nomor_telepon}
-            onChange={(e) => handleChange("nomor_telepon", e.target.value)}
-            placeholder="Masukkan nomor telepon"
-          />
-          {errors.nomor_telepon && <div className="invalid-feedback">{errors.nomor_telepon}</div>}
-        </div>
+      <div className="mb-3">
+        <label htmlFor="nomor_telepon" className="form-label">
+          Nomor Telepon *
+        </label>
+        <input
+          type="tel"
+          className={`form-control ${errors.nomor_telepon ? "is-invalid" : ""}`}
+          id="nomor_telepon"
+          value={formData.nomor_telepon}
+          onChange={(e) => handleChange("nomor_telepon", e.target.value)}
+          placeholder="Masukkan nomor telepon"
+        />
+        {errors.nomor_telepon && <div className="invalid-feedback">{errors.nomor_telepon}</div>}
+      </div>
 
-        <div className="col-12">
-          <label htmlFor="alamat_rumah" className="form-label">
-            Alamat Rumah *
-          </label>
-          <textarea
-            className={`form-control ${errors.alamat_rumah ? "is-invalid" : ""}`}
-            id="alamat_rumah"
-            rows={3}
-            value={formData.alamat_rumah}
-            onChange={(e) => handleChange("alamat_rumah", e.target.value)}
-            placeholder="Masukkan alamat rumah"
-          />
-          {errors.alamat_rumah && <div className="invalid-feedback">{errors.alamat_rumah}</div>}
-        </div>
+      <div className="mb-3">
+        <label htmlFor="alamat_rumah" className="form-label">
+          Alamat Rumah *
+        </label>
+        <textarea
+          className={`form-control ${errors.alamat_rumah ? "is-invalid" : ""}`}
+          id="alamat_rumah"
+          rows={3}
+          value={formData.alamat_rumah}
+          onChange={(e) => handleChange("alamat_rumah", e.target.value)}
+          placeholder="Masukkan alamat rumah"
+        />
+        {errors.alamat_rumah && <div className="invalid-feedback">{errors.alamat_rumah}</div>}
+      </div>
 
-        <div className="col-12">
-          <label htmlFor="password" className="form-label">
-            Password (Kosongkan jika tidak ingin mengubah)
-          </label>
-          <input
-            type="password"
-            className={`form-control ${errors.password ? "is-invalid" : ""}`}
-            id="password"
-            value={formData.password}
-            onChange={(e) => handleChange("password", e.target.value)}
-            placeholder="Masukkan password baru"
-          />
-          {errors.password && <div className="invalid-feedback">{errors.password}</div>}
-        </div>
+      <div className="mb-3">
+        <label htmlFor="password" className="form-label">
+          Password (Kosongkan jika tidak ingin mengubah)
+        </label>
+        <input
+          type="password"
+          className={`form-control ${errors.password ? "is-invalid" : ""}`}
+          id="password"
+          value={formData.password}
+          onChange={(e) => handleChange("password", e.target.value)}
+          placeholder="Masukkan password baru"
+        />
+        {errors.password && <div className="invalid-feedback">{errors.password}</div>}
       </div>
 
       <div className="d-flex justify-content-end gap-2 mt-4">
