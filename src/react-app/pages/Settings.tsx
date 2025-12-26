@@ -72,10 +72,6 @@ export function Settings() {
       if (formData.password) {
         updateData.password = formData.password
       }
-      if (user?.roles === "masyarakat") {
-        updateData.alamat_rumah = formData.alamat_rumah
-        updateData.nomor_telepon = formData.nomor_telepon
-      }
 
       await apiRequest("/api/auth/profile", {
         method: "PUT",
@@ -140,24 +136,6 @@ export function Settings() {
                     onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                   />
                 </div>
-                {user?.roles === "masyarakat" && (
-                  <>
-                    <div className="mb-3">
-                      <label className="form-label">Alamat Rumah</label>
-                      <textarea className="form-control" value={formData.alamat_rumah} onChange={(e) => setFormData({ ...formData, alamat_rumah: e.target.value })} required />
-                    </div>
-                    <div className="mb-3">
-                      <label className="form-label">Nomor Telepon</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={formData.nomor_telepon}
-                        onChange={(e) => setFormData({ ...formData, nomor_telepon: e.target.value })}
-                        required
-                      />
-                    </div>
-                  </>
-                )}
                 <button type="submit" className="btn btn-primary w-100" disabled={saving}>
                   {saving ? "Menyimpan..." : "Simpan Perubahan"}
                 </button>

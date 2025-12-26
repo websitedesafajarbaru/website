@@ -45,17 +45,12 @@ dusunRoutes.post("/", requireRole("admin"), async (c) => {
 
 // Routes accessible to kepala_dusun and admin (must be before ANY /:id routes)
 dusunRoutes.get("/my/tokens", async (c) => {
-  console.log("=== ENTERING /my/tokens ENDPOINT ===")
   try {
     const user = c.get("user") as JWTPayload
-    console.log("User accessing /my/tokens:", user)
 
     if (user.roles !== "kepala_dusun" && user.roles !== "admin") {
-      console.log("Forbidden: user role is", user.roles)
       return c.json({ error: "Forbidden" }, 403)
     }
-
-    console.log("User role check passed:", user.roles)
 
     let dusunId: number
 
@@ -84,7 +79,6 @@ dusunRoutes.get("/my/tokens", async (c) => {
       const dusun = await c.env.DB.prepare("SELECT nama_dusun FROM dusun WHERE id = ?").bind(dusunId).first()
       if (dusun) {
         finalToken = generateToken(dusun.nama_dusun as string)
-        console.log("Generated new token:", finalToken)
       }
     }
 
@@ -185,10 +179,8 @@ dusunRoutes.post("/:id/regenerate-tokens", requireRole("admin"), async (c) => {
 dusunRoutes.get("/my/tokens", async (c) => {
   try {
     const user = c.get("user") as JWTPayload
-    console.log("User accessing /my/tokens:", user)
 
     if (user.roles !== "kepala_dusun" && user.roles !== "admin") {
-      console.log("Forbidden: user role is", user.roles)
       return c.json({ error: "Forbidden" }, 403)
     }
 
@@ -219,7 +211,6 @@ dusunRoutes.get("/my/tokens", async (c) => {
       const dusun = await c.env.DB.prepare("SELECT nama_dusun FROM dusun WHERE id = ?").bind(dusunId).first()
       if (dusun) {
         finalToken = generateToken(dusun.nama_dusun as string)
-        console.log("Generated new token:", finalToken)
       }
     }
 
@@ -235,17 +226,12 @@ dusunRoutes.get("/my/tokens", async (c) => {
 
 // Routes accessible to kepala_dusun and admin (must be before /:id route)
 dusunRoutes.get("/my/tokens", async (c) => {
-  console.log("=== ENTERING /my/tokens ENDPOINT ===")
   try {
     const user = c.get("user") as JWTPayload
-    console.log("User accessing /my/tokens:", user)
 
     if (user.roles !== "kepala_dusun" && user.roles !== "admin") {
-      console.log("Forbidden: user role is", user.roles)
       return c.json({ error: "Forbidden" }, 403)
     }
-
-    console.log("User role check passed:", user.roles)
 
     let dusunId: number
 
@@ -274,7 +260,6 @@ dusunRoutes.get("/my/tokens", async (c) => {
       const dusun = await c.env.DB.prepare("SELECT nama_dusun FROM dusun WHERE id = ?").bind(dusunId).first()
       if (dusun) {
         finalToken = generateToken(dusun.nama_dusun as string)
-        console.log("Generated new token:", finalToken)
       }
     }
 

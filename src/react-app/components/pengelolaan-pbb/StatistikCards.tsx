@@ -82,7 +82,7 @@ export function StatistikCards({ data }: StatistikCardsProps) {
               <div className="card-body p-1 p-md-3">
                 <div className="d-flex align-items-center">
                   <div className="flex-grow-1">
-                    <div className="text-muted small mb-1">Surat Sudah Dibayar</div>
+                    <div className="text-muted small mb-1">Surat Sudah Lunas</div>
                     <div className="h4 mb-0">{data.totalSuratDibayar}</div>
                   </div>
                 </div>

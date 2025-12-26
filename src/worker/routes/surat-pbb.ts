@@ -281,6 +281,13 @@ suratPBBRoutes.put("/:id", async (c) => {
       }
 
       if (updates.status_pembayaran !== undefined && updates.status_pembayaran !== originalSurat?.status_pembayaran) {
+        // Prevent non-admin users from changing status if it's already "sudah_lunas"
+        if (originalSurat?.status_pembayaran === "sudah_lunas" && user.roles !== "admin") {
+          return c.json({ 
+            error: "Status sudah lunas dan hanya dapat diubah oleh admin" 
+          }, 403)
+        }
+
         // Check user role and restrict status options for perangkat desa
         if (user.roles !== "admin") {
           const perangkat = await c.env.DB.prepare("SELECT jabatan FROM perangkat_desa WHERE id = ?").bind(user.userId).first()

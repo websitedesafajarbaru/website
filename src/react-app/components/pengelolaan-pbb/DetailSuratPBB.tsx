@@ -32,7 +32,7 @@ export function DetailSuratPBB({
   dusunOptions = [],
 }: DetailSuratPBBProps) {
   // Define status options based on user role
-  const statusOptions = isPerangkatDesa
+  const baseStatusOptions = isPerangkatDesa
     ? [
         { value: "belum_bayar", label: "Belum Bayar" },
         { value: "bayar_sendiri_di_bank", label: "Bayar Sendiri di Bank" },
@@ -48,6 +48,11 @@ export function DetailSuratPBB({
         { value: "pindah_rumah", label: "Pindah Rumah" },
         { value: "tidak_diketahui", label: "Tidak Diketahui" },
       ]
+
+  // Always include current status in options, especially for "sudah_lunas" for perangkat desa
+  const statusOptions = surat.status_pembayaran && !baseStatusOptions.find(opt => opt.value === surat.status_pembayaran)
+    ? [...baseStatusOptions, { value: surat.status_pembayaran, label: surat.status_pembayaran.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) }]
+    : baseStatusOptions
 
   // Check if the surat is readonly for perangkat desa when status is sudah_bayar
   const isReadonlyForPerangkatDesa = isPerangkatDesa && surat.status_pembayaran === "sudah_bayar"
@@ -65,19 +70,8 @@ export function DetailSuratPBB({
                     <i className="bi bi-pencil me-1 d-sm-inline"></i>
                     <span className="d-none d-sm-inline">Edit</span>
                   </button>
-                ) : (
-                  <>
-                    <button className="btn btn-success btn-sm flex-grow-1 flex-md-grow-0" onClick={onSaveEdit}>
-                      <i className="bi bi-check me-1"></i>
-                      <span className="d-none d-sm-inline">Simpan</span>
-                    </button>
-                    <button className="btn btn-secondary btn-sm flex-grow-1 flex-md-grow-0" onClick={onCancelEdit}>
-                      <i className="bi bi-x me-1"></i>
-                      <span className="d-none d-sm-inline">Batal</span>
-                    </button>
-                  </>
-                )}
-                {!isPerangkatDesa && onDelete && (
+                ) : null}
+                {!isPerangkatDesa && onDelete && !isEditing && (
                   <button className="btn btn-danger btn-sm flex-grow-1 flex-md-grow-0" onClick={onDelete}>
                     <i className="bi bi-trash me-1"></i>
                     <span className="d-none d-sm-inline">Hapus</span>
@@ -137,11 +131,14 @@ export function DetailSuratPBB({
         </div>
         <div className="mb-3">
           <label className="form-label text-muted small mb-1">Status Pembayaran</label>
-          {isEditing ? (
+          {isPerangkatDesa && surat.status_pembayaran === "sudah_lunas" ? (
+            <div className="form-control-plaintext fw-bold text-success">Sudah Lunas</div>
+          ) : isEditing ? (
             <select
               className="form-select"
               value={editForm.status_pembayaran || ""}
               onChange={(e) => onEditFormChange("status_pembayaran", e.target.value)}
+              disabled={isPerangkatDesa && surat.status_pembayaran === "sudah_lunas"}
             >
               {statusOptions.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -154,6 +151,7 @@ export function DetailSuratPBB({
               className="form-select"
               value={surat.status_pembayaran}
               onChange={(e) => onStatusChange(e.target.value)}
+              disabled={isPerangkatDesa && surat.status_pembayaran === "sudah_lunas"}
             >
               {statusOptions.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -234,6 +232,18 @@ export function DetailSuratPBB({
               <div className="text-break">{surat.nama_perangkat}</div>
             </div>
           )}
+        {isEditing && showAdminActions && !isReadonlyForPerangkatDesa && (
+          <div className="d-flex gap-2 mt-4">
+            <button className="btn btn-success flex-grow-1 flex-md-grow-0" onClick={onSaveEdit}>
+              <i className="bi bi-check me-1"></i>
+              <span>Simpan</span>
+            </button>
+            <button className="btn btn-secondary flex-grow-1 flex-md-grow-0" onClick={onCancelEdit}>
+              <i className="bi bi-x me-1"></i>
+              <span>Batal</span>
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )

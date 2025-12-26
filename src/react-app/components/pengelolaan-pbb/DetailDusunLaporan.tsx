@@ -37,10 +37,8 @@ export function DetailDusunLaporan({ dusunId, onBack }: DetailDusunLaporanProps)
       return (
         surat.nomor_objek_pajak.toLowerCase().includes(searchLower) ||
         surat.nama_wajib_pajak.toLowerCase().includes(searchLower) ||
-        (surat.alamat_objek_pajak || "").toLowerCase().includes(searchLower) ||
-        (surat.tahun_pajak?.toString() || "").includes(searchLower) ||
-        (surat.jumlah_pajak_terhutang?.toString() || "").includes(searchLower) ||
-        formatStatusPembayaran(surat.status_pembayaran || "belum_bayar").toLowerCase().includes(searchLower)
+        (surat.nama_dusun || "").toLowerCase().includes(searchLower) ||
+        (surat.tahun_pajak?.toString() || "").includes(searchLower)
       )
     }) || []
 
@@ -115,7 +113,7 @@ export function DetailDusunLaporan({ dusunId, onBack }: DetailDusunLaporanProps)
           <div className="d-flex justify-content-between align-items-center">
             <h6 className="mb-0">
               <i className="bi bi-bar-chart me-2"></i>
-              Statistik PBB
+              Statistik PBB - {statistik.dusun.nama_dusun}
             </h6>
           </div>
         </div>
@@ -178,7 +176,7 @@ export function DetailDusunLaporan({ dusunId, onBack }: DetailDusunLaporanProps)
                   <div className="card-body p-1 p-md-3">
                     <div className="d-flex align-items-center">
                       <div className="flex-grow-1">
-                        <div className="text-muted small mb-1">Surat Sudah Dibayar</div>
+                        <div className="text-muted small mb-1">Surat Sudah Lunas</div>
                         <div className="h4 mb-0">{statistik.total_surat_dibayar}</div>
                       </div>
                     </div>

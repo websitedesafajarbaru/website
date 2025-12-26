@@ -111,8 +111,6 @@ perangkatDesaRoutes.get("/", async (c) => {
 perangkatDesaRoutes.get("/:id", async (c) => {
   try {
     const id = c.req.param("id")
-    console.log("[DEBUG] GET /:id called with id:", id)
-    console.log("[DEBUG] DB available:", !!c.env.DB)
 
     const result = await c.env.DB.prepare(
       `
@@ -126,14 +124,10 @@ perangkatDesaRoutes.get("/:id", async (c) => {
       .bind(id)
       .first()
 
-    console.log("[DEBUG] Query result:", result)
-
     if (!result) {
-      console.log("[DEBUG] Result not found for id:", id)
       return c.json({ error: "Perangkat desa tidak ditemukan" }, 404)
     }
 
-    console.log("[DEBUG] Returning success result")
     return c.json(result)
   } catch (err) {
     console.error("[ERROR] Exception in GET /:id:", err)
@@ -248,8 +242,7 @@ perangkatDesaRoutes.delete("/:id", requireRole("admin"), async (c) => {
       await c.env.KV.delete(userSessionsKey)
     }
 
-    await c.env.DB.prepare("DELETE FROM tanggapan_aduan WHERE id_perangkat_desa = ?").bind(id).run()
-    await c.env.DB.prepare("DELETE FROM surat_pbb WHERE id_pengguna = ?").bind(id).run()
+    await c.env.DB.prepare("DELETE FROM surat_pbb_tahun WHERE id_pengguna = ?").bind(id).run()
     await c.env.DB.prepare("DELETE FROM perangkat_desa WHERE id = ?").bind(id).run()
     await c.env.DB.prepare("DELETE FROM pengguna WHERE id = ?").bind(id).run()
 

@@ -5,10 +5,6 @@ import { ProtectedRoute } from "./components/ProtectedRoute"
 import { LandingPage } from "./pages/LandingPage"
 import { Login } from "./pages/Login"
 import { CekPembayaran } from "./pages/CekPembayaran"
-import { RegistrasiMasyarakat } from "./pages/pengaduan-masyarakat/RegistrasiMasyarakat"
-import { DashboardMasyarakat } from "./pages/pengaduan-masyarakat/DashboardMasyarakat"
-import { DashboardAdminPengaduan } from "./pages/pengaduan-masyarakat/DashboardAdminPengaduan"
-import { DashboardPerangkatDesaPengaduan } from "./pages/pengaduan-masyarakat/DashboardPerangkatDesaPengaduan"
 import { RegistrasiPerangkatDesa } from "./pages/pengelolaan-pbb/RegistrasiPerangkatDesa"
 import { DashboardAdminPBB } from "./pages/pengelolaan-pbb/DashboardAdminPBB"
 import { DashboardKepalaDusun } from "./pages/pengelolaan-pbb/DashboardKepalaDusun"
@@ -24,32 +20,6 @@ function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/cek-pembayaran" element={<CekPembayaran />} />
-
-            <Route path="/pengaduan-masyarakat/registrasi" element={<RegistrasiMasyarakat />} />
-            <Route
-              path="/pengaduan-masyarakat/dashboard-masyarakat"
-              element={
-                <ProtectedRoute allowedRoles={["masyarakat"]}>
-                  <DashboardMasyarakat />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/pengaduan-masyarakat/dashboard-admin"
-              element={
-                <ProtectedRoute allowedRoles={["admin"]}>
-                  <DashboardAdminPengaduan />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/pengaduan-masyarakat/dashboard-perangkat-desa"
-              element={
-                <ProtectedRoute allowedRoles={["kepala_dusun", "ketua_rt"]}>
-                  <DashboardPerangkatDesaPengaduan />
-                </ProtectedRoute>
-              }
-            />
 
             <Route path="/pengelolaan-pbb/registrasi" element={<RegistrasiPerangkatDesa />} />
             <Route
@@ -79,7 +49,7 @@ function App() {
             <Route
               path="/settings"
               element={
-                <ProtectedRoute allowedRoles={["admin", "kepala_dusun", "ketua_rt", "masyarakat"]}>
+                <ProtectedRoute allowedRoles={["admin", "kepala_dusun", "ketua_rt"]}>
                   <Settings />
                 </ProtectedRoute>
               }

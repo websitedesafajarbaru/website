@@ -371,6 +371,18 @@ export function DashboardKepalaDusun() {
   const handleStatusChange = async (newStatus: string) => {
     if (!selectedSurat) return
 
+    // Prevent status change if already "sudah_lunas" for non-admin users
+    if (selectedSurat.status_pembayaran === "sudah_lunas" && user?.roles !== "admin") {
+      Swal.fire({
+        title: "Tidak Dapat Mengubah!",
+        text: "Status sudah lunas dan hanya dapat diubah oleh admin",
+        icon: "warning",
+        timer: 3000,
+        showConfirmButton: false,
+      })
+      return
+    }
+
     try {
       const response = await fetch(`/api/surat-pbb/${selectedSurat.id}`, {
         method: "PUT",
@@ -476,23 +488,23 @@ export function DashboardKepalaDusun() {
   }
 
   return (
-    <div>
-      <div className="d-flex justify-content-between align-items-center mb-4">
+    <div className="container-wide">
+      <div className="dashboard-header">
         <div>
-          <h2 className="mb-1">Dashboard Kepala Dusun</h2>
+          <h2>Dashboard Pengelolaan PBB</h2>
+          <p className="text-muted mb-0 small">{user?.nama_lengkap} (Kepala Dusun)</p>
         </div>
-        <div className="text-end">
-          <div className="badge bg-primary fs-6">
-            <i className="bi bi-calendar me-1"></i>Tahun {activeYear}
+        <div className="d-flex align-items-center gap-3" style={{ padding: "0.25rem 0" }}>
+          <div className="d-flex align-items-center gap-2">
+            <span className="text-muted small">Tahun Aktif: <strong>{activeYear}</strong></span>
           </div>
-          <div className="small text-muted mt-1">Data yang ditampilkan untuk tahun {activeYear}</div>
         </div>
       </div>
 
       <ul className="nav nav-tabs mb-3" style={{ backgroundColor: "#fff", padding: "0.5rem 1rem", borderRadius: "4px", border: "1px solid #dee2e6" }}>
         <li className="nav-item">
           <button className={`nav-link ${activeTab === "laporan" ? "active" : ""}`} onClick={() => setActiveTab("laporan")} style={{ border: "none", fontSize: "0.9rem" }}>
-            <i className="bi bi-bar-chart me-2"></i>Laporan & Surat PBB
+            <i className="bi bi-bar-chart me-2"></i>Surat PBB
           </button>
         </li>
         <li className="nav-item">

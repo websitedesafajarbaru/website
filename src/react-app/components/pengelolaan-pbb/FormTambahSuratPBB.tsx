@@ -42,12 +42,16 @@ export function FormTambahSuratPBB({ suratForm, onFormChange, onSubmit, onCancel
 
   return (
     <div className="card">
-      <div className="card-header d-flex justify-content-between align-items-center">
-        <h6 className="mb-0">Tambah Surat PBB Baru</h6>
-        <button className="btn btn-sm btn-secondary" onClick={onCancel}>
-          <i className="bi bi-arrow-left me-1"></i>
-          Kembali ke Daftar
-        </button>
+      <div className="card-header">
+        <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2">
+          <h6 className="mb-0">Tambah Surat PBB Baru</h6>
+          <div className="w-100 d-flex justify-content-end">
+            <button className="btn btn-sm btn-secondary" onClick={onCancel}>
+              <i className="bi bi-arrow-left me-1"></i>
+              Kembali ke Daftar
+            </button>
+          </div>
+        </div>
       </div>
       <div className="card-body">
         <form onSubmit={onSubmit}>

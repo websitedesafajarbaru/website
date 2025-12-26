@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react"
+import { createContext, useContext, useState, useEffect, useRef, ReactNode } from "react"
 import { apiRequest, ApiError } from "../utils/api"
 
 interface User {
@@ -23,9 +23,13 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const hasCheckedAuth = useRef(false)
 
   useEffect(() => {
-    checkAuth()
+    if (!hasCheckedAuth.current) {
+      hasCheckedAuth.current = true
+      checkAuth()
+    }
   }, [])
 
   const checkAuth = async () => {

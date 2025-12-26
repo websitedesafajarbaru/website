@@ -45,20 +45,6 @@ export function Navbar() {
               </>
             ) : (
               <>
-                {(user?.roles === "admin" || user?.roles === "masyarakat") && (
-                  <li className="nav-item">
-                    <Link className="nav-link" to={user?.roles === "admin" ? "/pengaduan-masyarakat/dashboard-admin" : "/pengaduan-masyarakat/dashboard-masyarakat"}>
-                      Dashboard Pengaduan
-                    </Link>
-                  </li>
-                )}
-                {(user?.roles === "kepala_dusun" || user?.roles === "ketua_rt") && (
-                  <li className="nav-item">
-                    <Link className="nav-link" to="/pengaduan-masyarakat/dashboard-perangkat-desa">
-                      Dashboard Pengaduan
-                    </Link>
-                  </li>
-                )}
                 {(user?.roles === "admin" || user?.roles === "kepala_dusun" || user?.roles === "ketua_rt") && (
                   <li className="nav-item">
                     <Link

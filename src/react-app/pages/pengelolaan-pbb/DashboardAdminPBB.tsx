@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react"
 import { Dusun, SuratPBB, Laporan } from "../../types"
+import { useAuth } from "../../contexts/AuthContext"
 import { TabelSuratPBB } from "../../components/pengelolaan-pbb/TabelSuratPBB"
 import { DetailSuratPBB } from "../../components/pengelolaan-pbb/DetailSuratPBB"
 import { DetailDusunLaporan } from "../../components/pengelolaan-pbb/DetailDusunLaporan"
@@ -18,6 +19,7 @@ interface PerangkatDesa {
 }
 
 export function DashboardAdminPBB() {
+  const { user } = useAuth()
   const [activeTab, setActiveTab] = useState<
     "dusun" | "surat" | "laporan" | "tambah-dusun" | "tambah-surat" | "detail-dusun" | "detail-perangkat" | "detail-laporan-dusun"
   >("dusun")
@@ -103,9 +105,8 @@ export function DashboardAdminPBB() {
       const matchesSearch = (
         surat.nomor_objek_pajak.toLowerCase().includes(searchLower) ||
         surat.nama_wajib_pajak.toLowerCase().includes(searchLower) ||
-        (surat.alamat_objek_pajak || "").toLowerCase().includes(searchLower) ||
-        (surat.tahun_pajak?.toString() || "").includes(searchLower) ||
-        (surat.jumlah_pajak_terhutang?.toString() || "").includes(searchLower)
+        (surat.nama_dusun || "").toLowerCase().includes(searchLower) ||
+        (surat.tahun_pajak?.toString() || "").includes(searchLower)
       )
       
       const matchesStatus = filterStatusSurat === "semua" || surat.status_pembayaran === filterStatusSurat
@@ -962,9 +963,9 @@ export function DashboardAdminPBB() {
       <div className="dashboard-header">
         <div>
           <h2>Dashboard Pengelolaan PBB</h2>
-          <p className="text-muted mb-0 small">Admin</p>
+          <p className="text-muted mb-0 small">{user?.nama_lengkap} (Admin)</p>
         </div>
-        <div className="d-flex align-items-center gap-3">
+        <div className="d-flex align-items-center gap-3" style={{ padding: "0.25rem 0" }}>
           <div className="d-flex align-items-center gap-2">
             <label className="form-label mb-0 text-muted small">Tahun Aktif:</label>
             <select className="form-select form-select-sm" style={{ width: "auto", minWidth: "100px" }} value={activeYear} onChange={(e) => setYear(parseInt(e.target.value))}>
@@ -974,9 +975,6 @@ export function DashboardAdminPBB() {
                 </option>
               ))}
             </select>
-          </div>
-          <div className="text-end">
-            <small className="text-muted">Data yang ditampilkan untuk tahun {activeYear}</small>
           </div>
         </div>
       </div>
@@ -1105,73 +1103,75 @@ export function DashboardAdminPBB() {
           {!selectedSurat ? (
             <>
               <div className="card mb-3">
-                <div className="card-header d-flex justify-content-between align-items-center">
-                  <h6 className="mb-0">Daftar Surat PBB</h6>
-                  <div className="d-flex gap-2">
-                    <button
-                      className="btn btn-sm btn-success"
-                      onClick={async () => {
-                        const filteredData = getFilteredSuratPBB()
-                        if (filteredData.length === 0) {
-                          await Swal.fire({
-                            title: "Tidak Dapat Export",
-                            text: "Tidak ada data surat PBB yang dapat diexport. Silakan sesuaikan filter atau pencarian Anda.",
-                            icon: "warning",
-                            confirmButtonText: "OK",
+                <div className="card-header">
+                  <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2">
+                    <h6 className="mb-0">Daftar Surat PBB</h6>
+                    <div className="d-flex gap-2">
+                      <button
+                        className="btn btn-sm btn-success"
+                        onClick={async () => {
+                          const filteredData = getFilteredSuratPBB()
+                          if (filteredData.length === 0) {
+                            await Swal.fire({
+                              title: "Tidak Dapat Export",
+                              text: "Tidak ada data surat PBB yang dapat diexport. Silakan sesuaikan filter atau pencarian Anda.",
+                              icon: "warning",
+                              confirmButtonText: "OK",
+                            })
+                            return
+                          }
+                          
+                          const statusText = filterStatusSurat === "semua" ? "Semua Status" : filterStatusSurat === "belum_bayar" ? "Belum Bayar" : "Sudah Bayar"
+                          const result = await Swal.fire({
+                            title: "Pilih Format Export",
+                            html: `
+                              <p>Pilih format file untuk export data Surat PBB</p>
+                              <div class="text-start mt-3" style="background: #f8f9fa; padding: 12px; border-radius: 6px; font-size: 0.9em;">
+                                <p class="mb-1"><strong>Data yang akan diexport:</strong></p>
+                                <p class="mb-1">• Total: <strong>${filteredData.length}</strong> surat</p>
+                                <p class="mb-1">• Status: <strong>${statusText}</strong></p>
+                                <p class="mb-0">• Tahun: <strong>${activeYear}</strong></p>
+                              </div>
+                            `,
+                            icon: "question",
+                            showCancelButton: true,
+                            showCloseButton: true,
+                            confirmButtonText: '<i class="bi bi-file-earmark-excel me-1"></i> Excel',
+                            cancelButtonText: '<i class="bi bi-file-earmark-pdf me-1"></i> PDF',
+                            confirmButtonColor: "#28a745",
+                            cancelButtonColor: "#dc3545",
+                            reverseButtons: true,
                           })
-                          return
-                        }
-                        
-                        const statusText = filterStatusSurat === "semua" ? "Semua Status" : filterStatusSurat === "belum_bayar" ? "Belum Bayar" : "Sudah Bayar"
-                        const result = await Swal.fire({
-                          title: "Pilih Format Export",
-                          html: `
-                            <p>Pilih format file untuk export data Surat PBB</p>
-                            <div class="text-start mt-3" style="background: #f8f9fa; padding: 12px; border-radius: 6px; font-size: 0.9em;">
-                              <p class="mb-1"><strong>Data yang akan diexport:</strong></p>
-                              <p class="mb-1">• Total: <strong>${filteredData.length}</strong> surat</p>
-                              <p class="mb-1">• Status: <strong>${statusText}</strong></p>
-                              <p class="mb-0">• Tahun: <strong>${activeYear}</strong></p>
-                            </div>
-                          `,
-                          icon: "question",
-                          showCancelButton: true,
-                          showCloseButton: true,
-                          confirmButtonText: '<i class="bi bi-file-earmark-excel me-1"></i> Excel',
-                          cancelButtonText: '<i class="bi bi-file-earmark-pdf me-1"></i> PDF',
-                          confirmButtonColor: "#28a745",
-                          cancelButtonColor: "#dc3545",
-                          reverseButtons: true,
-                        })
 
-                        if (result.isConfirmed) {
-                          exportToExcel()
-                          Swal.fire({
-                            title: "Berhasil!",
-                            text: `File Excel dengan ${filteredData.length} data berhasil didownload!`,
-                            icon: "success",
-                            timer: 3000,
-                            showConfirmButton: false,
-                          })
-                        } else if (result.dismiss === "cancel") {
-                          exportToPDF()
-                          Swal.fire({
-                            title: "Berhasil!",
-                            text: `File PDF dengan ${filteredData.length} data berhasil didownload!`,
-                            icon: "success",
-                            timer: 3000,
-                            showConfirmButton: false,
-                          })
-                        }
-                      }}
-                    >
-                      <i className="bi bi-download me-1"></i>
-                      Export
-                    </button>
-                    <button className="btn btn-sm btn-primary" onClick={() => setActiveTab("tambah-surat")}>
-                      <i className="bi bi-plus-circle me-1"></i>
-                      Tambah Surat
-                    </button>
+                          if (result.isConfirmed) {
+                            exportToExcel()
+                            Swal.fire({
+                              title: "Berhasil!",
+                              text: `File Excel dengan ${filteredData.length} data berhasil didownload!`,
+                              icon: "success",
+                              timer: 3000,
+                              showConfirmButton: false,
+                            })
+                          } else if (result.dismiss === "cancel") {
+                            exportToPDF()
+                            Swal.fire({
+                              title: "Berhasil!",
+                              text: `File PDF dengan ${filteredData.length} data berhasil didownload!`,
+                              icon: "success",
+                              timer: 3000,
+                              showConfirmButton: false,
+                            })
+                          }
+                        }}
+                      >
+                        <i className="bi bi-download me-1"></i>
+                        Export
+                      </button>
+                      <button className="btn btn-sm btn-primary" onClick={() => setActiveTab("tambah-surat")}>
+                        <i className="bi bi-plus-circle me-1"></i>
+                        Tambah Surat
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1273,7 +1273,7 @@ export function DashboardAdminPBB() {
                     <div className="card-body p-1 p-md-3">
                       <div className="d-flex align-items-center">
                         <div className="flex-grow-1">
-                          <div className="text-muted small mb-1">Surat Sudah Dibayar</div>
+                          <div className="text-muted small mb-1">Surat Sudah Lunas</div>
                           <div className="h4 mb-0">{laporan.total_surat_dibayar_keseluruhan}</div>
                         </div>
                       </div>

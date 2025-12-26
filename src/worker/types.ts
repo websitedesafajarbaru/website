@@ -1,7 +1,7 @@
 export interface User {
   id: string
   nama_lengkap: string
-  roles: "admin" | "kepala_dusun" | "ketua_rt" | "masyarakat"
+  roles: "admin" | "kepala_dusun" | "ketua_rt"
 }
 
 export interface JWTPayload {

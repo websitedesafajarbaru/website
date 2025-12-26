@@ -40,9 +40,7 @@ export function Login() {
       login(result.user)
 
       if (result.user.roles === "admin") {
-        navigate("/pengaduan-masyarakat/dashboard-admin")
-      } else if (result.user.roles === "masyarakat") {
-        navigate("/pengaduan-masyarakat/dashboard-masyarakat")
+        navigate("/pengelolaan-pbb/dashboard-admin")
       } else if (result.user.roles === "kepala_dusun") {
         navigate("/pengelolaan-pbb/dashboard-kepala-dusun")
       } else if (result.user.roles === "ketua_rt") {
@@ -83,15 +81,9 @@ export function Login() {
             </form>
 
             <div className="mt-3 text-center">
-              <p className="mb-2">Belum punya akun?</p>
-              <div className="d-flex gap-2 justify-content-center">
-                <Link to="/pengaduan-masyarakat/registrasi" className="btn btn-outline-primary btn-sm">
-                  Registrasi Masyarakat
-                </Link>
-                <Link to="/pengelolaan-pbb/registrasi" className="btn btn-outline-secondary btn-sm">
-                  Registrasi Perangkat Desa
-                </Link>
-              </div>
+              <p className="mb-0">
+                Belum punya akun? <Link to="/pengelolaan-pbb/registrasi">Daftar disini</Link>
+              </p>
             </div>
           </div>
         </div>

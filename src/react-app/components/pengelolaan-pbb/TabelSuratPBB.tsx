@@ -20,10 +20,8 @@ export function TabelSuratPBB({ suratPBB, searchTerm, onSearchChange, onSuratCli
     const matchesSearch = (
       surat.nomor_objek_pajak.toLowerCase().includes(searchLower) ||
       surat.nama_wajib_pajak.toLowerCase().includes(searchLower) ||
-      (surat.alamat_objek_pajak || "").toLowerCase().includes(searchLower) ||
-      (surat.tahun_pajak?.toString() || "").includes(searchLower) ||
-      (surat.jumlah_pajak_terhutang?.toString() || "").includes(searchLower) ||
-      formatStatusPembayaran(surat.status_pembayaran || "").toLowerCase().includes(searchLower)
+      (surat.nama_dusun || "").toLowerCase().includes(searchLower) ||
+      (surat.tahun_pajak?.toString() || "").includes(searchLower)
     )
     
     const matchesStatus = filterStatus === "semua" || surat.status_pembayaran === filterStatus

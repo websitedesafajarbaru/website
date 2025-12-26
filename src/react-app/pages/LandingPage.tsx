@@ -9,10 +9,10 @@ export function LandingPage() {
     let dashboardPath = "/"
     switch (user.roles) {
       case "masyarakat":
-        dashboardPath = "/pengaduan-masyarakat/dashboard-masyarakat"
+        dashboardPath = "/settings"
         break
       case "admin":
-        dashboardPath = "/pengaduan-masyarakat/dashboard-admin"
+        dashboardPath = "/pengelolaan-pbb/dashboard-admin"
         break
       case "kepala_dusun":
         dashboardPath = "/pengelolaan-pbb/dashboard-kepala-dusun"
@@ -33,7 +33,7 @@ export function LandingPage() {
         <div className="container-wide text-center px-3">
           <img src={logo} alt="Logo SIFABAR" className="mb-3" style={{ height: "80px" }} />
           <h1 className="display-4 fw-bold mb-3">SIFABAR</h1>
-          <p className="lead mb-4">Sistem Informasi Desa Fajar Baru - Portal Informasi dan Layanan Digital Untuk Warga Desa</p>
+          <p className="lead mb-4">Sistem Informasi Desa Fajar Baru - Portal Digital untuk Pengelolaan PBB</p>
           <div className="d-flex justify-content-center gap-3 flex-column flex-md-row mx-3">
             <Link to="/cek-pembayaran" className="btn btn-light btn-lg" style={{ minWidth: "200px" }}>
               Cek Pembayaran
@@ -47,9 +47,9 @@ export function LandingPage() {
 
       {/* Services Section */}
       <div className="container-wide py-5">
-        <h2 className="text-center mb-4">Layanan Kami</h2>
+        <h2 className="text-center mb-4">Fitur Kami</h2>
         <div className="row g-4">
-          <div className="col-md-4">
+          <div className="col-md-6">
             <div className="card h-100 shadow-sm">
               <div className="card-body d-flex flex-column justify-content-between text-center">
                 <div>
@@ -64,36 +64,16 @@ export function LandingPage() {
             </div>
           </div>
 
-          <div className="col-md-4">
-            <div className="card h-100 shadow-sm">
-              <div className="card-body d-flex flex-column justify-content-between text-center">
-                <div>
-                  <i className="bi bi-megaphone text-success mb-3" style={{ fontSize: "3rem" }}></i>
-                  <h5 className="card-title">Pengaduan Masyarakat</h5>
-                  <p className="card-text text-muted">Sampaikan keluhan dan aspirasi Anda kepada pemerintah desa melalui platform digital.</p>
-                </div>
-                <div className="d-flex justify-content-center gap-2">
-                  <Link to="/login" className="btn btn-success flex-fill">
-                    Login
-                  </Link>
-                  <Link to="/pengaduan-masyarakat/registrasi" className="btn btn-outline-success flex-fill">
-                    Daftar
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="col-md-4">
+          <div className="col-md-6">
             <div className="card h-100 shadow-sm">
               <div className="card-body d-flex flex-column justify-content-between text-center">
                 <div>
                   <i className="bi bi-briefcase text-info mb-3" style={{ fontSize: "3rem" }}></i>
                   <h5 className="card-title">Pengelolaan PBB</h5>
-                  <p className="card-text text-muted">Layanan khusus perangkat desa untuk mengelola data Pajak Bumi dan Bangunan.</p>
+                  <p className="card-text text-muted">Sistem lengkap untuk perangkat desa mengelola data Pajak Bumi dan Bangunan.</p>
                 </div>
                 <Link to="/login" className="btn btn-info" style={{ minWidth: "120px" }}>
-                  Login Perangkat
+                  Login
                 </Link>
               </div>
             </div>
