@@ -1,2 +1,2 @@
-npx wrangler d1 execute production --local --file=./schema.sql
-npx wrangler d1 execute production --local --file=./seed.sql
+npx wrangler d1 execute website-desa --local --file=./schema.sql
+npx wrangler d1 execute website-desa --local --file=./seed.sql

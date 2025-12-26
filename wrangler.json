@@ -3,64 +3,68 @@
  * https://developers.cloudflare.com/workers/wrangler/configuration/
  */
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "website",
-  "main": "./src/worker/index.ts",
-  "compatibility_date": "2025-10-08",
-  "compatibility_flags": ["nodejs_compat"],
-  "observability": {
-    "enabled": true
-  },
-  /**
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "website",
+	"main": "./src/worker/index.ts",
+	"compatibility_date": "2025-10-08",
+	"compatibility_flags": [
+		"nodejs_compat"
+	],
+	"observability": {
+		"enabled": true
+	},
+	/**
    * Smart Placement
    * Docs: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
    */
-  // "placement": { "mode": "smart" }
-  /**
+	// "placement": { "mode": "smart" }
+	/**
    * Bindings
    * Bindings allow your Worker to interact with resources on the Cloudflare Developer Platform, including
    * databases, object storage, AI inference, real-time communication and more.
    * https://developers.cloudflare.com/workers/runtime-apis/bindings/
    */
-  /**
+	/**
    * Environment Variables
    * https://developers.cloudflare.com/workers/wrangler/configuration/#environment-variables
    */
-  // "vars": { "MY_VARIABLE": "production_value" }
-  /**
+	// "vars": { "MY_VARIABLE": "production_value" }
+	/**
    * Note: Use secrets to store sensitive data.
    * https://developers.cloudflare.com/workers/configuration/secrets/
    */
-  /**
+	/**
    * Static Assets
    * https://developers.cloudflare.com/workers/static-assets/binding/
    */
-  // "assets": { "directory": "./public/", "binding": "ASSETS" }
-  /**
+	// "assets": { "directory": "./public/", "binding": "ASSETS" }
+	/**
    * Service Bindings (communicate between multiple Workers)
    * https://developers.cloudflare.com/workers/wrangler/configuration/#service-bindings
    */
-  // "services": [{ "binding": "MY_SERVICE", "service": "my-service" }]
-  "upload_source_maps": true,
-  "assets": {
-    "directory": "./dist/client",
-    "binding": "ASSETS",
-    "not_found_handling": "single-page-application"
-  },
-  "d1_databases": [
-    {
-      "binding": "DB",
-      "database_name": "production",
-      "database_id": "1c9bc36c-c0ae-43c1-80ab-7bbd34b4ad92"
-    }
-  ],
-  "kv_namespaces": [
-    {
-      "binding": "KV",
-      "id": "983bddfbdbbc4415b04afdc4edc3a433"
-    }
-  ],
-  "triggers": {
-    "crons": ["0 0 * * *"]
-  }
+	// "services": [{ "binding": "MY_SERVICE", "service": "my-service" }]
+	"upload_source_maps": true,
+	"assets": {
+		"directory": "./dist/client",
+		"binding": "ASSETS",
+		"not_found_handling": "single-page-application"
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "website-desa",
+			"database_id": "2d93ad6a-26cc-4c2a-8d63-00930de04b4e"
+		}
+	],
+	"kv_namespaces": [
+		{
+			"binding": "KV",
+			"id": "983bddfbdbbc4415b04afdc4edc3a433"
+		}
+	],
+	"triggers": {
+		"crons": [
+			"0 0 * * *"
+		]
+	}
 }
